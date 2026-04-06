@@ -208,11 +208,6 @@ export default function ChamarCorrida() {
                     cursor: not-allowed;
                 }
 
-                .corrida-status {
-                    font-size: 0.82rem;
-                    color: #374151;
-                    min-height: 18px;
-                }
             </style>
 
             <section class="corrida-card" id="corrida-card">
@@ -234,7 +229,6 @@ export default function ChamarCorrida() {
                 </div>
 
                 <button id="corrida-btn" class="corrida-btn" disabled>Solicitar corrida</button>
-                <p id="corrida-status" class="corrida-status"></p>
             </section>
         `;
     }
@@ -243,8 +237,7 @@ export default function ChamarCorrida() {
         if (!map || !window.L || !window.TomSelect) return;
 
         const button = document.getElementById('corrida-btn');
-        const status = document.getElementById('corrida-status');
-        if (!button || !status) return;
+        if (!button) return;
 
         layer = L.layerGroup().addTo(map);
 
@@ -280,7 +273,6 @@ export default function ChamarCorrida() {
             }
 
             button.disabled = true;
-            status.textContent = '';
             layer.clearLayers();
         });
 
@@ -289,6 +281,12 @@ export default function ChamarCorrida() {
             const features = rotasEmGrafo[origem] || [];
             const valido = destino && features.some((f) => f.properties.destino === destino);
             button.disabled = !valido;
+
+            if (valido) {
+                solicitar();
+            } else {
+                layer.clearLayers();
+            }
         });
 
         const solicitar = () => {
@@ -311,7 +309,6 @@ export default function ChamarCorrida() {
             L.marker(destinoCoord).addTo(layer).bindPopup(`<b>Destino:</b> ${destino}`);
 
             map.fitBounds(linhaLayer.getBounds(), { padding: [40, 40] });
-            status.textContent = `Corrida solicitada: ${origem} → ${destino}`;
         };
 
         button.addEventListener('click', solicitar);
