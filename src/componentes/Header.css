@@ -1,0 +1,172 @@
+/* ── Header ── */
+.leaflet-control-zoom.leaflet-bar.leaflet-control {
+	display: none;
+}
+.leaflet-control-attribution.leaflet-control {
+	display: none;
+}
+header {
+	background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+	padding: 1rem 2rem;
+	box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+	position: sticky;
+	top: 0;
+	z-index: 1100;
+}
+
+.hm-nav-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+.hm-nav-top h1 {
+	color: #e2e8f0;
+	font-size: 1.6rem;
+	margin: 0;
+	letter-spacing: 0.05em;
+	font-weight: 700;
+}
+
+/* ── Botão Hamburger ── */
+.hm-btn-hamburger {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 30px;
+	height: 22px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+}
+
+.hm-btn-hamburger span {
+	display: block;
+	width: 100%;
+	height: 3px;
+	background: #e2e8f0;
+	border-radius: 3px;
+	transition: transform 0.3s ease, opacity 0.3s ease, background 0.2s ease;
+	transform-origin: center;
+}
+
+.hm-btn-hamburger:hover span {
+	background: #63b3ed;
+}
+
+/* Animação X ao abrir */
+.hm-btn-hamburger.hm-ativo span:nth-child(1) {
+	transform: translateY(9.5px) rotate(45deg);
+}
+.hm-btn-hamburger.hm-ativo span:nth-child(2) {
+	opacity: 0;
+	transform: scaleX(0);
+}
+.hm-btn-hamburger.hm-ativo span:nth-child(3) {
+	transform: translateY(-9.5px) rotate(-45deg);
+}
+
+/* ── Overlay ── */
+.hm-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 1200;
+	backdrop-filter: blur(2px);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.3s ease;
+}
+
+.hm-overlay.hm-aberto {
+	opacity: 1;
+	pointer-events: all;
+}
+
+/* ── Sidebar ── */
+.hm-sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 270px;
+	background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+	box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+	z-index: 1300;
+	transform: translateX(-100%);
+	transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	flex-direction: column;
+}
+
+.hm-sidebar.hm-aberto {
+	transform: translateX(0);
+}
+
+.hm-sidebar-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1.2rem 1.5rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hm-sidebar-titulo {
+	color: #e2e8f0;
+	font-size: 1.2rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+}
+
+.hm-btn-fechar {
+	background: none;
+	border: none;
+	color: #a0aec0;
+	font-size: 1.3rem;
+	cursor: pointer;
+	padding: 0.2rem 0.5rem;
+	border-radius: 4px;
+	transition: color 0.2s, background 0.2s;
+}
+
+.hm-btn-fechar:hover {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Links dentro da sidebar ── */
+.hm-sidebar-nav {
+	display: flex;
+	flex-direction: column;
+	padding: 1.2rem 1rem;
+	gap: 0.4rem;
+}
+
+.hm-link {
+	color: #a0aec0;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 1rem;
+	padding: 0.75rem 1.2rem;
+	border-radius: 8px;
+	letter-spacing: 0.03em;
+	transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+	border: 1px solid transparent;
+}
+
+.hm-link:hover {
+	color: #e2e8f0;
+	background: rgba(255, 255, 255, 0.07);
+	transform: translateX(4px);
+}
+
+.hm-link.hm-ativo {
+	color: #fff;
+	background: rgba(99, 179, 237, 0.18);
+	border-color: rgba(99, 179, 237, 0.35);
+	padding-left: 1.4rem;
+}
+
