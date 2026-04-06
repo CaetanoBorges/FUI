@@ -1,3 +1,4 @@
+import './style.css';
 import Home from './paginas/Home.js';
 import Sobre from './paginas/Sobre.js';
 
