@@ -126,17 +126,16 @@ export default function ChamarCorrida() {
                 /* BOTTOM SHEET */
                 .cr-sheet {
                     position: absolute;
-                    bottom: 28px;
+                    bottom: 0;
                     left: 50%;
                     transform: translateX(-50%);
                     z-index: 600;
-                    background: rgba(255, 255, 255, 0.78);
-                    backdrop-filter: blur(22px);
+                    backdrop-filter: blur(9px);
                     -webkit-backdrop-filter: blur(22px);
                     border: 1px solid rgba(255, 255, 255, 0.55);
-                    border-radius: 22px;
+                    border-radius: 22px 22px 0 0;
                     padding: 20px 22px 22px;
-                    width: 370px;
+                    width: 100%;
                     box-shadow:
                         0 2px 0 rgba(0,0,0,0.03),
                         0 12px 48px rgba(0,0,0,0.16),
@@ -262,6 +261,25 @@ export default function ChamarCorrida() {
                 .cr-rota-bullet.origem  { background: #10b981; }
                 .cr-rota-bullet.destino { background: #e63946; }
 
+                .cr-datalist-input {
+                    flex: 1;
+                    border: none;
+                    background: transparent;
+                    font-size: 0.9rem;
+                    font-family: inherit;
+                    color: #0f1729;
+                    outline: none;
+                    padding: 6px 4px;
+                    min-width: 0;
+                    width: 100%;
+                }
+                .cr-datalist-input::placeholder { color: #9ca3af; }
+                .cr-datalist-input:disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
+                    color: #6b7280;
+                }
+
                 /* TOGGLE GROUP (pill) */
                 .cr-toggle {
                     display: flex;
@@ -320,8 +338,6 @@ export default function ChamarCorrida() {
                     box-shadow: 0 0 0 3px rgba(15,52,96,0.1) !important;
                     background: rgba(255,255,255,0.9) !important;
                 }
-
-                .cr-pessoas-raw { display: none; }
 
                 .cr-sheet .ts-dropdown {
                     border-radius: 12px;
@@ -485,22 +501,24 @@ export default function ChamarCorrida() {
                 <div class="cr-step ativo" id="cr-step-1">
                     <div>
                         <div class="cr-titulo">Para onde vamos?</div>
-                        <div class="cr-sub">Selecione origem e destino</div>
                     </div>
 
                     <div class="cr-rota-wrap">
                         <div class="cr-rota-row">
                             <div class="cr-rota-bullet origem"></div>
-                            <select id="cr-origem-select">
-                                <option value="">Selecione a origem...</option>
-                                ${Object.keys(rotasEmGrafo).map((o) => `<option value="${o}">${o}</option>`).join('')}
-                            </select>
+                            <input type="text" id="cr-origem-input" list="cr-origem-list"
+                                placeholder="Selecione a origem..." autocomplete="off"
+                                class="cr-datalist-input">
+                            <datalist id="cr-origem-list">
+                                ${Object.keys(rotasEmGrafo).map((o) => `<option value="${o}"></option>`).join('')}
+                            </datalist>
                         </div>
                         <div class="cr-rota-row">
                             <div class="cr-rota-bullet destino"></div>
-                            <select id="cr-destino-select" disabled>
-                                <option value="">Selecione o destino...</option>
-                            </select>
+                            <input type="text" id="cr-destino-input" list="cr-destino-list"
+                                placeholder="Selecione o destino..." autocomplete="off"
+                                class="cr-datalist-input" disabled>
+                            <datalist id="cr-destino-list"></datalist>
                         </div>
                     </div>
 
@@ -511,10 +529,6 @@ export default function ChamarCorrida() {
 
                 <!-- STEP 2: DETALHES -->
                 <div class="cr-step" id="cr-step-2">
-                    <div>
-                        <div class="cr-titulo">Como prefere ir?</div>
-                        <div class="cr-sub">Veiculo, passageiros e horario</div>
-                    </div>
 
                     <div class="cr-field">
                         <span class="cr-label">Veiculo</span>
@@ -526,12 +540,12 @@ export default function ChamarCorrida() {
 
                     <div class="cr-field" id="cr-pessoas-field">
                         <span class="cr-label">Passageiros</span>
-                        <select id="cr-pessoas-select" class="cr-pessoas-raw">
-                            <option value="1">1 pessoa</option>
-                            <option value="2">2 pessoas</option>
-                            <option value="3">3 pessoas</option>
-                            <option value="4">4 pessoas</option>
-                        </select>
+                        <div class="cr-toggle" id="cr-pessoas-group">
+                            <button data-p="1" class="cr-on">1</button>
+                            <button data-p="2">2</button>
+                            <button data-p="3">3</button>
+                            <button data-p="4">4</button>
+                        </div>
                     </div>
 
                     <div class="cr-field">
@@ -555,10 +569,6 @@ export default function ChamarCorrida() {
 
                 <!-- STEP 3: CONFIRMAR -->
                 <div class="cr-step" id="cr-step-3">
-                    <div>
-                        <div class="cr-titulo">Confirmar corrida</div>
-                        <div class="cr-sub">Tudo certo? Entao vamos!</div>
-                    </div>
 
                     <div class="cr-resumo">
                         <div class="cr-resumo-row">
@@ -589,7 +599,7 @@ export default function ChamarCorrida() {
                             <div class="cr-preco-card-label">Preco estimado</div>
                             <div class="cr-preco-card-dist" id="cr-preco-dist">-- km</div>
                         </div>
-                        <span class="cr-preco-card-valor" id="cr-preco-valor">R$ --</span>
+                        <span class="cr-preco-card-valor" id="cr-preco-valor">AOA --</span>
                     </div>
 
                     <div class="cr-footer">
@@ -611,7 +621,7 @@ export default function ChamarCorrida() {
         let veiculoAtual = 'carro';
         let quandoAtual  = 'agora';
         let fp           = null;
-        let tsPessoas    = null;
+        let pessoasAtual = 1;
         function irPara(n) {
             document.getElementById(`cr-step-${stepAtual}`).classList.remove('ativo');
             stepAtual = n;
@@ -628,31 +638,36 @@ export default function ChamarCorrida() {
             });
         }
 
-        // â”€â”€ Tom Select â€” Origem / Destino â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        const tsOrigem = new TomSelect('#cr-origem-select', {
-            create: false,
-            placeholder: 'Selecione a origem...',
-            allowEmptyOption: false,
-            dropdownParent: 'body',
-            onInitialize() { this.clear(); }
+        // ── Inputs com Datalist — Origem / Destino ────────────────────────
+        const origemInput  = document.getElementById('cr-origem-input');
+        const destinoInput = document.getElementById('cr-destino-input');
+
+        // Recria o <datalist> do destino no body para garantir que o browser
+        // re-associa as novas opções do grafo sem cache do elemento anterior
+        function refreshDestinoList(features) {
+            const old = document.getElementById('cr-destino-list');
+            if (old) old.remove();
+            const dl = document.createElement('datalist');
+            dl.id = 'cr-destino-list';
+            features.forEach((f) => {
+                const opt = document.createElement('option');
+                opt.value = f.properties.destino;
+                dl.appendChild(opt);
+            });
+            document.body.appendChild(dl);
+            destinoInput.removeAttribute('list');
+            requestAnimationFrame(() => destinoInput.setAttribute('list', 'cr-destino-list'));
+        }
+
+
+        document.getElementById('cr-pessoas-group').addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-p]');
+            if (!btn) return;
+            pessoasAtual = parseInt(btn.dataset.p, 10);
+            document.querySelectorAll('#cr-pessoas-group button').forEach((b) =>
+                b.classList.toggle('cr-on', b === btn));
         });
 
-        const tsDestino = new TomSelect('#cr-destino-select', {
-            create: false,
-            placeholder: 'Selecione o destino...',
-            allowEmptyOption: false,
-            dropdownParent: 'body',
-            onInitialize() { this.clear(); }
-        });
-        tsDestino.disable();
-
-        // â”€â”€ Tom Select â€” Pessoas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        tsPessoas = new TomSelect('#cr-pessoas-select', {
-            create: false,
-            searchField: [],
-        });
-
-        // â”€â”€ Flatpickr â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         fp = flatpickr('#cr-datetime', {
             enableTime: true,
             dateFormat: 'd/m/Y H:i',
@@ -669,24 +684,37 @@ export default function ChamarCorrida() {
         const next1 = document.getElementById('cr-next-1');
 
         function validarStep1() {
-            next1.disabled = !(tsOrigem.getValue() && tsDestino.getValue());
+            const arestas = rotasEmGrafo[origemInput.value] || [];
+            const destinoValido = arestas.some((f) => f.properties.destino === destinoInput.value);
+            next1.disabled = !(arestas.length > 0 && destinoValido);
         }
 
-        tsOrigem.on('change', (origem) => {
-            const features = rotasEmGrafo[origem] || [];
-            tsDestino.clear();
-            tsDestino.clearOptions();
-            tsDestino.addOptions(features.map((f) => ({ value: f.properties.destino, text: f.properties.destino })));
-            tsDestino.refreshOptions(false);
-            features.length ? tsDestino.enable() : tsDestino.disable();
+        // Ao mudar a origem, recalculamos os destinos disponíveis no grafo
+        function handleOrigem() {
+            const arestas = rotasEmGrafo[origemInput.value] || [];
+            destinoInput.value = '';
             layer.clearLayers();
+            if (arestas.length) {
+                refreshDestinoList(arestas);
+                destinoInput.disabled = false;
+            } else {
+                const old = document.getElementById('cr-destino-list');
+                if (old) old.remove();
+                destinoInput.removeAttribute('list');
+                destinoInput.disabled = true;
+            }
             validarStep1();
-        });
+        }
+        origemInput.addEventListener('input',  handleOrigem);
+        origemInput.addEventListener('change', handleOrigem);
 
-        tsDestino.on('change', () => {
+        // Ao mudar o destino, validamos o par (origem, destino) no grafo e exibimos a rota
+        function handleDestino() {
             validarStep1();
             exibirRota();
-        });
+        }
+        destinoInput.addEventListener('input',  handleDestino);
+        destinoInput.addEventListener('change', handleDestino);
 
         next1.addEventListener('click', () => irPara(2));
 
@@ -709,7 +737,11 @@ export default function ChamarCorrida() {
             document.querySelectorAll('#cr-veiculo-group button').forEach((b) =>
                 b.classList.toggle('cr-on', b === btn));
             pessoasField.style.display = veiculoAtual === 'moto' ? 'none' : '';
-            if (veiculoAtual === 'moto' && tsPessoas) tsPessoas.setValue('1');
+            if (veiculoAtual === 'moto') {
+                pessoasAtual = 1;
+                document.querySelectorAll('#cr-pessoas-group button').forEach((b) =>
+                    b.classList.toggle('cr-on', b.dataset.p === '1'));
+            }
         });
 
         document.getElementById('cr-quando-group').addEventListener('click', (e) => {
@@ -736,10 +768,10 @@ export default function ChamarCorrida() {
 
         // â”€â”€ Preenche o resumo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function preencherResumo() {
-            const origem  = tsOrigem.getValue();
-            const destino = tsDestino.getValue();
+            const origem  = origemInput.value;
+            const destino = destinoInput.value;
             const feature = (rotasEmGrafo[origem] || []).find((f) => f.properties.destino === destino);
-            const pessoas = parseInt(tsPessoas ? tsPessoas.getValue() : '1', 10) || 1;
+            const pessoas = pessoasAtual;
 
             document.getElementById('cr-res-rota').textContent = `${origem} â†’ ${destino}`;
 
@@ -768,8 +800,8 @@ export default function ChamarCorrida() {
 
         // â”€â”€ Exibe a rota no mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function exibirRota() {
-            const origem  = tsOrigem.getValue();
-            const destino = tsDestino.getValue();
+            const origem  = origemInput.value;
+            const destino = destinoInput.value;
             const feature = (rotasEmGrafo[origem] || []).find((f) => f.properties.destino === destino);
             if (!feature) return;
 
@@ -787,9 +819,6 @@ export default function ChamarCorrida() {
 
         return {
             destroy() {
-                tsOrigem.destroy();
-                tsDestino.destroy();
-                if (tsPessoas) tsPessoas.destroy();
                 if (fp) fp.destroy();
                 if (layer) { layer.remove(); layer = null; }
             }

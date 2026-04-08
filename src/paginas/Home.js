@@ -69,11 +69,11 @@ function html(rotaAtual = '/') {
                 position: relative;
                 width: 100%;
                 max-width: 900px;
-                height: 100vh;
+                height: 92vh;
                 overflow: hidden;
                 box-shadow: 0 4px 24px rgba(0,0,0,0.18);
             ">
-                <div id="home-map" style="width: 100%; height: 100%;"></div>
+                <div id="home-map" style="width: 100%; height: 100vh;"></div>
                 <div id="loader-overlay" class="loader-overlay">
                     <div id="loader-spinner" class="loader-spinner"></div>
                 </div>
