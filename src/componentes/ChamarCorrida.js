@@ -529,6 +529,32 @@ export default function ChamarCorrida() {
                 }
                 .cr-btn-confirmar:hover { opacity: 0.9; transform: translateY(-1px); }
                 .cr-btn-confirmar:active { transform: translateY(0); }
+
+                /* TOAST NOTIFICATION */
+                .cr-toast {
+                    position: fixed;
+                    bottom: 42%;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(6px);
+                    background: #dc2626;
+                    color: #fff;
+                    padding: 9px 16px;
+                    border-radius: 10px;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    opacity: 0;
+                    transition: opacity 0.25s, transform 0.25s;
+                    z-index: 10000;
+                    pointer-events: none;
+                    box-shadow: 0 4px 16px rgba(220,38,38,0.28);
+                    max-width: 90%;
+                    text-align: center;
+                    white-space: normal;
+                }
+                .cr-toast.cr-toast-visible {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
             </style>
 
             <section class="cr-sheet" id="cr-sheet">
@@ -672,6 +698,23 @@ export default function ChamarCorrida() {
         let pessoasAtual = 1;
         let dataHoraConfirmada = false;
         let confirmarDatetimeBtn = null;
+        function mostrarNotificacao(msg) {
+            const existente = document.getElementById('cr-toast');
+            if (existente) existente.remove();
+            const toast = document.createElement('div');
+            toast.id = 'cr-toast';
+            toast.className = 'cr-toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => toast.classList.add('cr-toast-visible'));
+            });
+            setTimeout(() => {
+                toast.classList.remove('cr-toast-visible');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
         function irPara(n) {
             document.getElementById(`cr-step-${stepAtual}`).classList.remove('ativo');
             stepAtual = n;
@@ -721,7 +764,8 @@ export default function ChamarCorrida() {
         fp = flatpickr('#cr-datetime', {
             enableTime: true,
             dateFormat: 'd/m/Y H:i',
-            minDate: 'today',
+            minDate: new Date(),
+            maxDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
             time_24hr: true,
             locale: flatpickr.l10ns.pt,
             disableMobile: true,
@@ -830,6 +874,18 @@ export default function ChamarCorrida() {
             confirmarDatetimeBtn.textContent = 'Confirmar data e hora';
             confirmarDatetimeBtn.addEventListener('click', () => {
                 if (!(fp && fp.selectedDates.length > 0)) return;
+                const selecionada = fp.selectedDates[0];
+                const agora = new Date();
+                const minValido = new Date(agora.getTime() + 60 * 60 * 1000);
+                const maxValido = new Date(agora.getTime() + 2 * 24 * 60 * 60 * 1000);
+                if (selecionada < minValido) {
+                    mostrarNotificacao('O agendamento deve ser com no mínimo 1 hora de antecedência.');
+                    return;
+                }
+                if (selecionada > maxValido) {
+                    mostrarNotificacao('O agendamento deve ser para no máximo os próximos 2 dias.');
+                    return;
+                }
                 dataHoraConfirmada = true;
                 atualizarBotaoDataHora();
                 validarStep2();
@@ -838,6 +894,19 @@ export default function ChamarCorrida() {
 
             wrap.appendChild(confirmarDatetimeBtn);
             fp.calendarContainer.appendChild(wrap);
+
+            fp.calendarContainer.addEventListener('mousedown', (e) => {
+                const dia = e.target.closest('.flatpickr-day.flatpickr-disabled');
+                if (!dia) return;
+                const allDays = Array.from(fp.calendarContainer.querySelectorAll('.flatpickr-day'));
+                const todayIdx = allDays.findIndex((d) => d.classList.contains('today'));
+                const diaIdx = allDays.indexOf(dia);
+                if (todayIdx !== -1 && diaIdx < todayIdx) {
+                    mostrarNotificacao('Não é possível agendar para datas passadas.');
+                } else {
+                    mostrarNotificacao('O agendamento deve ser para no máximo os próximos 2 dias.');
+                }
+            }, true);
         }
 
         function atualizarBotaoDataHora() {
@@ -884,6 +953,7 @@ export default function ChamarCorrida() {
             document.querySelectorAll('#cr-quando-group button').forEach((b) =>
                 b.classList.toggle('cr-on', b === btn));
             agendarField.style.display = quandoAtual === 'agendar' ? '' : 'none';
+            if (quandoAtual === 'agendar' && fp) fp.open();
             atualizarBotaoDataHora();
             validarStep2();
             atualizarBotaoConfirmarCorrida();
