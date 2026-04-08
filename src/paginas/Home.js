@@ -10,7 +10,7 @@ let hmCorridaLifecycle = null;
 const HM_FALLBACK_CENTER = [-14.235, -51.925];
 let hmMapState = {
     center: HM_FALLBACK_CENTER,
-    zoom: 4
+    zoom: 13
 };
 
 function carregarCentroInicialAtual() {

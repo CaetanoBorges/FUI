@@ -103,6 +103,14 @@ function haversineKm([lon1, lat1], [lon2, lat2]) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function formatarDuracaoHMS(totalSegundos) {
+    const segundosNormalizados = Math.max(0, Math.round(totalSegundos));
+    const horas = Math.floor(segundosNormalizados / 3600);
+    const minutos = Math.floor((segundosNormalizados % 3600) / 60);
+    const segundos = segundosNormalizados % 60;
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+}
+
 function calcularPreco(feature, veiculo, pessoas) {
     if (!feature) return null;
     const coords = feature.geometry.coordinates;
@@ -114,7 +122,14 @@ function calcularPreco(feature, veiculo, pessoas) {
     const taxaKm  = veiculo === 'moto' ? 1.80 : 2.50;
     const taxaPessoa = veiculo === 'carro' ? Math.max(0, (pessoas - 1)) * 1.00 : 0;
     const total = taxaBase + distancia * taxaKm + taxaPessoa;
-    return { total: total.toFixed(2), distancia: distancia.toFixed(1) };
+    const velocidadeMediaKmH = veiculo === 'moto' ? 32 : 26;
+    const tempoSegundos = (distancia / velocidadeMediaKmH) * 3600;
+
+    return {
+        total: total.toFixed(2),
+        distancia: distancia.toFixed(1),
+        tempo: formatarDuracaoHMS(tempoSegundos)
+    };
 }
 
 export default function ChamarCorrida() {
@@ -134,7 +149,7 @@ export default function ChamarCorrida() {
                     -webkit-backdrop-filter: blur(22px);
                     border: 1px solid rgba(255, 255, 255, 0.55);
                     border-radius: 22px 22px 0 0;
-                    padding: 20px 22px 22px;
+                    padding: 10px;
                     width: 100%;
                     box-shadow:
                         0 2px 0 rgba(0,0,0,0.03),
@@ -151,7 +166,7 @@ export default function ChamarCorrida() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    margin-bottom: 18px;
+                    margin-bottom: 10px;
                 }
 
                 .cr-step-dot {
@@ -211,7 +226,6 @@ export default function ChamarCorrida() {
                     font-size: 1.05rem;
                     font-weight: 700;
                     color: #0f1729;
-                    line-height: 1.3;
                 }
                 .cr-sub {
                     font-size: 0.8rem;
@@ -380,6 +394,7 @@ export default function ChamarCorrida() {
                     box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
                     border: 1px solid #e5e7eb !important;
                     z-index: 9999 !important;
+                    width: 95% !important;
                 }
                 .flatpickr-day.selected, .flatpickr-day.selected:hover {
                     background: #0f3460 !important; border-color: #0f3460 !important;
@@ -404,7 +419,7 @@ export default function ChamarCorrida() {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    padding: 12px 14px;
+                    padding: 5px;
                 }
                 .cr-resumo-row:not(:last-child) { border-bottom: 1px solid rgba(229,231,235,0.7); }
                 .cr-resumo-icon { font-size: 1.1rem; width: 30px; text-align: center; flex-shrink: 0; }
@@ -426,8 +441,14 @@ export default function ChamarCorrida() {
                     border-radius: 14px;
                     color: #fff;
                 }
+                .cr-preco-card-right {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
                 .cr-preco-card-label { font-size: 0.78rem; font-weight: 600; opacity: 0.75; }
                 .cr-preco-card-dist  { font-size: 0.72rem; opacity: 0.6; margin-top: 2px; }
+                .cr-preco-card-tempo { font-size: 0.72rem; opacity: 0.6; margin-top: 2px; }
                 .cr-preco-card-valor { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
 
                 /* BOTOES */
@@ -466,6 +487,30 @@ export default function ChamarCorrida() {
                 }
                 .cr-btn-next:hover:not(:disabled) { background: #16213e; }
                 .cr-btn-next:disabled { background: rgba(209,213,219,0.7); cursor: not-allowed; color: #9ca3af; }
+
+                .cr-btn-datahora {
+                    width: 100%;
+                    height: 40px;
+                    border: none;
+                    border-radius: 10px;
+                    background: #0f3460;
+                    color: #fff;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    font-family: inherit;
+                    transition: background 0.18s;
+                    margin-top: 8px;
+                }
+                .cr-btn-datahora:hover:not(:disabled) { background: #16213e; }
+                .cr-btn-datahora:disabled { background: rgba(209,213,219,0.7); cursor: not-allowed; color: #9ca3af; }
+                .cr-btn-datahora.confirmado { background: #059669; }
+
+                .cr-fp-confirm-wrap {
+                    padding: 8px;
+                    border-top: 1px solid rgba(229,231,235,0.85);
+                    background: #fff;
+                }
 
                 .cr-btn-confirmar {
                     flex: 1;
@@ -596,10 +641,13 @@ export default function ChamarCorrida() {
 
                     <div class="cr-preco-card">
                         <div>
-                            <div class="cr-preco-card-label">Preco estimado</div>
-                            <div class="cr-preco-card-dist" id="cr-preco-dist">-- km</div>
+                            <div class="cr-preco-card-dist" id="cr-preco-dist">&#x1F4CD; -- km</div>
+                            <div class="cr-preco-card-tempo" id="cr-preco-tempo">&#x23F1;&#xFE0F; --:--:--</div>
                         </div>
-                        <span class="cr-preco-card-valor" id="cr-preco-valor">AOA --</span>
+                        <div class="cr-preco-card-right">
+                            <div class="cr-preco-card-label">Preco estimado</div>
+                            <span class="cr-preco-card-valor" id="cr-preco-valor">Kz --</span>
+                        </div>
                     </div>
 
                     <div class="cr-footer">
@@ -622,6 +670,8 @@ export default function ChamarCorrida() {
         let quandoAtual  = 'agora';
         let fp           = null;
         let pessoasAtual = 1;
+        let dataHoraConfirmada = false;
+        let confirmarDatetimeBtn = null;
         function irPara(n) {
             document.getElementById(`cr-step-${stepAtual}`).classList.remove('ativo');
             stepAtual = n;
@@ -675,14 +725,48 @@ export default function ChamarCorrida() {
             time_24hr: true,
             locale: flatpickr.l10ns.pt,
             disableMobile: true,
-            onChange() { validarStep2(); },
+            onReady() {
+                montarBotaoNoCalendario();
+                atualizarBotaoDataHora();
+            },
+            onOpen() {
+                montarBotaoNoCalendario();
+                atualizarBotaoDataHora();
+            },
+            onChange() {
+                dataHoraConfirmada = false;
+                atualizarBotaoDataHora();
+                validarStep2();
+            },
         });
 
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // STEP 1
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const next1 = document.getElementById('cr-next-1');
+        function atualizarBotaoConfirmarCorrida() {
+            const btnConfirmar = document.getElementById('cr-confirmar');
+            if (!btnConfirmar) return;
+            btnConfirmar.textContent = quandoAtual === 'agendar'
+                ? '📅 Confirmar agendamento'
+                : '✓ Confirmar corrida';
+        }
 
+        function confirmarCorridaFinal() {
+            exibirRota();
+
+            if (quandoAtual === 'agendar') {
+                const dataAgendada = fp && fp.selectedDates.length > 0
+                    ? fp.formatDate(fp.selectedDates[0], 'd/m/Y H:i')
+                    : 'data não informada';
+                window.alert(`Agendamento confirmado para ${dataAgendada}.`);
+                return;
+            }
+
+            window.alert('Corrida confirmada para agora.');
+        }
+
+        document.getElementById('cr-confirmar').addEventListener('click', confirmarCorridaFinal);
         function validarStep1() {
             const arestas = rotasEmGrafo[origemInput.value] || [];
             const destinoValido = arestas.some((f) => f.properties.destino === destinoInput.value);
@@ -726,8 +810,56 @@ export default function ChamarCorrida() {
         const pessoasField = document.getElementById('cr-pessoas-field');
         const agendarField = document.getElementById('cr-agendar-field');
 
+        function montarBotaoNoCalendario() {
+            if (!fp || !fp.calendarContainer) return;
+
+            const existente = fp.calendarContainer.querySelector('#cr-confirmar-datetime-popup');
+            if (existente) {
+                confirmarDatetimeBtn = existente;
+                return;
+            }
+
+            const wrap = document.createElement('div');
+            wrap.className = 'cr-fp-confirm-wrap';
+
+            confirmarDatetimeBtn = document.createElement('button');
+            confirmarDatetimeBtn.type = 'button';
+            confirmarDatetimeBtn.id = 'cr-confirmar-datetime-popup';
+            confirmarDatetimeBtn.className = 'cr-btn-datahora';
+            confirmarDatetimeBtn.disabled = true;
+            confirmarDatetimeBtn.textContent = 'Confirmar data e hora';
+            confirmarDatetimeBtn.addEventListener('click', () => {
+                if (!(fp && fp.selectedDates.length > 0)) return;
+                dataHoraConfirmada = true;
+                atualizarBotaoDataHora();
+                validarStep2();
+                fp.close();
+            });
+
+            wrap.appendChild(confirmarDatetimeBtn);
+            fp.calendarContainer.appendChild(wrap);
+        }
+
+        function atualizarBotaoDataHora() {
+            if (!confirmarDatetimeBtn) return;
+
+            if (quandoAtual !== 'agendar') {
+                confirmarDatetimeBtn.disabled = true;
+                confirmarDatetimeBtn.classList.remove('confirmado');
+                confirmarDatetimeBtn.textContent = 'Confirmar data e hora';
+                return;
+            }
+
+            const temDataSelecionada = fp && fp.selectedDates.length > 0;
+            confirmarDatetimeBtn.disabled = !temDataSelecionada;
+            confirmarDatetimeBtn.classList.toggle('confirmado', dataHoraConfirmada && temDataSelecionada);
+            confirmarDatetimeBtn.textContent = dataHoraConfirmada && temDataSelecionada
+                ? '✓ Data e hora confirmadas'
+                : 'Confirmar data e hora';
+        }
+
         function validarStep2() {
-            next2.disabled = quandoAtual === 'agendar' && !(fp && fp.selectedDates.length > 0);
+            next2.disabled = quandoAtual === 'agendar' && !dataHoraConfirmada;
         }
 
         document.getElementById('cr-veiculo-group').addEventListener('click', (e) => {
@@ -748,17 +880,24 @@ export default function ChamarCorrida() {
             const btn = e.target.closest('button[data-q]');
             if (!btn) return;
             quandoAtual = btn.dataset.q;
+            dataHoraConfirmada = false;
             document.querySelectorAll('#cr-quando-group button').forEach((b) =>
                 b.classList.toggle('cr-on', b === btn));
             agendarField.style.display = quandoAtual === 'agendar' ? '' : 'none';
+            atualizarBotaoDataHora();
             validarStep2();
+            atualizarBotaoConfirmarCorrida();
         });
 
         back2.addEventListener('click', () => irPara(1));
         next2.addEventListener('click', () => {
             preencherResumo();
+            atualizarBotaoConfirmarCorrida();
             irPara(3);
         });
+
+        atualizarBotaoDataHora();
+        atualizarBotaoConfirmarCorrida();
 
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // STEP 3
@@ -793,8 +932,9 @@ export default function ChamarCorrida() {
 
             if (feature) {
                 const preco = calcularPreco(feature, veiculoAtual, pessoas);
-                document.getElementById('cr-preco-valor').textContent = `R$ ${preco.total}`;
-                document.getElementById('cr-preco-dist').textContent  = `${preco.distancia} km`;
+                document.getElementById('cr-preco-valor').textContent = `Kz ${preco.total.replace('.', ',')}`;
+                document.getElementById('cr-preco-dist').textContent  = `📍 ${preco.distancia} km`;
+                document.getElementById('cr-preco-tempo').textContent = `⏱️ ${preco.tempo}`;
             }
         }
 
