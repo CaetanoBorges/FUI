@@ -356,10 +356,14 @@ export default function ChamarCorrida() {
                 .cr-sheet .ts-dropdown {
                     border-radius: 12px;
                     border: 1.5px solid #e5e7eb;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+                    box-shadow: 0 -8px 24px rgba(0,0,0,0.13);
                     font-size: 0.9rem;
                     z-index: 9999;
                     font-family: inherit;
+                    top: auto !important;
+                    bottom: 100% !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 4px !important;
                 }
                 .cr-sheet .ts-dropdown .option { padding: 10px 14px; transition: background 0.12s; }
                 .cr-sheet .ts-dropdown .option:hover,
@@ -367,6 +371,43 @@ export default function ChamarCorrida() {
                 .cr-sheet .ts-dropdown .option.selected { background: #dbeafe; color: #1e40af; font-weight: 600; }
 
                 .cr-sheet .ts-wrapper.disabled .ts-control { opacity: 0.45; cursor: not-allowed; }
+
+                /* ROTA SEARCH — opcoes personalizadas */
+                .cr-ts-rota-opt {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 6px;
+                    width: 100%;
+                    overflow: hidden;
+                }
+                .cr-ts-lado {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    min-width: 0;
+                    flex: 1;
+                }
+                .cr-ts-lado.direito { justify-content: flex-end; }
+                .cr-ts-label {
+                    font-size: 0.88rem;
+                    color: #1d51ca;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    min-width: 0;
+                }
+                .cr-ts-label.bold { font-weight: 600; }
+                .cr-ts-bullet {
+                    width: 9px;
+                    height: 9px;
+                    border-radius: 50%;
+                    flex-shrink: 0;
+                }
+                .cr-ts-origem  { background: #10b981; }
+                .cr-ts-destino { background: #e63946; }
+                .cr-ts-sep { color: #d1d5db; font-size: 0.75rem; flex-shrink: 0; padding: 0 2px; }
+                .cr-ts-rota-nome { font-size: 0.88rem; color: #0f1729; }
 
                 /* FLATPICKR */
                 .cr-sheet .flatpickr-input {
@@ -574,23 +615,9 @@ export default function ChamarCorrida() {
                         <div class="cr-titulo">Para onde vamos?</div>
                     </div>
 
-                    <div class="cr-rota-wrap">
-                        <div class="cr-rota-row">
-                            <div class="cr-rota-bullet origem"></div>
-                            <input type="text" id="cr-origem-input" list="cr-origem-list"
-                                placeholder="Selecione a origem..." autocomplete="off"
-                                class="cr-datalist-input">
-                            <datalist id="cr-origem-list">
-                                ${Object.keys(rotasEmGrafo).map((o) => `<option value="${o}"></option>`).join('')}
-                            </datalist>
-                        </div>
-                        <div class="cr-rota-row">
-                            <div class="cr-rota-bullet destino"></div>
-                            <input type="text" id="cr-destino-input" list="cr-destino-list"
-                                placeholder="Selecione o destino..." autocomplete="off"
-                                class="cr-datalist-input" disabled>
-                            <datalist id="cr-destino-list"></datalist>
-                        </div>
+                    <div class="cr-field">
+                        <span class="cr-label">Pesquisar rota</span>
+                        <select id="cr-rota-search" placeholder="Ex: Centro → Aeroporto..."></select>
                     </div>
 
                     <div class="cr-footer">
@@ -731,26 +758,65 @@ export default function ChamarCorrida() {
             });
         }
 
-        // ── Inputs com Datalist — Origem / Destino ────────────────────────
-        const origemInput  = document.getElementById('cr-origem-input');
-        const destinoInput = document.getElementById('cr-destino-input');
+        // ── TomSelect — pesquisa de rota unificada ─────────────────────────
+        let rotaSelecionada = null; // { origem, destino, feature }
 
-        // Recria o <datalist> do destino no body para garantir que o browser
-        // re-associa as novas opções do grafo sem cache do elemento anterior
-        function refreshDestinoList(features) {
-            const old = document.getElementById('cr-destino-list');
-            if (old) old.remove();
-            const dl = document.createElement('datalist');
-            dl.id = 'cr-destino-list';
-            features.forEach((f) => {
-                const opt = document.createElement('option');
-                opt.value = f.properties.destino;
-                dl.appendChild(opt);
+        // Monta todas as combinações origem → destino do grafo
+        const todasRotas = [];
+        Object.entries(rotasEmGrafo).forEach(([origem, arestas]) => {
+            arestas.forEach((feature) => {
+                todasRotas.push({
+                    value: `${origem}|||${feature.properties.destino}`,
+                    origem,
+                    destino: feature.properties.destino,
+                    feature,
+                });
             });
-            document.body.appendChild(dl);
-            destinoInput.removeAttribute('list');
-            requestAnimationFrame(() => destinoInput.setAttribute('list', 'cr-destino-list'));
-        }
+        });
+
+        const tsRota = new TomSelect('#cr-rota-search', {
+            options: todasRotas,
+            valueField: 'value',
+            labelField: 'value',
+            searchField: ['origem', 'destino'],
+            placeholder: 'Ex: Centro → Aeroporto...',
+            maxOptions: 20,
+            render: {
+                option(item) {
+                    return `<div class="cr-ts-rota-opt">
+                        <div class="cr-ts-lado">
+                            <span class="cr-ts-bullet cr-ts-origem"></span>
+                            <span class="cr-ts-label bold">${item.origem}</span>
+                        </div>
+                        <span class="cr-ts-sep">|</span>
+                        <div class="cr-ts-lado direito">
+                            <span class="cr-ts-label">${item.destino}</span>
+                            <span class="cr-ts-bullet cr-ts-destino"></span>
+                        </div>
+                    </div>`;
+                },
+                item(item) {
+                    return `<div class="cr-ts-rota-opt">
+                        <div class="cr-ts-lado">
+                            <span class="cr-ts-bullet cr-ts-origem"></span>
+                            <span class="cr-ts-label bold">${item.origem}</span>
+                        </div>
+                        <span class="cr-ts-sep">|</span>
+                        <div class="cr-ts-lado direito">
+                            <span class="cr-ts-label">${item.destino}</span>
+                            <span class="cr-ts-bullet cr-ts-destino"></span>
+                        </div>
+                    </div>`;
+                },
+            },
+            onChange(value) {
+                const item = todasRotas.find((r) => r.value === value);
+                rotaSelecionada = item || null;
+                next1.disabled = !rotaSelecionada;
+                layer.clearLayers();
+                if (rotaSelecionada) exibirRota();
+            },
+        });
 
 
         document.getElementById('cr-pessoas-group').addEventListener('click', (e) => {
@@ -811,38 +877,6 @@ export default function ChamarCorrida() {
         }
 
         document.getElementById('cr-confirmar').addEventListener('click', confirmarCorridaFinal);
-        function validarStep1() {
-            const arestas = rotasEmGrafo[origemInput.value] || [];
-            const destinoValido = arestas.some((f) => f.properties.destino === destinoInput.value);
-            next1.disabled = !(arestas.length > 0 && destinoValido);
-        }
-
-        // Ao mudar a origem, recalculamos os destinos disponíveis no grafo
-        function handleOrigem() {
-            const arestas = rotasEmGrafo[origemInput.value] || [];
-            destinoInput.value = '';
-            layer.clearLayers();
-            if (arestas.length) {
-                refreshDestinoList(arestas);
-                destinoInput.disabled = false;
-            } else {
-                const old = document.getElementById('cr-destino-list');
-                if (old) old.remove();
-                destinoInput.removeAttribute('list');
-                destinoInput.disabled = true;
-            }
-            validarStep1();
-        }
-        origemInput.addEventListener('input',  handleOrigem);
-        origemInput.addEventListener('change', handleOrigem);
-
-        // Ao mudar o destino, validamos o par (origem, destino) no grafo e exibimos a rota
-        function handleDestino() {
-            validarStep1();
-            exibirRota();
-        }
-        destinoInput.addEventListener('input',  handleDestino);
-        destinoInput.addEventListener('change', handleDestino);
 
         next1.addEventListener('click', () => irPara(2));
 
@@ -977,9 +1011,8 @@ export default function ChamarCorrida() {
 
         // â”€â”€ Preenche o resumo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function preencherResumo() {
-            const origem  = origemInput.value;
-            const destino = destinoInput.value;
-            const feature = (rotasEmGrafo[origem] || []).find((f) => f.properties.destino === destino);
+            if (!rotaSelecionada) return;
+            const { origem, destino, feature } = rotaSelecionada;
             const pessoas = pessoasAtual;
 
             document.getElementById('cr-res-rota').textContent = `${origem} â†’ ${destino}`;
@@ -1010,10 +1043,8 @@ export default function ChamarCorrida() {
 
         // â”€â”€ Exibe a rota no mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function exibirRota() {
-            const origem  = origemInput.value;
-            const destino = destinoInput.value;
-            const feature = (rotasEmGrafo[origem] || []).find((f) => f.properties.destino === destino);
-            if (!feature) return;
+            if (!rotaSelecionada) return;
+            const { origem, destino, feature } = rotaSelecionada;
 
             layer.clearLayers();
 
@@ -1030,6 +1061,7 @@ export default function ChamarCorrida() {
         return {
             destroy() {
                 if (fp) fp.destroy();
+                if (tsRota) tsRota.destroy();
                 if (layer) { layer.remove(); layer = null; }
             }
         };
