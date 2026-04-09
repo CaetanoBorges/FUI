@@ -35,8 +35,22 @@ function renderRoute() {
 
 window.addEventListener('hashchange', renderRoute);
 window.addEventListener('load', () => {
+	// Prepara as promessas antes do renderRoute para não perder o evento
+	const animDone = new Promise(resolve => setTimeout(resolve, 1600));
+	const pageDone = new Promise(resolve =>
+		document.addEventListener('app:ready', resolve, { once: true })
+	);
+
 	if (!window.location.hash) {
 		window.location.hash = '#/';
 	}
 	renderRoute();
+
+	const splash = document.getElementById('splash');
+	if (splash) {
+		Promise.all([animDone, pageDone]).then(() => {
+			splash.classList.add('hidden');
+			splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+		});
+	}
 });

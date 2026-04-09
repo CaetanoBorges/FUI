@@ -107,8 +107,14 @@ async function init() {
 
     setMapLoader(true);
     hmTileLayer.on('loading', () => setMapLoader(true));
-    hmTileLayer.on('load', () => setMapLoader(false));
+    hmTileLayer.on('load', () => {
+        setMapLoader(false);
+        document.dispatchEvent(new CustomEvent('app:ready'));
+    });
     hmTileLayer.addTo(hmMap);
+
+    // Fallback: garante que o splash some mesmo se os tiles demorarem
+    setTimeout(() => document.dispatchEvent(new CustomEvent('app:ready')), 5000);
 
     hmCorridaLifecycle = hmCorridaComponent?.init?.(hmMap) || null;
 
