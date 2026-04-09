@@ -1,97 +1,4 @@
-﻿// Grafo de rotas: cada origem mapeia para um array de GeoJSON Features (LineString + estilo em properties)
-const rotasEmGrafo = {
-    Centro: [
-        {
-            type: 'Feature',
-            properties: {
-                destino: 'Aeroporto',
-                style: { color: '#e63946', weight: 5, opacity: 0.85, dashArray: null }
-            },
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [-47.8828, -15.7939],
-                    [-47.9182, -15.8703]
-                ]
-            }
-        },
-        {
-            type: 'Feature',
-            properties: {
-                destino: 'Universidade',
-                style: { color: '#2a9d8f', weight: 5, opacity: 0.85, dashArray: '8 4' }
-            },
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [-47.8828, -15.7939],
-                    [-47.8713, -15.7636]
-                ]
-            }
-        }
-    ],
-    Rodovia: [
-        {
-            type: 'Feature',
-            properties: {
-                destino: 'Universidade',
-                style: { color: '#2a9d8f', weight: 5, opacity: 0.85, dashArray: '8 4' }
-            },
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [-47.8919, -15.7985],
-                    [-47.8713, -15.7636]
-                ]
-            }
-        },
-        {
-            type: 'Feature',
-            properties: {
-                destino: 'Hospital',
-                style: { color: '#f4a261', weight: 5, opacity: 0.85, dashArray: null }
-            },
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [-47.8919, -15.7985],
-                    [-47.8822, -15.7942]
-                ]
-            }
-        }
-    ],
-    Shopping: [
-        {
-            type: 'Feature',
-            properties: {
-                destino: 'Hospital',
-                style: { color: '#f4a261', weight: 5, opacity: 0.85, dashArray: null }
-            },
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [-47.9564, -15.8319],
-                    [-47.8822, -15.7942],
-                    
-                ]
-            }
-        },
-        {
-            type: 'Feature',
-            properties: {
-                destino: 'Aeroporto',
-                style: { color: '#e63946', weight: 5, opacity: 0.85, dashArray: '8 4' }
-            },
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    [-47.9564, -15.8319],
-                    [-47.9182, -15.8703]
-                ]
-            }
-        }
-    ]
-};
+﻿import rotasEmGrafo from '../dados/rotasEmGrafo.js';
 
 function haversineKm([lon1, lat1], [lon2, lat2]) {
     const R = 6371;
@@ -112,12 +19,21 @@ function formatarDuracaoHMS(totalSegundos) {
 }
 
 function calcularPreco(feature, veiculo, pessoas) {
-    if (!feature) return null;
-    const coords = feature.geometry.coordinates;
+    const trechos = Array.isArray(feature)
+        ? feature.filter(Boolean)
+        : [feature].filter(Boolean);
+
+    if (!trechos.length) return null;
+
     let distancia = 0;
-    for (let i = 0; i < coords.length - 1; i++) {
-        distancia += haversineKm(coords[i], coords[i + 1]);
-    }
+
+    trechos.forEach((trecho) => {
+        const coords = trecho.geometry.coordinates;
+        for (let i = 0; i < coords.length - 1; i++) {
+            distancia += haversineKm(coords[i], coords[i + 1]);
+        }
+    });
+
     const taxaBase = veiculo === 'moto' ? 2.00 : 3.00;
     const taxaKm  = veiculo === 'moto' ? 1.80 : 2.50;
     const taxaPessoa = veiculo === 'carro' ? Math.max(0, (pessoas - 1)) * 1.00 : 0;
@@ -372,6 +288,22 @@ export default function ChamarCorrida() {
 
                 .cr-sheet .ts-wrapper.disabled .ts-control { opacity: 0.45; cursor: not-allowed; }
 
+                .cr-subopcao {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    padding: 12px;
+                    border-radius: 14px;
+                    background: rgba(248,250,255,0.6);
+                    border: 1.5px solid rgba(219,234,254,0.8);
+                }
+
+                .cr-info {
+                    font-size: 0.8rem;
+                    color: #6b7280;
+                    line-height: 1.45;
+                }
+
                 /* ROTA SEARCH — opcoes personalizadas */
                 .cr-ts-rota-opt {
                     display: flex;
@@ -620,6 +552,23 @@ export default function ChamarCorrida() {
                         <select id="cr-rota-search" placeholder="Ex: Centro → Aeroporto..."></select>
                     </div>
 
+                    <div class="cr-field" id="cr-continuar-field" style="display:none">
+                        <span class="cr-label">Continuar apos o destino?</span>
+                        <div class="cr-subopcao">
+                            <div class="cr-toggle" id="cr-continuar-group">
+                                <button type="button" data-c="nao" class="cr-on">Nao</button>
+                                <button type="button" data-c="sim">Sim</button>
+                            </div>
+
+                            <div class="cr-field" id="cr-continuacao-rota-field" style="display:none">
+                                <span class="cr-label">Proxima rota</span>
+                                <select id="cr-rota-continuacao" placeholder="Selecione a proxima rota..."></select>
+                            </div>
+
+                            <div class="cr-info" id="cr-continuacao-info" style="display:none"></div>
+                        </div>
+                    </div>
+
                     <div class="cr-footer">
                         <button class="cr-btn-next" id="cr-next-1" disabled>Proximo &#8594;</button>
                     </div>
@@ -760,6 +709,14 @@ export default function ChamarCorrida() {
 
         // ── TomSelect — pesquisa de rota unificada ─────────────────────────
         let rotaSelecionada = null; // { origem, destino, feature }
+        let rotaContinuidade = null;
+        let continuarAposDestino = false;
+
+        const next1 = document.getElementById('cr-next-1');
+        const continuarField = document.getElementById('cr-continuar-field');
+        const continuarGroup = document.getElementById('cr-continuar-group');
+        const continuacaoRotaField = document.getElementById('cr-continuacao-rota-field');
+        const continuacaoInfo = document.getElementById('cr-continuacao-info');
 
         // Monta todas as combinações origem → destino do grafo
         const todasRotas = [];
@@ -774,6 +731,70 @@ export default function ChamarCorrida() {
             });
         });
 
+        function renderizarOpcaoRota(item) {
+            return `<div class="cr-ts-rota-opt">
+                <div class="cr-ts-lado">
+                    <span class="cr-ts-bullet cr-ts-origem"></span>
+                    <span class="cr-ts-label bold">${item.origem}</span>
+                </div>
+                <span class="cr-ts-sep">|</span>
+                <div class="cr-ts-lado direito">
+                    <span class="cr-ts-label">${item.destino}</span>
+                    <span class="cr-ts-bullet cr-ts-destino"></span>
+                </div>
+            </div>`;
+        }
+
+        function obterRotasConectadas() {
+            if (!rotaSelecionada?.destino) return [];
+            return todasRotas.filter((rota) => rota.origem === rotaSelecionada.destino);
+        }
+
+        function obterTrechosSelecionados() {
+            return [rotaSelecionada, rotaContinuidade].filter(Boolean);
+        }
+
+        function montarResumoRota() {
+            const trechos = obterTrechosSelecionados();
+            if (!trechos.length) return '--';
+
+            const pontos = [trechos[0].origem, ...trechos.map((trecho) => trecho.destino)];
+            return pontos.join(' → ');
+        }
+
+        function atualizarBotaoStep1() {
+            const possuiConectadas = obterRotasConectadas().length > 0;
+            const precisaEscolherContinuidade = continuarAposDestino && possuiConectadas;
+            next1.disabled = !rotaSelecionada || (precisaEscolherContinuidade && !rotaContinuidade);
+        }
+
+        function atualizarCampoContinuidade() {
+            const rotasConectadas = obterRotasConectadas();
+
+            continuarField.style.display = rotaSelecionada ? '' : 'none';
+            continuacaoInfo.style.display = 'none';
+            continuacaoInfo.textContent = '';
+
+            if (!rotaSelecionada || !continuarAposDestino) {
+                continuacaoRotaField.style.display = 'none';
+                atualizarBotaoStep1();
+                return;
+            }
+
+            if (!rotasConectadas.length) {
+                continuacaoRotaField.style.display = 'none';
+                continuacaoInfo.style.display = '';
+                continuacaoInfo.textContent = 'Nao existem rotas cadastradas saindo deste destino.';
+                atualizarBotaoStep1();
+                return;
+            }
+
+            continuacaoRotaField.style.display = '';
+            continuacaoInfo.style.display = '';
+            continuacaoInfo.textContent = `Mostrando apenas rotas com partida em ${rotaSelecionada.destino}.`;
+            atualizarBotaoStep1();
+        }
+
         const tsRota = new TomSelect('#cr-rota-search', {
             options: todasRotas,
             valueField: 'value',
@@ -782,40 +803,66 @@ export default function ChamarCorrida() {
             placeholder: 'Ex: Centro → Aeroporto...',
             maxOptions: 20,
             render: {
-                option(item) {
-                    return `<div class="cr-ts-rota-opt">
-                        <div class="cr-ts-lado">
-                            <span class="cr-ts-bullet cr-ts-origem"></span>
-                            <span class="cr-ts-label bold">${item.origem}</span>
-                        </div>
-                        <span class="cr-ts-sep">|</span>
-                        <div class="cr-ts-lado direito">
-                            <span class="cr-ts-label">${item.destino}</span>
-                            <span class="cr-ts-bullet cr-ts-destino"></span>
-                        </div>
-                    </div>`;
-                },
-                item(item) {
-                    return `<div class="cr-ts-rota-opt">
-                        <div class="cr-ts-lado">
-                            <span class="cr-ts-bullet cr-ts-origem"></span>
-                            <span class="cr-ts-label bold">${item.origem}</span>
-                        </div>
-                        <span class="cr-ts-sep">|</span>
-                        <div class="cr-ts-lado direito">
-                            <span class="cr-ts-label">${item.destino}</span>
-                            <span class="cr-ts-bullet cr-ts-destino"></span>
-                        </div>
-                    </div>`;
-                },
+                option: renderizarOpcaoRota,
+                item: renderizarOpcaoRota,
             },
             onChange(value) {
                 const item = todasRotas.find((r) => r.value === value);
                 rotaSelecionada = item || null;
-                next1.disabled = !rotaSelecionada;
+                rotaContinuidade = null;
                 layer.clearLayers();
+                if (tsRotaContinuidade) {
+                    tsRotaContinuidade.clear(true);
+                    tsRotaContinuidade.clearOptions();
+
+                    const rotasConectadas = obterRotasConectadas();
+                    if (rotasConectadas.length) {
+                        tsRotaContinuidade.addOptions(rotasConectadas);
+                        tsRotaContinuidade.enable();
+                    } else {
+                        tsRotaContinuidade.disable();
+                    }
+                    tsRotaContinuidade.refreshOptions(false);
+                }
+
+                atualizarCampoContinuidade();
                 if (rotaSelecionada) exibirRota();
             },
+        });
+
+        const tsRotaContinuidade = new TomSelect('#cr-rota-continuacao', {
+            options: [],
+            valueField: 'value',
+            labelField: 'value',
+            searchField: ['origem', 'destino'],
+            placeholder: 'Selecione a proxima rota...',
+            maxOptions: 10,
+            render: {
+                option: renderizarOpcaoRota,
+                item: renderizarOpcaoRota,
+            },
+            onChange(value) {
+                const item = obterRotasConectadas().find((rota) => rota.value === value);
+                rotaContinuidade = item || null;
+                atualizarBotaoStep1();
+                exibirRota();
+            },
+        });
+
+        tsRotaContinuidade.disable();
+
+        continuarGroup.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-c]');
+            if (!btn) return;
+
+            continuarAposDestino = btn.dataset.c === 'sim';
+            document.querySelectorAll('#cr-continuar-group button').forEach((button) =>
+                button.classList.toggle('cr-on', button === btn));
+
+            rotaContinuidade = null;
+            tsRotaContinuidade.clear(true);
+            atualizarCampoContinuidade();
+            exibirRota();
         });
 
 
@@ -853,7 +900,6 @@ export default function ChamarCorrida() {
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // STEP 1
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        const next1 = document.getElementById('cr-next-1');
         function atualizarBotaoConfirmarCorrida() {
             const btnConfirmar = document.getElementById('cr-confirmar');
             if (!btnConfirmar) return;
@@ -1012,10 +1058,10 @@ export default function ChamarCorrida() {
         // â”€â”€ Preenche o resumo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function preencherResumo() {
             if (!rotaSelecionada) return;
-            const { origem, destino, feature } = rotaSelecionada;
+            const trechos = obterTrechosSelecionados();
             const pessoas = pessoasAtual;
 
-            document.getElementById('cr-res-rota').textContent = `${origem} â†’ ${destino}`;
+            document.getElementById('cr-res-rota').textContent = montarResumoRota();
 
             const icon = veiculoAtual === 'moto' ? 'ðŸï¸' : 'ðŸš—';
             const desc = veiculoAtual === 'moto'
@@ -1033,8 +1079,8 @@ export default function ChamarCorrida() {
                 document.getElementById('cr-res-quando').textContent = val;
             }
 
-            if (feature) {
-                const preco = calcularPreco(feature, veiculoAtual, pessoas);
+            if (trechos.length) {
+                const preco = calcularPreco(trechos.map((trecho) => trecho.feature), veiculoAtual, pessoas);
                 document.getElementById('cr-preco-valor').textContent = `Kz ${preco.total.replace('.', ',')}`;
                 document.getElementById('cr-preco-dist').textContent  = `📍 ${preco.distancia} km`;
                 document.getElementById('cr-preco-tempo').textContent = `⏱️ ${preco.tempo}`;
@@ -1044,18 +1090,34 @@ export default function ChamarCorrida() {
         // â”€â”€ Exibe a rota no mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function exibirRota() {
             if (!rotaSelecionada) return;
-            const { origem, destino, feature } = rotaSelecionada;
+            const trechos = obterTrechosSelecionados();
 
             layer.clearLayers();
 
-            const linhaLayer   = L.geoJSON(feature, { style: () => feature.properties.style }).addTo(layer);
-            const coords       = feature.geometry.coordinates;
-            const origemCoord  = [coords[0][1], coords[0][0]];
-            const destinoCoord = [coords[coords.length - 1][1], coords[coords.length - 1][0]];
+            const bounds = L.latLngBounds([]);
 
-            L.marker(origemCoord).addTo(layer).bindPopup(`<b>Origem:</b> ${origem}`);
-            L.marker(destinoCoord).addTo(layer).bindPopup(`<b>Destino:</b> ${destino}`);
-            map.fitBounds(linhaLayer.getBounds(), { padding: [60, 180] });
+            trechos.forEach((trecho, index) => {
+                const { origem, destino, feature } = trecho;
+                const coords = feature.geometry.coordinates;
+                const origemCoord = [coords[0][1], coords[0][0]];
+                const destinoCoord = [coords[coords.length - 1][1], coords[coords.length - 1][0]];
+                const latLngs = coords.map(([lng, lat]) => [lat, lng]);
+
+                L.polyline(latLngs, feature.properties.style || {}).addTo(layer);
+                bounds.extend(origemCoord);
+                bounds.extend(destinoCoord);
+
+                if (index === 0) {
+                    L.marker(origemCoord).addTo(layer).bindPopup(`<b>Origem:</b> ${origem}`);
+                }
+
+                const labelDestino = index === trechos.length - 1 ? 'Destino' : 'Parada';
+                L.marker(destinoCoord).addTo(layer).bindPopup(`<b>${labelDestino}:</b> ${destino}`);
+            });
+
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [60, 180] });
+            }
         }
 
         return {
