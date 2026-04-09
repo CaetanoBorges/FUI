@@ -7,6 +7,8 @@ let hmGeoWatchId = null;
 let hmMapLoaderEl = null;
 let hmCorridaComponent = null;
 let hmCorridaLifecycle = null;
+let hmPrimeiroFix = true;
+let hmCrResetHandler = null;
 const HM_FALLBACK_CENTER = [-14.235, -51.925];
 let hmMapState = {
     center: HM_FALLBACK_CENTER,
@@ -110,6 +112,16 @@ async function init() {
 
     hmCorridaLifecycle = hmCorridaComponent?.init?.(hmMap) || null;
 
+    hmCrResetHandler = () => {
+        hmPrimeiroFix = true;
+        if (hmMap) {
+            const pos = hmMarker ? hmMarker.getLatLng() : null;
+            const center = pos ? [pos.lat, pos.lng] : hmMapState.center;
+            hmMap.setView(center, hmMap.getZoom(), { animate: true });
+        }
+    };
+    document.addEventListener('cr:reset', hmCrResetHandler);
+
     hmMap.on('moveend zoomend', () => {
         const center = hmMap.getCenter();
         hmMapState = {
@@ -124,17 +136,39 @@ async function init() {
                 const { latitude, longitude } = position.coords;
                 hmMapState.center = [latitude, longitude];
 
+                const userLatLng = [latitude, longitude];
+
                 if (!hmMarker) {
-                    hmMarker = L.marker([latitude, longitude])
+                    const userIcon = L.divIcon({
+                        html: `<div style="
+                            width:28px;height:28px;
+                            border-radius:50%;
+                            background:#3b82f6;
+                            color:#fff;
+                            border:2px solid #fff;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            box-shadow:0 0 0 5px rgba(59,130,246,0.30),0 2px 8px rgba(0,0,0,0.25);
+                            font-size:12px;
+                        "><i class="fa-solid fa-location-crosshairs"></i></div>`,
+                        className: '',
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14],
+                        popupAnchor: [0, -16],
+                    });
+                    hmMarker = L.marker(userLatLng, { icon: userIcon })
                         .addTo(hmMap)
                         .bindPopup('<b>Você está aqui</b>');
                 } else {
-                    hmMarker.setLatLng([latitude, longitude]);
+                    hmMarker.setLatLng(userLatLng);
                 }
 
-                if (hmMap) {
-                    hmMap.setView([latitude, longitude], hmMap.getZoom(), { animate: true });
+                const rotaAtiva = hmCorridaLifecycle?.isRotaAtiva?.() ?? false;
+                if (hmMap && (hmPrimeiroFix || !rotaAtiva)) {
+                    hmMap.setView(userLatLng, hmMap.getZoom(), { animate: true });
                 }
+                hmPrimeiroFix = false;
             },
             () => {
             }
@@ -165,6 +199,12 @@ export default function Home(rotaAtual = '/') {
 
             hmCorridaLifecycle = null;
             hmCorridaComponent = null;
+            hmPrimeiroFix = true;
+
+            if (hmCrResetHandler) {
+                document.removeEventListener('cr:reset', hmCrResetHandler);
+                hmCrResetHandler = null;
+            }
 
             if (hmGeoWatchId !== null) {
                 navigator.geolocation.clearWatch(hmGeoWatchId);

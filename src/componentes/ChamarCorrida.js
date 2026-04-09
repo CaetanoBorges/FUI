@@ -1,5 +1,23 @@
 ﻿import rotasEmGrafo from '../dados/rotasEmGrafo.js';
 
+// ── Ícones customizados para os marcadores do mapa ──────────────────────
+function criarIcone(tipo) {
+    const estilos = {
+        origem:  { cor: '#10b981', icone: 'fa-circle-play' },
+        parada:  { cor: '#f59e0b', icone: 'fa-circle-dot' },
+        destino: { cor: '#e63946', icone: 'fa-flag-checkered' },
+    };
+    const { cor, icone } = estilos[tipo] || estilos.destino;
+    const html = `<div class="cr-map-marker" style="background:${cor}"><i class="fa-solid ${icone}"></i></div>`;
+    return L.divIcon({
+        html,
+        className: 'cr-map-marker-wrap',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -18],
+    });
+}
+
 function haversineKm([lon1, lat1], [lon2, lat2]) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -528,6 +546,24 @@ export default function ChamarCorrida() {
                     opacity: 1;
                     transform: translateX(-50%) translateY(0);
                 }
+
+                .cr-fa { margin-right: 6px; }
+                .cr-resumo-icon i { font-size: 1.05rem; }
+
+                /* MARCADORES DO MAPA */
+                .cr-map-marker-wrap { background: none !important; border: none !important; }
+                .cr-map-marker {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    border: 2px solid #fff;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.28);
+                    font-size: 0.82rem;
+                }
             </style>
 
             <section class="cr-sheet" id="cr-sheet">
@@ -538,7 +574,7 @@ export default function ChamarCorrida() {
                     <div class="cr-step-line" id="cr-line-1"></div>
                     <div class="cr-step-dot" id="cr-dot-2">2</div>
                     <div class="cr-step-line" id="cr-line-2"></div>
-                    <div class="cr-step-dot" id="cr-dot-3">&#10003;</div>
+                    <div class="cr-step-dot" id="cr-dot-3"><i class="fa-solid fa-check"></i></div>
                 </div>
 
                 <!-- STEP 1: ROTA -->
@@ -570,7 +606,8 @@ export default function ChamarCorrida() {
                     </div>
 
                     <div class="cr-footer">
-                        <button class="cr-btn-next" id="cr-next-1" disabled>Proximo &#8594;</button>
+                        <button class="cr-btn-back" id="cr-reset-1" title="Limpar seleção"><i class="fa-solid fa-rotate-left"></i></button>
+                        <button class="cr-btn-next" id="cr-next-1" disabled>Proximo <i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
 
@@ -580,8 +617,8 @@ export default function ChamarCorrida() {
                     <div class="cr-field">
                         <span class="cr-label">Veiculo</span>
                         <div class="cr-toggle" id="cr-veiculo-group">
-                            <button data-v="carro" class="cr-on">&#x1F697; Carro</button>
-                            <button data-v="moto">&#x1F3CD;&#xFE0F; Moto</button>
+                            <button data-v="carro" class="cr-on"><i class="fa-solid fa-car cr-fa"></i>Carro</button>
+                            <button data-v="moto"><i class="fa-solid fa-motorcycle cr-fa"></i>Moto</button>
                         </div>
                     </div>
 
@@ -598,8 +635,8 @@ export default function ChamarCorrida() {
                     <div class="cr-field">
                         <span class="cr-label">Quando</span>
                         <div class="cr-toggle" id="cr-quando-group">
-                            <button data-q="agora" class="cr-on">&#x26A1; Agora</button>
-                            <button data-q="agendar">&#x1F4C5; Agendar</button>
+                            <button data-q="agora" class="cr-on"><i class="fa-solid fa-bolt cr-fa"></i>Agora</button>
+                            <button data-q="agendar"><i class="fa-solid fa-calendar-days cr-fa"></i>Agendar</button>
                         </div>
                     </div>
 
@@ -609,8 +646,8 @@ export default function ChamarCorrida() {
                     </div>
 
                     <div class="cr-footer">
-                        <button class="cr-btn-back" id="cr-back-2">&#8592;</button>
-                        <button class="cr-btn-next" id="cr-next-2">Ver resumo &#8594;</button>
+                        <button class="cr-btn-back" id="cr-back-2"><i class="fa-solid fa-arrow-left"></i></button>
+                        <button class="cr-btn-next" id="cr-next-2">Ver resumo <i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
 
@@ -619,21 +656,21 @@ export default function ChamarCorrida() {
 
                     <div class="cr-resumo">
                         <div class="cr-resumo-row">
-                            <span class="cr-resumo-icon">&#x1F4CD;</span>
+                            <span class="cr-resumo-icon"><i class="fa-solid fa-route"></i></span>
                             <div>
                                 <div class="cr-resumo-chave">Rota</div>
                                 <div class="cr-resumo-val" id="cr-res-rota">--</div>
                             </div>
                         </div>
                         <div class="cr-resumo-row">
-                            <span class="cr-resumo-icon" id="cr-res-v-icon">&#x1F697;</span>
+                            <span class="cr-resumo-icon" id="cr-res-v-icon"><i class="fa-solid fa-car"></i></span>
                             <div>
                                 <div class="cr-resumo-chave">Veiculo</div>
                                 <div class="cr-resumo-val" id="cr-res-veiculo">--</div>
                             </div>
                         </div>
                         <div class="cr-resumo-row">
-                            <span class="cr-resumo-icon">&#x1F550;</span>
+                            <span class="cr-resumo-icon"><i class="fa-solid fa-clock"></i></span>
                             <div>
                                 <div class="cr-resumo-chave">Partida</div>
                                 <div class="cr-resumo-val" id="cr-res-quando">Agora</div>
@@ -643,8 +680,8 @@ export default function ChamarCorrida() {
 
                     <div class="cr-preco-card">
                         <div>
-                            <div class="cr-preco-card-dist" id="cr-preco-dist">&#x1F4CD; -- km</div>
-                            <div class="cr-preco-card-tempo" id="cr-preco-tempo">&#x23F1;&#xFE0F; --:--:--</div>
+                            <div class="cr-preco-card-dist" id="cr-preco-dist"><i class="fa-solid fa-location-dot cr-fa"></i>-- km</div>
+                            <div class="cr-preco-card-tempo" id="cr-preco-tempo"><i class="fa-solid fa-stopwatch cr-fa"></i>--:--:--</div>
                         </div>
                         <div class="cr-preco-card-right">
                             <div class="cr-preco-card-label">Preco estimado</div>
@@ -653,8 +690,8 @@ export default function ChamarCorrida() {
                     </div>
 
                     <div class="cr-footer">
-                        <button class="cr-btn-back" id="cr-back-3">&#8592;</button>
-                        <button class="cr-btn-confirmar" id="cr-confirmar">&#10003; Confirmar corrida</button>
+                        <button class="cr-btn-back" id="cr-back-3"><i class="fa-solid fa-arrow-left"></i></button>
+                        <button class="cr-btn-confirmar" id="cr-confirmar"><i class="fa-solid fa-check cr-fa"></i>Confirmar corrida</button>
                     </div>
                 </div>
 
@@ -691,7 +728,7 @@ export default function ChamarCorrida() {
             }, 3500);
         }
 
-        function irPara(n) {
+        function irPara(n, viaPopstate = false) {
             document.getElementById(`cr-step-${stepAtual}`).classList.remove('ativo');
             stepAtual = n;
             document.getElementById(`cr-step-${n}`).classList.add('ativo');
@@ -705,7 +742,26 @@ export default function ChamarCorrida() {
             [1, 2].forEach((i) => {
                 document.getElementById(`cr-line-${i}`).classList.toggle('feita', i < stepAtual);
             });
+
+            // Empurra estado no histórico ao avançar (não ao voltar via popstate)
+            if (!viaPopstate && n > 1) {
+                history.pushState({ crStep: n }, '');
+            }
         }
+
+        // Estado base no histórico para interceptar o botão voltar no step 1
+        history.pushState({ crStep: 1 }, '');
+
+        function onPopState() {
+            if (stepAtual > 1) {
+                irPara(stepAtual - 1, true);
+            } else if (rotaSelecionada !== null) {
+                // Step 1 com rota selecionada: reset e reempurra o estado base
+                resetarStep1();
+                history.pushState({ crStep: 1 }, '');
+            }
+        }
+        window.addEventListener('popstate', onPopState);
 
         // ── TomSelect — pesquisa de rota unificada ─────────────────────────
         let rotaSelecionada = null; // { origem, destino, feature }
@@ -760,6 +816,28 @@ export default function ChamarCorrida() {
 
             const pontos = [trechos[0].origem, ...trechos.map((trecho) => trecho.destino)];
             return pontos.join(' → ');
+        }
+
+        function resetarStep1() {
+            rotaSelecionada = null;
+            rotaContinuidade = null;
+            continuarAposDestino = false;
+
+            tsRota.clear(true);
+            tsRotaContinuidade.clear(true);
+            tsRotaContinuidade.clearOptions();
+            tsRotaContinuidade.disable();
+
+            layer.clearLayers();
+
+            // Reset toggle "Continuar após o destino?" para "Não"
+            document.querySelectorAll('#cr-continuar-group button').forEach((btn) => {
+                btn.classList.toggle('cr-on', btn.dataset.c === 'nao');
+            });
+
+            atualizarCampoContinuidade();
+
+            document.dispatchEvent(new CustomEvent('cr:reset'));
         }
 
         function atualizarBotaoStep1() {
@@ -903,9 +981,9 @@ export default function ChamarCorrida() {
         function atualizarBotaoConfirmarCorrida() {
             const btnConfirmar = document.getElementById('cr-confirmar');
             if (!btnConfirmar) return;
-            btnConfirmar.textContent = quandoAtual === 'agendar'
-                ? '📅 Confirmar agendamento'
-                : '✓ Confirmar corrida';
+            btnConfirmar.innerHTML = quandoAtual === 'agendar'
+                ? '<i class="fa-solid fa-calendar-check cr-fa"></i>Confirmar agendamento'
+                : '<i class="fa-solid fa-check cr-fa"></i>Confirmar corrida';
         }
 
         function confirmarCorridaFinal() {
@@ -923,6 +1001,8 @@ export default function ChamarCorrida() {
         }
 
         document.getElementById('cr-confirmar').addEventListener('click', confirmarCorridaFinal);
+
+        document.getElementById('cr-reset-1').addEventListener('click', resetarStep1);
 
         next1.addEventListener('click', () => irPara(2));
 
@@ -951,7 +1031,7 @@ export default function ChamarCorrida() {
             confirmarDatetimeBtn.id = 'cr-confirmar-datetime-popup';
             confirmarDatetimeBtn.className = 'cr-btn-datahora';
             confirmarDatetimeBtn.disabled = true;
-            confirmarDatetimeBtn.textContent = 'Confirmar data e hora';
+            confirmarDatetimeBtn.innerHTML = '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
             confirmarDatetimeBtn.addEventListener('click', () => {
                 if (!(fp && fp.selectedDates.length > 0)) return;
                 const selecionada = fp.selectedDates[0];
@@ -995,16 +1075,16 @@ export default function ChamarCorrida() {
             if (quandoAtual !== 'agendar') {
                 confirmarDatetimeBtn.disabled = true;
                 confirmarDatetimeBtn.classList.remove('confirmado');
-                confirmarDatetimeBtn.textContent = 'Confirmar data e hora';
+                confirmarDatetimeBtn.innerHTML = '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
                 return;
             }
 
             const temDataSelecionada = fp && fp.selectedDates.length > 0;
             confirmarDatetimeBtn.disabled = !temDataSelecionada;
             confirmarDatetimeBtn.classList.toggle('confirmado', dataHoraConfirmada && temDataSelecionada);
-            confirmarDatetimeBtn.textContent = dataHoraConfirmada && temDataSelecionada
-                ? '✓ Data e hora confirmadas'
-                : 'Confirmar data e hora';
+            confirmarDatetimeBtn.innerHTML = dataHoraConfirmada && temDataSelecionada
+                ? '<i class="fa-solid fa-circle-check cr-fa"></i>Data e hora confirmadas'
+                : '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
         }
 
         function validarStep2() {
@@ -1053,7 +1133,6 @@ export default function ChamarCorrida() {
         // STEP 3
         // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         document.getElementById('cr-back-3').addEventListener('click', () => irPara(2));
-        document.getElementById('cr-confirmar').addEventListener('click', exibirRota);
 
         // â”€â”€ Preenche o resumo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function preencherResumo() {
@@ -1063,11 +1142,11 @@ export default function ChamarCorrida() {
 
             document.getElementById('cr-res-rota').textContent = montarResumoRota();
 
-            const icon = veiculoAtual === 'moto' ? 'ðŸï¸' : 'ðŸš—';
+            const icon = veiculoAtual === 'moto' ? 'fa-motorcycle' : 'fa-car';
             const desc = veiculoAtual === 'moto'
                 ? 'Moto'
-                : `Carro Â· ${pessoas} passageiro${pessoas > 1 ? 's' : ''}`;
-            document.getElementById('cr-res-v-icon').textContent = icon;
+                : `Carro • ${pessoas} passageiro${pessoas > 1 ? 's' : ''}`;
+            document.getElementById('cr-res-v-icon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
             document.getElementById('cr-res-veiculo').textContent = desc;
 
             if (quandoAtual === 'agora') {
@@ -1082,8 +1161,8 @@ export default function ChamarCorrida() {
             if (trechos.length) {
                 const preco = calcularPreco(trechos.map((trecho) => trecho.feature), veiculoAtual, pessoas);
                 document.getElementById('cr-preco-valor').textContent = `Kz ${preco.total.replace('.', ',')}`;
-                document.getElementById('cr-preco-dist').textContent  = `📍 ${preco.distancia} km`;
-                document.getElementById('cr-preco-tempo').textContent = `⏱️ ${preco.tempo}`;
+                document.getElementById('cr-preco-dist').innerHTML  = `<i class="fa-solid fa-location-dot cr-fa"></i>${preco.distancia} km`;
+                document.getElementById('cr-preco-tempo').innerHTML = `<i class="fa-solid fa-stopwatch cr-fa"></i>${preco.tempo}`;
             }
         }
 
@@ -1108,11 +1187,16 @@ export default function ChamarCorrida() {
                 bounds.extend(destinoCoord);
 
                 if (index === 0) {
-                    L.marker(origemCoord).addTo(layer).bindPopup(`<b>Origem:</b> ${origem}`);
+                    L.marker(origemCoord, { icon: criarIcone('origem') })
+                        .addTo(layer)
+                        .bindPopup(`<b>Origem:</b> ${origem}`);
                 }
 
-                const labelDestino = index === trechos.length - 1 ? 'Destino' : 'Parada';
-                L.marker(destinoCoord).addTo(layer).bindPopup(`<b>${labelDestino}:</b> ${destino}`);
+                const tipoDestino = index === trechos.length - 1 ? 'destino' : 'parada';
+                const labelDestino = tipoDestino === 'destino' ? 'Destino' : 'Parada';
+                L.marker(destinoCoord, { icon: criarIcone(tipoDestino) })
+                    .addTo(layer)
+                    .bindPopup(`<b>${labelDestino}:</b> ${destino}`);
             });
 
             if (bounds.isValid()) {
@@ -1121,7 +1205,11 @@ export default function ChamarCorrida() {
         }
 
         return {
+            isRotaAtiva() {
+                return rotaSelecionada !== null;
+            },
             destroy() {
+                window.removeEventListener('popstate', onPopState);
                 if (fp) fp.destroy();
                 if (tsRota) tsRota.destroy();
                 if (layer) { layer.remove(); layer = null; }

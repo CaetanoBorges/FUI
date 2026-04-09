@@ -22,7 +22,7 @@ export default function Header(titulo, rotaAtual = '/') {
         <aside class="hm-sidebar" id="hm-sidebar">
             <div class="hm-sidebar-header">
                 <span class="hm-sidebar-titulo">${titulo}</span>
-                <button class="hm-btn-fechar" aria-label="Fechar menu" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">&#x2715;</button>
+                <button class="hm-btn-fechar" aria-label="Fechar menu" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <nav class="hm-sidebar-nav">
                 <a href="#/" class="hm-link ${rotaAtual === '/' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Home</a>
