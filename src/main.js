@@ -1,13 +1,17 @@
 import './style.css';
 import Home from './paginas/Home.js';
 import Sobre from './paginas/Sobre.js';
+import Login from './paginas/Login.js';
+import Cadastro from './paginas/Cadastro.js';
 
 const root = document.getElementById('render');
 let currentPageResult = null;
 
 const routes = {
 	'/': Home,
-	'/sobre': Sobre
+	'/sobre': Sobre,
+	'/login': Login,
+	'/cadastro': Cadastro
 };
 
 function getCurrentPath() {
@@ -30,6 +34,10 @@ function renderRoute() {
 		result.init?.();
 	} else {
 		root.innerHTML = result;
+	}
+
+	if (path !== '/') {
+		document.dispatchEvent(new CustomEvent('app:ready'));
 	}
 }
 
