@@ -1,4 +1,3 @@
-import Header from '../componentes/Header.js';
 import { authenticateUser, getCurrentUser, logoutUser } from '../dados/authStorage.js';
 
 let loginSubmitHandler = null;
@@ -14,7 +13,6 @@ function buildLoggedState(user, rotaAtual) {
     const roleLabel = getRoleLabel(user.role);
 
     return `
-        ${Header('Sua conta', rotaAtual)}
         <main class="auth-shell auth-shell-scrollable">
             <section class="auth-card auth-card-compact">
                 <div class="auth-badge"><i class="fa-solid fa-circle-check"></i> Sessão ativa</div>
@@ -31,22 +29,13 @@ function buildLoggedState(user, rotaAtual) {
 
 function buildLoginForm(rotaAtual) {
     return `
-        ${Header('Entrar', rotaAtual)}
         <main class="auth-shell auth-shell-scrollable">
             <section class="auth-card">
-                <div class="auth-panel">
-                    <div class="auth-badge"><i class="fa-solid fa-bolt"></i> Acesso rápido</div>
-                    <h1>Entre em segundos.</h1>
-                    <p class="auth-subtitle">Use só e-mail e senha para entrar como motorista ou passageiro.</p>
-                    <ul class="auth-highlights">
-                        <li><i class="fa-solid fa-check"></i> Só pedimos e-mail e senha</li>
-                        <li><i class="fa-solid fa-check"></i> Processo simples e direto</li>
-                        <li><i class="fa-solid fa-check"></i> Acesso ao seu perfil salvo</li>
-                        <li><i class="fa-solid fa-check"></i> Cadastro rápido se ainda não tiver conta</li>
-                    </ul>
-                </div>
-
                 <form class="auth-form" id="login-form">
+                    <div class="auth-login-brand" aria-label="Logo FUI">
+                        <div class="auth-login-logo">F<span>UI</span></div>
+                    </div>
+
                     <label class="auth-field">
                         <span>E-mail</span>
                         <input type="email" name="email" placeholder="voce@email.com" autocomplete="email" required />

@@ -1,4 +1,3 @@
-import Header from '../componentes/Header.js';
 import { scanBilhete } from '../dados/documentScannerApi.js';
 import { getCurrentUser, logoutUser, registerUser } from '../dados/authStorage.js';
 
@@ -48,8 +47,7 @@ function buildLoggedState(user, rotaAtual) {
     const roleLabel = getRoleLabel(user.role);
 
     return `
-        ${Header('Cadastro', rotaAtual)}
-        <main class="auth-shell auth-shell-scrollable">
+        <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card auth-card-compact">
                 <div class="auth-badge"><i class="fa-solid fa-user-check"></i> Conta pronta</div>
                 <h1>${firstName}, sua conta já está ativa.</h1>
@@ -65,52 +63,21 @@ function buildLoggedState(user, rotaAtual) {
 
 function buildCadastroForm(rotaAtual) {
     return `
-        ${Header('Criar conta', rotaAtual)}
-        <main class="auth-shell auth-shell-scrollable">
+        <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card">
                 <div class="auth-panel">
-                    <div class="auth-badge"><i class="fa-solid fa-id-card"></i> Cadastro validado</div>
-                    <h1>Cadastre-se a partir do bilhete.</h1>
-                    <p class="auth-subtitle">Primeiro escaneie frente e verso do bilhete. Depois confirme os dados essenciais e escolha se será motorista ou passageiro.</p>
-                    <ul class="auth-highlights">
-                        <li><i class="fa-solid fa-check"></i> OCR na frente e no verso do bilhete</li>
-                        <li><i class="fa-solid fa-check"></i> Cópia salva no sistema de arquivos do backend</li>
-                        <li><i class="fa-solid fa-check"></i> Nome preenchido automaticamente quando identificado</li>
-                        <li><i class="fa-solid fa-check"></i> Perfil rápido entre motorista e passageiro</li>
-                    </ul>
+                    <h1>Cadastre-se a partir do bilhete de identidade.</h1>
                 </div>
 
                 <div class="auth-form auth-form-stack">
-                    <div class="auth-wizard" id="cadastro-wizard" data-step="1">
-                        <div class="auth-wizard-progress">
-                            <span class="auth-wizard-progress-bar"></span>
-                        </div>
-
-                        <div class="auth-wizard-steps">
-                            <article class="auth-wizard-step is-active" data-step-indicator="1">
-                                <span class="auth-wizard-bullet">1</span>
-                                <div class="auth-wizard-copy">
-                                    <strong>Bilhete</strong>
-                                    <small>Envie frente e verso</small>
-                                </div>
-                            </article>
-
-                            <article class="auth-wizard-step auth-step-hidden" data-step-indicator="2" hidden aria-hidden="true">
-                                <span class="auth-wizard-bullet">2</span>
-                                <div class="auth-wizard-copy">
-                                    <strong>Conta</strong>
-                                    <small>Confirme dados e perfil</small>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
+                    
 
                     <form class="auth-step-card is-active" id="cadastro-scan-form">
                         <div class="auth-step-header">
                             <span class="auth-step-number">1</span>
                             <div>
                                 <h2>Escanear bilhete</h2>
-                                <p class="auth-step-description">Tire ou envie uma foto nítida da frente e do verso para o OCR extrair as informações essenciais.</p>
+                                <p class="auth-step-description">Tire ou envie uma foto nítida da frente e do verso do BI.</p>
                             </div>
                         </div>
 
@@ -129,7 +96,7 @@ function buildCadastroForm(rotaAtual) {
                         <div id="scan-feedback" class="auth-alert" role="status" aria-live="polite"></div>
                         <div id="scan-summary" class="auth-scan-summary" hidden></div>
 
-                        <button type="submit" class="auth-submit" id="scan-submit-button">Próximo: ler bilhete</button>
+                        <button type="submit" class="auth-submit" id="scan-submit-button">Avançar</button>
                     </form>
 
                     <form class="auth-step-card auth-step-hidden" id="cadastro-form" hidden aria-hidden="true">
@@ -258,7 +225,19 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                 form.classList.toggle('is-active', step === 2);
             };
 
+            const notifyMissingBilhete = () => {
+                scanFeedback.className = 'auth-alert auth-alert-error';
+                scanFeedback.textContent = 'Insira e escaneie o bilhete antes de avançar para o passo 2.';
+                scanForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
             const toggleCadastroForm = enabled => {
+                if (enabled && !latestScanResult?.scanId) {
+                    setWizardStep(1);
+                    notifyMissingBilhete();
+                    return false;
+                }
+
                 scanForm.hidden = enabled;
                 scanForm.setAttribute('aria-hidden', String(enabled));
                 scanForm.classList.toggle('auth-step-hidden', enabled);
@@ -279,6 +258,7 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                 cadastroSubmitButton.disabled = !enabled;
                 setWizardStep(enabled ? 2 : 1);
                 playStepAnimation(enabled ? form : scanForm);
+                return true;
             };
 
             toggleCadastroForm(false);
@@ -329,8 +309,10 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                     scanSummary.hidden = false;
                     scanSummary.innerHTML = buildScanSummaryMarkup(latestScanResult);
                     nameInput.value = latestScanResult.extractedData?.name || '';
-                    toggleCadastroForm(true);
-                    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const movedToStepTwo = toggleCadastroForm(true);
+                    if (movedToStepTwo) {
+                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                 } catch (error) {
                     latestScanResult = null;
                     scanSummary.hidden = true;
