@@ -68,12 +68,9 @@ function buildCadastroForm(rotaAtual) {
     return `
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card">
-                <div class="auth-panel">
-                    <div class="auth-login-brand" aria-label="Logo GYRO">
+                <div class="auth-login-brand" aria-label="Logo GYRO">
                         <div class="auth-login-logo">GY<span>RO</span></div>
                     </div>
-                    <h1>Cadastre-se a partir do bilhete de identidade.</h1>
-                </div>
 
                 <div class="auth-form auth-form-stack">
                     
