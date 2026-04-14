@@ -1,5 +1,5 @@
 const _fecharMenu = `document.getElementById('hm-sidebar').classList.remove('hm-aberto');document.getElementById('hm-overlay').classList.remove('hm-aberto');`;
-const _logout = `localStorage.removeItem('fui.auth.current');${_fecharMenu}document.querySelector('.hm-btn-hamburger')?.classList.remove('hm-ativo');window.location.hash='#/login';`;
+const _logout = `localStorage.removeItem('gyro.auth.current');${_fecharMenu}document.querySelector('.hm-btn-hamburger')?.classList.remove('hm-ativo');window.location.hash='#/login';`;
 
 function escapeHtml(value = '') {
     return value
@@ -11,7 +11,7 @@ function escapeHtml(value = '') {
 }
 
 export default function Header(titulo, rotaAtual = '/') {
-    const currentUser = JSON.parse(localStorage.getItem('fui.auth.current') || 'null');
+    const currentUser = JSON.parse(localStorage.getItem('gyro.auth.current') || 'null');
     const firstName = currentUser?.name ? escapeHtml(currentUser.name.split(' ')[0]) : '';
     const authSection = currentUser
         ? `

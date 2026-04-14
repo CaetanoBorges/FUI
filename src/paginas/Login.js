@@ -15,6 +15,9 @@ function buildLoggedState(user, rotaAtual) {
     return `
         <main class="auth-shell auth-shell-scrollable">
             <section class="auth-card auth-card-compact">
+                <div class="auth-login-brand" aria-label="Logo GYRO">
+                    <div class="auth-login-logo">GY<span>RO</span></div>
+                </div>
                 <div class="auth-badge"><i class="fa-solid fa-circle-check"></i> Sessão ativa</div>
                 <h1>Olá, ${firstName}.</h1>
                 <p class="auth-subtitle">Perfil atual: <strong>${roleLabel}</strong>. Você já está conectado e pode continuar usando o app.</p>
@@ -32,8 +35,8 @@ function buildLoginForm(rotaAtual) {
         <main class="auth-shell auth-shell-scrollable">
             <section class="auth-card">
                 <form class="auth-form" id="login-form">
-                    <div class="auth-login-brand" aria-label="Logo FUI">
-                        <div class="auth-login-logo">F<span>UI</span></div>
+                    <div class="auth-login-brand" aria-label="Logo GYRO">
+                        <div class="auth-login-logo">GY<span>RO</span></div>
                     </div>
 
                     <label class="auth-field">

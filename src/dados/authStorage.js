@@ -1,5 +1,5 @@
-const USERS_KEY = 'fui.auth.users';
-const SESSION_KEY = 'fui.auth.current';
+const USERS_KEY = 'gyro.auth.users';
+const SESSION_KEY = 'gyro.auth.current';
 
 const DEFAULT_ROLE = 'passageiro';
 

@@ -49,6 +49,9 @@ function buildLoggedState(user, rotaAtual) {
     return `
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card auth-card-compact">
+                <div class="auth-login-brand" aria-label="Logo GYRO">
+                    <div class="auth-login-logo">GY<span>RO</span></div>
+                </div>
                 <div class="auth-badge"><i class="fa-solid fa-user-check"></i> Conta pronta</div>
                 <h1>${firstName}, sua conta já está ativa.</h1>
                 <p class="auth-subtitle">Perfil selecionado: <strong>${roleLabel}</strong>. Se quiser, você já pode voltar para a tela principal e continuar.</p>
@@ -66,6 +69,9 @@ function buildCadastroForm(rotaAtual) {
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card">
                 <div class="auth-panel">
+                    <div class="auth-login-brand" aria-label="Logo GYRO">
+                        <div class="auth-login-logo">GY<span>RO</span></div>
+                    </div>
                     <h1>Cadastre-se a partir do bilhete de identidade.</h1>
                 </div>
 
