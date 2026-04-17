@@ -1,0 +1,21 @@
+.sobre-main {
+  padding: 2rem;
+  text-align: center;
+}
+
+.sobre-title {
+  font-size: 2.5rem;
+}
+
+.sobre-quote {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+.sobre-random-box {
+  margin-top: 3rem;
+  padding: 1rem;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+}

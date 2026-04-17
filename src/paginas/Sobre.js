@@ -1,4 +1,5 @@
 import Header from '../componentes/Header.js';
+import './Sobre.css';
 
 export default function Sobre(rotaAtual = '/sobre') {
     const randomQuotes = [
@@ -14,14 +15,14 @@ export default function Sobre(rotaAtual = '/sobre') {
 
     return `
         ${Header("Sobre Nós", rotaAtual)}
-        <main style="padding: 2rem; text-align: center;">
-            <h1 style="color: ${randomColor}; font-size: 2.5rem;">
+        <main class="sobre-main">
+            <h1 class="sobre-title" style="color: ${randomColor};">
                 Bem-vindo à Sobre Nós
             </h1>
-            <p style="font-size: 1.2rem; margin-top: 2rem; font-style: italic;">
+            <p class="sobre-quote">
                 "${randomQuote}"
             </p>
-            <div style="margin-top: 3rem; padding: 1rem; background-color: #f0f0f0; border-radius: 8px;">
+            <div class="sobre-random-box">
                 <h2>Conteúdo Aleatório</h2>
                 <p>ID da sessão: ${Math.random().toString(36).substring(7)}</p>
                 <p>Hora: ${new Date().toLocaleTimeString()}</p>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="GYR">
+  <defs>
+    <clipPath id="gyr-road-clip">
+      <text x="6" y="50" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-4">GYR</text>
+    </clipPath>
+  </defs>
+
+  <text x="6" y="50" fill="#16171d" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900" letter-spacing="-4">GYR</text>
+
+  <g clip-path="url(#gyr-road-clip)" fill="none" stroke="#aa3bff" stroke-width="4" stroke-linecap="round">
+    <path d="M10 32H70" stroke-dasharray="8 8" />
+    <path d="M80 14L107 40" stroke-dasharray="8 8" />
+    <path d="M134 21H183" stroke-dasharray="8 8" />
+    <path d="M150 46L194 46" stroke-dasharray="8 8" />
+    <path d="M156 31L196 51" stroke-dasharray="8 8" />
+  </g>
+</svg>

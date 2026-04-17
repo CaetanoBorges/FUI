@@ -1,5 +1,6 @@
 import { scanBilhete } from '../dados/documentScannerApi.js';
 import { getCurrentUser, logoutUser, registerUser } from '../dados/authStorage.js';
+import './Cadastro.css';
 
 function getRoleLabel(role = 'passageiro') {
     return role === 'motorista' ? 'Motorista' : 'Passageiro';
@@ -50,7 +51,7 @@ function buildLoggedState(user, rotaAtual) {
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card auth-card-compact">
                 <div class="auth-login-brand" aria-label="Logo GYRO">
-                    <div class="auth-login-logo">GY<span>RO</span></div>
+                    <div class="auth-login-logo"><img class="auth-logo-full" src="/logo-gyro-road.svg" alt="GYRO" /></div>
                 </div>
                 <div class="auth-badge"><i class="fa-solid fa-user-check"></i> Conta pronta</div>
                 <h1>${firstName}, sua conta já está ativa.</h1>
@@ -69,7 +70,7 @@ function buildCadastroForm(rotaAtual) {
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card">
                 <div class="auth-login-brand" aria-label="Logo GYRO">
-                        <div class="auth-login-logo">GY<span>RO</span></div>
+                    <div class="auth-login-logo"><img class="auth-logo-full" src="/logo-gyro-road.svg" alt="GYRO" /></div>
                     </div>
 
                 <div class="auth-form auth-form-stack">

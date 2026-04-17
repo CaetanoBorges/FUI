@@ -1,5 +1,6 @@
 import Header from '../componentes/Header.js';
 import ChamarCorrida from '../componentes/ChamarCorrida.js';
+import './Home.css';
 
 let hmMap = null;
 let hmMarker = null;
@@ -39,43 +40,9 @@ function html(rotaAtual = '/') {
 
     return `
         ${Header("Home", rotaAtual)}
-        <style>
-            @keyframes loader-spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-
-            .loader-overlay {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.75);
-                backdrop-filter: blur(1px);
-                z-index: 500;
-                transition: opacity 0.2s ease;
-            }
-
-            .loader-spinner {
-                width: 44px;
-                height: 44px;
-                border: 4px solid rgba(15, 52, 96, 0.2);
-                border-top-color: #0f3460;
-                border-radius: 50%;
-                animation: loader-spin 1s linear infinite;
-            }
-        </style>
-        <main>
-            <div style="
-                position: relative;
-                width: 100%;
-                max-width: 900px;
-                height: 92vh;
-                overflow: hidden;
-                box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-            ">
-                <div id="home-map" style="width: 100%; height: 100vh;"></div>
+        <main class="home-main">
+            <div class="home-map-wrapper">
+                <div id="home-map" class="home-map"></div>
                 <div id="loader-overlay" class="loader-overlay">
                     <div id="loader-spinner" class="loader-spinner"></div>
                 </div>

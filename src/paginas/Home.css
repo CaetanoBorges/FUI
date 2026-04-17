@@ -1,0 +1,50 @@
+@keyframes loader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.home-main {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.home-map-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  height: 100vh;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+.home-map {
+  width: 100%;
+  height: 100vh;
+}
+
+.loader-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(1px);
+  z-index: 500;
+  transition: opacity 0.2s ease;
+}
+
+.loader-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(15, 52, 96, 0.2);
+  border-top-color: #0f3460;
+  border-radius: 50%;
+  animation: loader-spin 1s linear infinite;
+}

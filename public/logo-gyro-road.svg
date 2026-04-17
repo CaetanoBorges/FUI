@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="286" height="64" viewBox="0 0 286 64" role="img" aria-label="GYRO">
+  <defs>
+    <clipPath id="gyro-gyr-clip">
+      <text x="6" y="50" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">G</text>
+      <text x="72" y="50" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">Y</text>
+      <text x="134" y="50" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">R</text>
+    </clipPath>
+  </defs>
+
+  <text x="6" y="50" fill="#16171d" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">G</text>
+  <text x="72" y="50" fill="#16171d" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">Y</text>
+  <text x="134" y="50" fill="#16171d" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">R</text>
+
+  <g clip-path="url(#gyro-gyr-clip)" fill="none" stroke="#aa3bff" stroke-width="4" stroke-linecap="round">
+    <path d="M12 32H56" stroke-dasharray="8 8" />
+    <path d="M80 16L101 38" stroke-dasharray="8 8" />
+    <path d="M102 38L122 16" stroke-dasharray="8 8" />
+    <path d="M146 22H177" stroke-dasharray="8 8" />
+    <path d="M146 47H171" stroke-dasharray="8 8" />
+    <path d="M164 33L191 50" stroke-dasharray="8 8" />
+  </g>
+
+  <g transform="translate(214 0)">
+    <circle cx="32" cy="32" r="25" fill="none" stroke="#aa3bff" stroke-width="10" />
+    <circle cx="32" cy="32" r="14" fill="none" stroke="#16171d" stroke-width="4" />
+    <circle cx="32" cy="32" r="4" fill="#16171d" />
+
+    <g fill="#16171d">
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" />
+      <rect x="30.8" y="57" width="2.4" height="6" rx="1" />
+      <rect x="57" y="30.8" width="6" height="2.4" rx="1" />
+      <rect x="1" y="30.8" width="6" height="2.4" rx="1" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(45 32 32)" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(90 32 32)" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(135 32 32)" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(180 32 32)" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(225 32 32)" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(270 32 32)" />
+      <rect x="30.8" y="1" width="2.4" height="6" rx="1" transform="rotate(315 32 32)" />
+    </g>
+
+    <g stroke="#16171d" stroke-width="1.8" stroke-linecap="round">
+      <line x1="32" y1="22" x2="32" y2="42" />
+      <line x1="22" y1="32" x2="42" y2="32" />
+      <line x1="25" y1="25" x2="39" y2="39" />
+      <line x1="39" y1="25" x2="25" y2="39" />
+    </g>
+  </g>
+</svg>

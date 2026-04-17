@@ -1,0 +1,90 @@
+@import './Login.css';
+
+.cadastro-simple {
+  padding: 0;
+}
+
+.cadastro-simple .auth-card {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.cadastro-simple .auth-panel,
+.cadastro-simple .auth-form,
+.cadastro-simple .auth-card-compact {
+  padding: 0;
+}
+
+.cadastro-simple .auth-form-stack {
+  gap: 1rem;
+}
+
+.cadastro-simple .auth-highlights {
+  margin-top: 1rem;
+  gap: 0.6rem;
+}
+
+.cadastro-simple .auth-wizard,
+.cadastro-simple .auth-step-card,
+.cadastro-simple .auth-upload-card,
+.cadastro-simple .auth-choice-content,
+.cadastro-simple .auth-scan-summary-box,
+.cadastro-simple .auth-summary-item,
+.cadastro-simple .auth-submit,
+.cadastro-simple .auth-field input {
+  border-radius: 0;
+}
+
+.cadastro-simple .auth-wizard,
+.cadastro-simple .auth-step-card,
+.cadastro-simple .auth-upload-card,
+.cadastro-simple .auth-scan-summary-box,
+.cadastro-simple .auth-summary-item {
+  padding: 1rem 2rem;
+}
+
+.cadastro-simple .auth-step-card.is-active,
+.cadastro-simple .auth-choice-card input:checked + .auth-choice-content,
+.cadastro-simple .auth-submit:hover {
+  box-shadow: none;
+}
+
+.cadastro-simple .auth-upload-grid,
+.cadastro-simple .auth-scan-summary-grid,
+.cadastro-simple .auth-actions-row,
+.cadastro-simple .auth-inline-actions {
+  gap: 0.65rem;
+}
+
+.cadastro-simple .auth-field {
+  gap: 0.4rem;
+}
+
+.cadastro-simple .auth-wizard {
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.cadastro-simple .auth-wizard-progress {
+  display: none;
+}
+
+.cadastro-simple .auth-wizard-steps {
+  grid-template-columns: 1fr;
+}
+
+.cadastro-simple .auth-wizard-step {
+  padding: 0.5rem 0.7rem;
+}
+
+.cadastro-simple .auth-wizard-bullet {
+  width: 28px;
+  height: 28px;
+  font-size: 0.85rem;
+}
+
+.cadastro-simple .auth-wizard-copy small {
+  display: none;
+}

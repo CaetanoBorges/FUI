@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <link rel="icon" href="/gyro-favicon.svg" type="image/svg+xml">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -48,14 +50,15 @@
         pointer-events: none;
       }
       #splash .splash-logo {
-        font-size: 64px;
-        font-family: 'Inter', system-ui, sans-serif;
-        font-weight: 800;
-        letter-spacing: -2px;
-        color: #fff;
+        display: flex;
+        align-items: center;
+        line-height: 1;
       }
-      #splash .splash-logo span {
-        color: #aa3bff;
+      #splash .splash-logo .splash-logo-full {
+        width: 4.35em;
+        height: 0.98em;
+        display: block;
+        transform: translateY(0.01em);
       }
       #splash .splash-bar {
         width: 120px;
@@ -80,7 +83,7 @@
 </head>
 <body>
     <div id="splash">
-      <div class="splash-logo">GY<span>RO</span></div>
+      <div class="splash-logo"><img class="splash-logo-full" src="/logo-gyro-road.svg" alt="GYRO" /></div>
       <div class="splash-bar"></div>
     </div>
     <div id="render"></div>
