@@ -1,10 +1,11 @@
 import Header from '../componentes/Header.js';
-import { clearActiveRide, getActiveRide } from '../dados/corridaStorage.js';
+import { clearActiveRide, getActiveRide, saveRideToHistory } from '../dados/corridaStorage.js';
 import './CorridaAtiva.css';
 
 let rideTickInterval = null;
 let rideCancelHandler = null;
 let ridePrimaryHandler = null;
+let rideAutoCompleteScheduled = false;
 
 const RIDE_FLOW = [
     {
@@ -36,6 +37,18 @@ const RIDE_FLOW = [
         tone: 'default'
     }
 ];
+
+function formatIso(iso) {
+    if (!iso) return '—';
+    try {
+        return new Date(iso).toLocaleString('pt-AO', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    } catch {
+        return iso;
+    }
+}
 
 function formatRemaining(ms) {
     const safe = Math.max(0, ms);
@@ -134,6 +147,27 @@ function getToneClass(tone = 'default') {
     return '';
 }
 
+const STAGES_WITH_DRIVER = new Set(['driver_on_way', 'boarding', 'in_progress', 'completed']);
+
+function renderDriverCard(ride) {
+    const d = ride?.driver;
+    if (!d) return '';
+
+    return `
+        <div class="ride-driver-card" id="ride-driver-card" hidden>
+            <div class="ride-driver-avatar">${d.initials || '?'}</div>
+            <div class="ride-driver-info">
+                <span class="ride-driver-name">${d.name}</span>
+                <span class="ride-driver-vehicle">${d.vehicleBrand} &middot; ${d.vehicleColor}</span>
+                <span class="ride-driver-plate">${d.plate}</span>
+            </div>
+            <a class="ride-driver-call" href="tel:${d.phone}" title="Ligar para ${d.name}" aria-label="Ligar para ${d.name}">
+                <i class="fa-solid fa-phone"></i>
+            </a>
+        </div>
+    `;
+}
+
 function getRouteStops(ride) {
     if (Array.isArray(ride?.stops) && ride.stops.length) {
         return ride.stops;
@@ -146,22 +180,20 @@ function getRouteStops(ride) {
     return [];
 }
 
-function renderRouteTable(ride) {
+function renderMinimalRoute(ride) {
     const stops = getRouteStops(ride);
     if (!stops.length) {
         return `
-            <table class="ride-table">
-                <tbody>
-                    <tr>
-                        <th>Rota</th>
-                        <td>Rota não disponível</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="ride-details">
+                <div class="ride-detail-row">
+                    <span class="ride-detail-label">Rota</span>
+                    <span class="ride-detail-value">Não disponível</span>
+                </div>
+            </div>
         `;
     }
 
-    const rows = stops.map((stop, index) => {
+    const items = stops.map((stop, index) => {
         const label = index === 0
             ? 'Origem'
             : index === stops.length - 1
@@ -169,61 +201,56 @@ function renderRouteTable(ride) {
                 : `Paragem ${index}`;
 
         return `
-            <tr>
-                <th>${label}</th>
-                <td>${stop}</td>
-            </tr>
+            <div class="ride-stop">
+                <div class="ride-stop-connector">
+                    <div class="ride-stop-dot"></div>
+                    <div class="ride-stop-line"></div>
+                </div>
+                <div>
+                    <div class="ride-stop-label">${label}</div>
+                    <div class="ride-stop-value">${stop}</div>
+                </div>
+            </div>
         `;
     }).join('');
 
-    return `
-        <table class="ride-table">
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    `;
+    return `<div class="ride-route">${items}</div>`;
 }
 
-function renderSummaryTable(ride) {
+function renderMinimalDetails(ride) {
     const fields = [
-        { label: 'Rota', value: ride.routeSummary || '—' },
-        { label: 'Veículo', value: ride.vehicleLabel || '—' },
-        { label: 'Partida', value: ride.whenLabel || '—' },
-        { label: 'Distância estimada', value: ride.estimatedDistance || '—' },
-        { label: 'Duração estimada', value: ride.estimatedDuration || '—' },
-        { label: 'Preço estimado', value: ride.estimatedPrice || '—' }
-    ];
+        { label: 'Veículo', value: ride.vehicleLabel || '' },
+        { label: 'Partida', value: ride.whenLabel || '' },
+        { label: 'Distância', value: ride.estimatedDistance || '' },
+        { label: 'Duração', value: ride.estimatedDuration || '' },
+        { label: 'Preço', value: ride.estimatedPrice || '' }
+    ].filter(f => f.value);
 
-    const rows = fields.map((field) => `
-        <tr>
-            <th>${field.label}</th>
-            <td>${field.value}</td>
-        </tr>
+    if (!fields.length) return '';
+
+    const rows = fields.map(({ label, value }) => `
+        <div class="ride-detail-row">
+            <span class="ride-detail-label">${label}</span>
+            <span class="ride-detail-value">${value}</span>
+        </div>
     `).join('');
 
-    return `
-        <table class="ride-table">
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    `;
+    return `<div class="ride-details">${rows}</div>`;
 }
 
 function buildEmptyState(rotaAtual) {
     return `
-        ${Header('Corrida ativa', rotaAtual)}
+        ${Header('Corrida ativa', rotaAtual, true)}
         <main class="ride-shell">
             <section class="ride-container">
-                <article class="ride-empty">
+                <div class="ride-empty">
                     <div class="ride-empty-icon"><i class="fa-solid fa-route"></i></div>
                     <h1>Sem corrida ativa</h1>
-                    <p>Ainda não existe nenhuma corrida guardada para simulação. Chame uma nova corrida na Home para ver todos os detalhes aqui.</p>
+                    <p>Nenhuma corrida foi encontrada. Chame uma corrida na Home para ver os detalhes aqui.</p>
                     <div class="ride-actions">
                         <a href="#/" class="ride-btn ride-btn-primary"><i class="fa-solid fa-house"></i>Ir para a Home</a>
                     </div>
-                </article>
+                </div>
             </section>
         </main>
     `;
@@ -231,48 +258,38 @@ function buildEmptyState(rotaAtual) {
 
 function buildRidePage(ride, rotaAtual) {
     const stage = getRideStage(ride);
+    const toneClass = getToneClass(stage.tone);
 
     return `
-        ${Header('Corrida ativa', rotaAtual)}
+        ${Header('Corrida ativa', rotaAtual, true)}
         <main class="ride-shell">
             <section class="ride-container">
-                <article class="ride-hero">
-                    <span class="ride-kicker"><i class="fa-solid fa-bolt"></i>Corrida ativa</span>
-                    <h1 class="ride-title">Acompanhe a simulação da sua corrida</h1>
-                    <p class="ride-subtitle">Detalhes exibidos exatamente conforme os dados confirmados no componente de chamada.</p>
-
-                    <div class="ride-status-pill ${getToneClass(stage.tone)}" id="ride-status-pill">
-                        <i class="fa-solid fa-car-side"></i>
-                        <span id="ride-status-label">${stage.label}</span>
-                    </div>
-
+                <div class="ride-status-block">
+                    <span class="ride-stage-label">Corrida ativa</span>
+                    <h1 class="ride-stage-title${toneClass ? ' ' + toneClass : ''}" id="ride-stage-title">${stage.label}</h1>
+                    <p class="ride-stage-desc" id="ride-stage-desc">${stage.description}</p>
                     <div class="ride-progress">
                         <div class="ride-progress-track">
-                            <div class="ride-progress-bar" id="ride-progress-bar" style="width:${stage.progress}%"></div>
+                            <div class="ride-progress-bar${toneClass ? ' ' + toneClass : ''}" id="ride-progress-bar" style="width:${stage.progress}%"></div>
                         </div>
-                        <div class="ride-progress-meta">
-                            <strong id="ride-progress-description">${stage.description}</strong>
-                            <span id="ride-progress-meta">${stage.progressLabel}</span>
-                        </div>
+                        <span class="ride-progress-meta" id="ride-progress-meta">${stage.progressLabel}</span>
                     </div>
-                </article>
+                </div>
 
-                <section class="ride-layout">
-                    <article class="ride-card">
-                        <h2 class="ride-section-title"><i class="fa-solid fa-route"></i>Rota da corrida</h2>
-                        ${renderRouteTable(ride)}
-                    </article>
+                ${renderDriverCard(ride)}
 
-                    <article class="ride-card">
-                        <h2 class="ride-section-title"><i class="fa-solid fa-table-list"></i>Resumo confirmado</h2>
-                        ${renderSummaryTable(ride)}
+                <hr class="ride-divider">
 
-                        <div class="ride-actions">
-                            <button type="button" class="ride-btn ride-btn-danger" id="ride-cancel-btn"><i class="fa-solid fa-ban"></i>Cancelar corrida</button>
-                            <button type="button" class="ride-btn ride-btn-secondary" id="ride-primary-btn"><i class="fa-solid fa-house"></i>${stage.isFinished ? 'Limpar e voltar para a Home' : 'Voltar para a Home'}</button>
-                        </div>
-                    </article>
-                </section>
+                ${renderMinimalRoute(ride)}
+
+                <hr class="ride-divider">
+
+                ${renderMinimalDetails(ride)}
+
+                <div class="ride-actions">
+                    <button type="button" class="ride-btn ride-btn-danger" id="ride-cancel-btn"><i class="fa-solid fa-ban"></i>Cancelar</button>
+                    <button type="button" class="ride-btn ride-btn-secondary" id="ride-primary-btn"><i class="fa-solid fa-house"></i>${stage.isFinished ? 'Limpar e voltar' : 'Voltar para Home'}</button>
+                </div>
             </section>
         </main>
     `;
@@ -283,34 +300,62 @@ function updateRideUi() {
     if (!ride) return;
 
     const stage = getRideStage(ride);
-    const statusPill = document.getElementById('ride-status-pill');
-    const statusLabel = document.getElementById('ride-status-label');
+    const stageTitle = document.getElementById('ride-stage-title');
+    const stageDesc = document.getElementById('ride-stage-desc');
     const progressBar = document.getElementById('ride-progress-bar');
-    const progressDescription = document.getElementById('ride-progress-description');
     const progressMeta = document.getElementById('ride-progress-meta');
     const primaryButton = document.getElementById('ride-primary-btn');
     const cancelButton = document.getElementById('ride-cancel-btn');
 
-    if (!statusPill || !statusLabel || !progressBar || !progressDescription || !progressMeta) {
-        return;
-    }
+    if (!stageTitle || !progressBar || !progressMeta) return;
 
-    statusPill.className = `ride-status-pill ${getToneClass(stage.tone)}`.trim();
-    statusLabel.textContent = stage.label;
+    const toneClass = getToneClass(stage.tone);
+
+    stageTitle.className = `ride-stage-title${toneClass ? ' ' + toneClass : ''}`;
+    stageTitle.textContent = stage.label;
+
+    if (stageDesc) stageDesc.textContent = stage.description;
+
+    progressBar.className = `ride-progress-bar${toneClass ? ' ' + toneClass : ''}`;
     progressBar.style.width = `${stage.progress}%`;
-    progressDescription.textContent = stage.description;
     progressMeta.textContent = stage.progressLabel;
+
+    const driverCard = document.getElementById('ride-driver-card');
+    if (driverCard) {
+        if (STAGES_WITH_DRIVER.has(stage.key)) {
+            driverCard.removeAttribute('hidden');
+        } else {
+            driverCard.setAttribute('hidden', '');
+        }
+    }
 
     if (primaryButton) {
         primaryButton.innerHTML = stage.isFinished
-            ? '<i class="fa-solid fa-house"></i>Limpar e voltar para a Home'
-            : '<i class="fa-solid fa-house"></i>Voltar para a Home';
+            ? '<i class="fa-solid fa-house"></i>Limpar e voltar'
+            : '<i class="fa-solid fa-house"></i>Voltar para Home';
     }
 
     if (cancelButton) {
         cancelButton.disabled = stage.isFinished;
-        cancelButton.style.opacity = stage.isFinished ? '0.55' : '1';
+        cancelButton.style.opacity = stage.isFinished ? '0.4' : '1';
         cancelButton.style.cursor = stage.isFinished ? 'not-allowed' : 'pointer';
+    }
+
+    // Auto-complete: quando a corrida termina, salva no histórico e navega
+    if (stage.key === 'completed' && !rideAutoCompleteScheduled) {
+        rideAutoCompleteScheduled = true;
+        // Atualiza título para dar feedback imediato
+        if (stageTitle) {
+            stageTitle.textContent = 'Corrida concluída!';
+        }
+        setTimeout(() => {
+            const current = getActiveRide();
+            if (current) {
+                saveRideToHistory({ ...current, status: 'completed' });
+                clearActiveRide();
+            }
+            window.location.hash = '#/historico';
+        }, 3000);
     }
 }
 
@@ -332,13 +377,16 @@ export default function CorridaAtiva(rotaAtual = '/corrida-ativa') {
                 const currentRide = getActiveRide();
                 if (!currentRide) return;
 
+                saveRideToHistory({ ...currentRide, status: 'cancelled' });
                 clearActiveRide();
-                window.location.hash = '#/corrida-ativa';
+                window.location.hash = '#/';
             };
 
             ridePrimaryHandler = () => {
-                const stage = getRideStage(getActiveRide());
-                if (stage.isFinished) {
+                const currentRide = getActiveRide();
+                const stage = getRideStage(currentRide);
+                if (stage.isFinished && currentRide) {
+                    saveRideToHistory({ ...currentRide, status: 'completed' });
                     clearActiveRide();
                 }
                 window.location.hash = '#/';
@@ -352,6 +400,8 @@ export default function CorridaAtiva(rotaAtual = '/corrida-ativa') {
                 window.clearInterval(rideTickInterval);
                 rideTickInterval = null;
             }
+
+            rideAutoCompleteScheduled = false;
 
             const cancelButton = document.getElementById('ride-cancel-btn');
             const primaryButton = document.getElementById('ride-primary-btn');

@@ -1,5 +1,5 @@
 ﻿import rotasEmGrafo from '../dados/rotasEmGrafo.js';
-import { saveActiveRide } from '../dados/corridaStorage.js';
+import { saveActiveRide, saveScheduledRide } from '../dados/corridaStorage.js';
 
 // ── Ícones customizados para os marcadores do mapa ──────────────────────
 function criarIcone(tipo) {
@@ -64,6 +64,28 @@ function calcularPreco(feature, veiculo, pessoas) {
         total: total.toFixed(2),
         distancia: distancia.toFixed(1),
         tempo: formatarDuracaoHMS(tempoSegundos)
+    };
+}
+
+const MOCK_DRIVERS = [
+    { name: 'Carlos Mendes',    phone: '+244923456789', vehicleBrand: 'Toyota Corolla',    vehicleColor: 'Branco',  plate: 'LD-45-67-BC' },
+    { name: 'Manuel da Silva',  phone: '+244912345678', vehicleBrand: 'Hyundai Accent',    vehicleColor: 'Preto',   plate: 'LD-12-34-AB' },
+    { name: 'António Ferreira', phone: '+244934567890', vehicleBrand: 'Honda Civic',       vehicleColor: 'Cinzento',plate: 'BG-78-90-CD' },
+    { name: 'João Baptista',    phone: '+244945678901', vehicleBrand: 'Volkswagen Polo',   vehicleColor: 'Prata',   plate: 'HU-23-45-EF' },
+    { name: 'Pedro Domingos',   phone: '+244956789012', vehicleBrand: 'Nissan Tiida',      vehicleColor: 'Azul',    plate: 'LD-99-11-GH' },
+    { name: 'Armando Lopes',    phone: '+244967890123', vehicleBrand: 'Kia Morning',       vehicleColor: 'Vermelho',plate: 'LU-56-78-IJ' },
+    { name: 'Rui Costa',        phone: '+244978901234', vehicleBrand: 'Mitsubishi Lancer', vehicleColor: 'Branco',  plate: 'MA-34-56-KL' },
+];
+
+function pickDriver() {
+    const d = MOCK_DRIVERS[Date.now() % MOCK_DRIVERS.length];
+    return {
+        name: d.name,
+        phone: d.phone,
+        vehicleBrand: d.vehicleBrand,
+        vehicleColor: d.vehicleColor,
+        plate: d.plate,
+        initials: d.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
     };
 }
 
@@ -1019,8 +1041,11 @@ export default function ChamarCorrida() {
                 segments: trechos.map((trecho, index) => ({
                     id: `${index + 1}`,
                     origem: trecho.origem,
-                    destino: trecho.destino
-                }))
+                    destino: trecho.destino,
+                    geometry: trecho.feature?.geometry ?? null,
+                    style: trecho.feature?.properties?.style ?? null
+                })),
+                driver: pickDriver()
             };
         }
 
@@ -1031,7 +1056,12 @@ export default function ChamarCorrida() {
             if (!payload) return;
 
             saveActiveRide(payload);
-            window.location.hash = '#/corrida-ativa';
+
+            if (payload.when === 'agendar') {
+                saveScheduledRide(payload);
+            }
+
+            window.location.hash = '#/aguardando-motorista';
         }
 
         document.getElementById('cr-confirmar').addEventListener('click', confirmarCorridaFinal);

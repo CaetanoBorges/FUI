@@ -4,6 +4,10 @@ import Sobre from './paginas/Sobre.js';
 import Login from './paginas/Login.js';
 import Cadastro from './paginas/Cadastro.js';
 import CorridaAtiva from './paginas/CorridaAtiva.js';
+import CorridasAgendadas from './paginas/CorridasAgendadas.js';
+import CorridaAgendadaDetalhe from './paginas/CorridaAgendadaDetalhe.js';
+import AguardandoMotorista from './paginas/AguardandoMotorista.js';
+import HistoricoCorridas from './paginas/HistoricoCorridas.js';
 
 const root = document.getElementById('render');
 let currentPageResult = null;
@@ -13,12 +17,25 @@ const routes = {
 	'/sobre': Sobre,
 	'/login': Login,
 	'/cadastro': Cadastro,
-	'/corrida-ativa': CorridaAtiva
+	'/corrida-ativa': CorridaAtiva,
+	'/aguardando-motorista': AguardandoMotorista,
+	'/corridas-agendadas': CorridasAgendadas,
+	'/corrida-agendada': CorridaAgendadaDetalhe,
+	'/historico': HistoricoCorridas
 };
 
 function getCurrentPath() {
 	const hash = window.location.hash || '#/';
-	return hash.replace('#', '');
+	const full = hash.replace('#', '');
+	return full.split('?')[0];
+}
+
+function getCurrentQuery() {
+	const hash = window.location.hash || '#/';
+	const full = hash.replace('#', '');
+	const qIndex = full.indexOf('?');
+	if (qIndex === -1) return {};
+	return Object.fromEntries(new URLSearchParams(full.slice(qIndex + 1)));
 }
 
 function renderRoute() {
@@ -27,8 +44,9 @@ function renderRoute() {
 	}
 
 	const path = getCurrentPath();
+	const query = getCurrentQuery();
 	const Page = routes[path] || Home;
-	const result = Page(path);
+	const result = Page(path, query);
 	currentPageResult = result;
 
 	if (result && typeof result === 'object' && result.html) {
@@ -37,6 +55,8 @@ function renderRoute() {
 	} else {
 		root.innerHTML = result;
 	}
+
+	window.scrollTo(0, 0);
 
 	if (path !== '/') {
 		document.dispatchEvent(new CustomEvent('app:ready'));

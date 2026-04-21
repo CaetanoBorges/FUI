@@ -1,0 +1,361 @@
+/* CorridasAgendadas — Minimal */
+
+.sched-shell {
+  min-height: 100vh;
+  padding: 5.5rem 1.25rem 2.5rem;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+.sched-container {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* ── Page header ── */
+.sched-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sched-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7d8590;
+}
+
+.sched-title {
+  font-size: clamp(1.4rem, 5.5vw, 1.9rem);
+  font-weight: 700;
+  color: #e6edf3;
+  line-height: 1.2;
+}
+
+.sched-count {
+  font-size: 0.8rem;
+  color: #7d8590;
+  margin-top: 0.1rem;
+}
+
+/* ── Divider ── */
+.sched-divider {
+  height: 1px;
+  background: #21262d;
+  border: none;
+  margin: 0;
+}
+
+/* ── Ride card ── */
+.sched-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sched-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.sched-card.is-cancelled {
+  opacity: 0.5;
+}
+
+.sched-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 0.875rem 0.625rem;
+}
+
+.sched-card-datetime {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e3b341;
+}
+
+.sched-card-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(227, 179, 65, 0.12);
+  border: 1px solid rgba(227, 179, 65, 0.3);
+  color: #e3b341;
+}
+
+.sched-card-badge.is-cancelled {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: rgba(248, 81, 73, 0.3);
+  color: #f85149;
+}
+
+.sched-card-body {
+  padding: 0 0.875rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Route summary */
+.sched-route {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.sched-route-origin,
+.sched-route-dest {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e6edf3;
+}
+
+.sched-route-arrow {
+  color: #7d8590;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Meta row */
+.sched-meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sched-meta-item {
+  font-size: 0.78rem;
+  color: #7d8590;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Driver mini */
+.sched-driver {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid #21262d;
+}
+
+.sched-driver-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1f6feb;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sched-driver-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sched-driver-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e6edf3;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sched-driver-plate {
+  font-size: 0.68rem;
+  color: #7d8590;
+}
+
+.sched-driver-call {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3fb950;
+  font-size: 0.8rem;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sched-driver-call:hover {
+  background: rgba(63, 185, 80, 0.12);
+  border-color: #3fb950;
+}
+
+/* Card footer */
+.sched-card-foot {
+  padding: 0 0.875rem 0.875rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sched-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.sched-btn:hover { opacity: 0.75; }
+.sched-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.sched-btn-secondary {
+  background: #21262d;
+  color: #e6edf3;
+  border: 1px solid #30363d;
+}
+
+.sched-btn-danger {
+  background: transparent;
+  color: #f85149;
+  border: 1px solid #30363d;
+}
+
+/* ── Empty state ── */
+.sched-empty {
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.sched-empty-icon {
+  font-size: 1.75rem;
+  color: #7d8590;
+  margin-bottom: 1rem;
+}
+
+.sched-empty h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e6edf3;
+  margin-bottom: 0.4rem;
+}
+
+.sched-empty p {
+  font-size: 0.875rem;
+  color: #7d8590;
+  max-width: 36ch;
+  margin: 0 auto 1.4rem;
+  line-height: 1.7;
+}
+
+.sched-btn-primary {
+  background: #1f6feb;
+  color: #fff;
+}
+
+/* ── Responsive ── */
+@media (min-width: 600px) {
+  .sched-shell {
+    padding: 6rem 1.5rem 2.5rem;
+  }
+}
+
+/* ── Confirmation modal ── */
+.sched-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 900;
+  padding: 1rem;
+  transition: background 0.25s ease;
+}
+
+.sched-modal-backdrop.is-visible {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.sched-modal {
+  width: min(100%, 420px);
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transform: translateY(24px);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.sched-modal-backdrop.is-visible .sched-modal {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.sched-modal-icon {
+  font-size: 1.5rem;
+  color: #f85149;
+}
+
+.sched-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e6edf3;
+  margin: 0;
+}
+
+.sched-modal-desc {
+  font-size: 0.875rem;
+  color: #7d8590;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.sched-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.sched-modal-actions .sched-btn {
+  flex: 1;
+}
+
+@media (min-width: 600px) {
+  .sched-modal-backdrop {
+    align-items: center;
+  }
+}

@@ -1,274 +1,243 @@
+/* CorridaAtiva — Minimal */
+
 .ride-shell {
   min-height: 100vh;
-  padding: 5.8rem 0.85rem 1.4rem;
-  background:
-    radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 36%),
-    linear-gradient(180deg, #0f172a 0%, #111827 42%, #0b1120 100%);
-  color: #f8fafc;
+  padding: 5.5rem 1.25rem 2.5rem;
+  background: #0d1117;
+  color: #e6edf3;
 }
 
 .ride-container {
-  width: min(100%, 940px);
+  width: min(100%, 520px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.75rem;
 }
 
-.ride-hero,
-.ride-card,
-.ride-empty {
-  background: rgba(15, 23, 42, 0.86);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 20px;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(18px);
-}
-
-.ride-hero {
-  padding: 1rem;
-}
-
-.ride-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #c4b5fd;
-}
-
-.ride-title {
-  margin-top: 0.55rem;
-  font-size: clamp(1.2rem, 5.4vw, 1.8rem);
-  font-weight: 800;
-  color: #fff;
-}
-
-.ride-subtitle {
-  margin-top: 0.5rem;
-  color: #cbd5e1;
-  line-height: 1.6;
-  font-size: 0.93rem;
-}
-
-.ride-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 0.85rem;
-  padding: 0.62rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.14);
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  color: #dbeafe;
-  font-weight: 700;
-  font-size: 0.88rem;
-}
-
-.ride-status-pill.is-success {
-  background: rgba(16, 185, 129, 0.14);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #d1fae5;
-}
-
-.ride-status-pill.is-warning {
-  background: rgba(245, 158, 11, 0.14);
-  border-color: rgba(245, 158, 11, 0.35);
-  color: #fef3c7;
-}
-
-.ride-status-pill.is-danger {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.35);
-  color: #fee2e2;
-}
-
-.ride-progress {
-  margin-top: 0.95rem;
+/* ── Status block ── */
+.ride-status-block {
   display: flex;
   flex-direction: column;
-  gap: 0.58rem;
+  gap: 0.35rem;
+}
+
+.ride-stage-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7d8590;
+}
+
+.ride-stage-title {
+  font-size: clamp(1.5rem, 5.5vw, 2rem);
+  font-weight: 700;
+  color: #e6edf3;
+  line-height: 1.2;
+}
+
+.ride-stage-title.is-success { color: #3fb950; }
+.ride-stage-title.is-warning { color: #e3b341; }
+.ride-stage-title.is-danger  { color: #f85149; }
+
+.ride-stage-desc {
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
+  color: #7d8590;
+  line-height: 1.6;
+}
+
+/* ── Progress ── */
+.ride-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
 }
 
 .ride-progress-track {
   width: 100%;
-  height: 10px;
+  height: 2px;
+  background: #21262d;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(51, 65, 85, 0.9);
 }
 
 .ride-progress-bar {
   height: 100%;
   width: 0%;
+  background: #58a6ff;
   border-radius: inherit;
-  background: linear-gradient(90deg, #8b5cf6 0%, #3b82f6 100%);
-  transition: width 0.45s ease;
+  transition: width 0.6s ease;
 }
+
+.ride-progress-bar.is-success { background: #3fb950; }
+.ride-progress-bar.is-warning { background: #e3b341; }
+.ride-progress-bar.is-danger  { background: #f85149; }
 
 .ride-progress-meta {
+  font-size: 0.78rem;
+  color: #7d8590;
+}
+
+/* ── Divider ── */
+.ride-divider {
+  height: 1px;
+  background: #21262d;
+  border: none;
+  margin: 0;
+}
+
+/* ── Route timeline ── */
+.ride-route {
   display: flex;
   flex-direction: column;
-  gap: 0.32rem;
-  color: #cbd5e1;
-  font-size: 0.88rem;
 }
 
-.ride-layout {
+.ride-stop {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.85rem;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0 0.875rem;
 }
 
-.ride-card {
-  padding: 1rem;
-}
-
-.ride-section-title {
+.ride-stop-connector {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.52rem;
-  font-size: 0.96rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 0.75rem;
 }
 
-.ride-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(30, 41, 59, 0.75);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+.ride-stop-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0d1117;
+  border: 1.5px solid #58a6ff;
+  flex-shrink: 0;
+  margin-top: 3px;
 }
 
-.ride-table tr + tr {
-  border-top: 1px solid rgba(148, 163, 184, 0.14);
+.ride-stop:first-child .ride-stop-dot { border-color: #3fb950; }
+.ride-stop:last-child  .ride-stop-dot { border-color: #f85149; }
+
+.ride-stop-line {
+  width: 1px;
+  flex: 1;
+  min-height: 14px;
+  background: #21262d;
+  margin: 3px 0;
 }
 
-.ride-table th,
-.ride-table td {
-  text-align: left;
-  padding: 0.8rem 0.75rem;
-  vertical-align: top;
-}
+.ride-stop:last-child .ride-stop-line { display: none; }
 
-.ride-table th {
-  width: 42%;
-  color: #94a3b8;
-  font-size: 0.73rem;
+.ride-stop-label {
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-weight: 700;
+  color: #7d8590;
 }
 
-.ride-table td {
-  color: #f8fafc;
-  font-size: 0.95rem;
-  font-weight: 650;
-  line-height: 1.45;
+.ride-stop-value {
+  font-size: 0.875rem;
+  color: #e6edf3;
+  padding-bottom: 1rem;
+  line-height: 1.4;
 }
 
+/* ── Details list ── */
+.ride-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.ride-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid #21262d;
+}
+
+.ride-detail-row:last-child {
+  border-bottom: none;
+}
+
+.ride-detail-label {
+  font-size: 0.8rem;
+  color: #7d8590;
+  flex-shrink: 0;
+}
+
+.ride-detail-value {
+  font-size: 0.875rem;
+  color: #e6edf3;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* ── Actions ── */
 .ride-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.62rem;
-  margin-top: 0.95rem;
+  gap: 0.5rem;
 }
 
 .ride-btn {
-  border: none;
-  border-radius: 14px;
-  width: 100%;
-  padding: 0.84rem 1rem;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
 }
 
-.ride-btn:hover {
-  transform: translateY(-1px);
-}
+.ride-btn:hover { opacity: 0.78; }
 
-.ride-btn-primary {
-  background: linear-gradient(135deg, #8b5cf6 0%, #2563eb 100%);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.28);
-}
+.ride-btn-primary   { background: #1f6feb; color: #fff; }
+.ride-btn-secondary { background: #161b22; color: #e6edf3; border: 1px solid #30363d; }
+.ride-btn-danger    { background: transparent; color: #f85149; border: 1px solid #30363d; }
 
-.ride-btn-secondary {
-  background: rgba(30, 41, 59, 0.85);
-  color: #e2e8f0;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.ride-btn-danger {
-  background: rgba(127, 29, 29, 0.9);
-  color: #fff;
-  border: 1px solid rgba(248, 113, 113, 0.25);
-}
-
+/* ── Empty state ── */
 .ride-empty {
-  padding: 1.45rem 1rem;
+  padding: 3.5rem 0;
   text-align: center;
 }
 
 .ride-empty-icon {
-  width: 74px;
-  height: 74px;
-  margin: 0 auto 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  color: #7d8590;
+  margin-bottom: 1rem;
 }
 
 .ride-empty h1 {
-  font-size: clamp(1.3rem, 5vw, 1.9rem);
-  margin-bottom: 0.55rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #e6edf3;
 }
 
 .ride-empty p {
-  color: #cbd5e1;
-  max-width: 48ch;
-  margin: 0 auto 1.25rem;
+  font-size: 0.875rem;
+  color: #7d8590;
+  max-width: 38ch;
+  margin: 0 auto 1.5rem;
   line-height: 1.7;
 }
 
-@media (min-width: 700px) {
+/* ── Responsive ── */
+@media (min-width: 600px) {
   .ride-shell {
-    padding: 6.2rem 1rem 1.8rem;
-  }
-
-  .ride-hero,
-  .ride-card,
-  .ride-empty {
-    border-radius: 22px;
-  }
-
-  .ride-hero,
-  .ride-card {
-    padding: 1.2rem;
-  }
-
-  .ride-progress-meta {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.9rem;
+    padding: 6rem 1.5rem 2.5rem;
   }
 
   .ride-actions {
@@ -277,20 +246,90 @@
 
   .ride-btn {
     width: auto;
+    flex: 1;
   }
 }
 
-@media (min-width: 980px) {
-  .ride-layout {
-    grid-template-columns: 1.05fr 1.15fr;
-    align-items: start;
-  }
+/* ── Driver card ── */
+.ride-driver-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+}
 
-  .ride-title {
-    font-size: clamp(1.45rem, 2.1vw, 2.05rem);
-  }
+.ride-driver-card[hidden] { display: none; }
 
-  .ride-table th {
-    width: 36%;
-  }
+.ride-driver-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #1f6feb;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.ride-driver-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.ride-driver-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e6edf3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ride-driver-vehicle {
+  font-size: 0.78rem;
+  color: #7d8590;
+}
+
+.ride-driver-plate {
+  display: inline-block;
+  margin-top: 0.1rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #e6edf3;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 1px 6px;
+  text-transform: uppercase;
+}
+
+.ride-driver-call {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3fb950;
+  font-size: 0.9rem;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ride-driver-call:hover {
+  background: rgba(63, 185, 80, 0.12);
+  border-color: #3fb950;
 }
