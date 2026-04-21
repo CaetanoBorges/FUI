@@ -28,6 +28,7 @@ export default function Header(_titulo, rotaAtual = '/', showLogo = false) {
                 ${activeRide ? `<a href="#/corrida-ativa" class="hm-link ${rotaAtual === '/corrida-ativa' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Corrida ativa</a>` : ''}
                 <a href="#/corridas-agendadas" class="hm-link ${rotaAtual === '/corridas-agendadas' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Agendamentos</a>
                 <a href="#/historico" class="hm-link ${rotaAtual === '/historico' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Histórico</a>
+                ${currentUser ? `<a href="#/perfil" class="hm-link ${rotaAtual === '/perfil' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Perfil</a>` : ''}
                 <a href="#/login" class="hm-link ${rotaAtual === '/login' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Entrar</a>
                 <a href="#/cadastro" class="hm-link ${rotaAtual === '/cadastro' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Criar conta</a>
                 ${currentUser ? `<button class="hm-link hm-link-button" onclick="${_logout}">Sair</button>` : ''}

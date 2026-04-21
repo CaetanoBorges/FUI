@@ -10,7 +10,7 @@ function getRoleLabel(role = 'passageiro') {
 }
 
 function buildLoggedState(user, rotaAtual) {
-    const firstName = user.name.split(' ')[0];
+    const firstName = (user.name || user.email || 'Utilizador').split(' ')[0];
     const roleLabel = getRoleLabel(user.role);
 
     return `

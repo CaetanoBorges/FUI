@@ -106,3 +106,19 @@ export function authenticateUser({ email, password }) {
     writeJson(SESSION_KEY, session);
     return session;
 }
+
+export function deleteUser({ email, password }) {
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = password.trim();
+
+    const users = getUsers();
+    const idx = users.findIndex(
+        u => u.email === normalizedEmail && u.password === normalizedPassword
+    );
+
+    if (idx === -1) throw new Error('Senha incorreta.');
+
+    users.splice(idx, 1);
+    writeJson(USERS_KEY, users);
+    localStorage.removeItem(SESSION_KEY);
+}
