@@ -3,6 +3,7 @@ import Home from './paginas/Home.js';
 import Sobre from './paginas/Sobre.js';
 import Login from './paginas/Login.js';
 import Cadastro from './paginas/Cadastro.js';
+import CorridaAtiva from './paginas/CorridaAtiva.js';
 
 const root = document.getElementById('render');
 let currentPageResult = null;
@@ -11,7 +12,8 @@ const routes = {
 	'/': Home,
 	'/sobre': Sobre,
 	'/login': Login,
-	'/cadastro': Cadastro
+	'/cadastro': Cadastro,
+	'/corrida-ativa': CorridaAtiva
 };
 
 function getCurrentPath() {

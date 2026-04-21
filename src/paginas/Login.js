@@ -16,8 +16,8 @@ function buildLoggedState(user, rotaAtual) {
     return `
         <main class="auth-shell auth-shell-scrollable">
             <section class="auth-card auth-card-compact">
-                <div class="auth-login-brand" aria-label="Logo GYRO">
-                    <div class="auth-login-logo"><img class="auth-logo-full" src="/logo-gyro-road.svg" alt="GYRO" /></div>
+                <div class="auth-login-brand" aria-label="Logo GIRO">
+                    <div class="auth-login-logo"><img class="auth-logo-full" src="/giro.svg" alt="GIRO" /></div>
                 </div>
                 <div class="auth-badge"><i class="fa-solid fa-circle-check"></i> Sessão ativa</div>
                 <h1>Olá, ${firstName}.</h1>
@@ -36,8 +36,8 @@ function buildLoginForm(rotaAtual) {
         <main class="auth-shell auth-shell-scrollable">
             <section class="auth-card">
                 <form class="auth-form" id="login-form">
-                    <div class="auth-login-brand" aria-label="Logo GYRO">
-                        <div class="auth-login-logo"><img class="auth-logo-full" src="/logo-gyro-road.svg" alt="GYRO" /></div>
+                    <div class="auth-login-brand" aria-label="Logo GIRO">
+                        <div class="auth-login-logo"><img class="auth-logo-full" src="/giro.svg" alt="GIRO" /></div>
                     </div>
 
                     <label class="auth-field">

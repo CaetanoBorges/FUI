@@ -69,8 +69,8 @@ function buildCadastroForm(rotaAtual) {
     return `
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card">
-                <div class="auth-login-brand" aria-label="Logo GYRO">
-                    <div class="auth-login-logo"><img class="auth-logo-full" src="/logo-gyro-road.svg" alt="GYRO" /></div>
+                <div class="auth-login-brand" aria-label="Logo GIRO">
+                    <div class="auth-login-logo"><img class="auth-logo-full" src="/giro.svg" alt="GIRO" /></div>
                     </div>
 
                 <div class="auth-form auth-form-stack">

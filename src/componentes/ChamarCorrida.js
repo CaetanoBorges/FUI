@@ -1,4 +1,5 @@
 ﻿import rotasEmGrafo from '../dados/rotasEmGrafo.js';
+import { saveActiveRide } from '../dados/corridaStorage.js';
 
 // ── Ícones customizados para os marcadores do mapa ──────────────────────
 function criarIcone(tipo) {
@@ -986,18 +987,51 @@ export default function ChamarCorrida() {
                 : '<i class="fa-solid fa-check cr-fa"></i>Confirmar corrida';
         }
 
+        function montarPayloadCorrida() {
+            if (!rotaSelecionada) return null;
+
+            const trechos = obterTrechosSelecionados();
+            const passageiros = veiculoAtual === 'moto' ? 1 : pessoasAtual;
+            const preco = calcularPreco(trechos.map((trecho) => trecho.feature), veiculoAtual, passageiros);
+            const dataSelecionada = fp && fp.selectedDates.length > 0 ? fp.selectedDates[0] : null;
+            const whenLabel = quandoAtual === 'agendar' && dataSelecionada
+                ? fp.formatDate(dataSelecionada, 'd/m/Y H:i')
+                : 'Agora';
+
+            return {
+                id: `CR-${Date.now()}`,
+                createdAt: new Date().toISOString(),
+                status: 'active',
+                when: quandoAtual,
+                whenLabel,
+                scheduledAt: quandoAtual === 'agendar' && dataSelecionada ? dataSelecionada.toISOString() : null,
+                routeSummary: montarResumoRota(),
+                continueAfterDestination: continuarAposDestino,
+                passengers: passageiros,
+                vehicle: veiculoAtual,
+                vehicleLabel: veiculoAtual === 'moto'
+                    ? 'Moto'
+                    : `Carro • ${passageiros} passageiro${passageiros > 1 ? 's' : ''}`,
+                estimatedPrice: preco ? `Kz ${preco.total.replace('.', ',')}` : 'Kz --',
+                estimatedDistance: preco ? `${preco.distancia} km` : '-- km',
+                estimatedDuration: preco ? preco.tempo : '--:--:--',
+                stops: [trechos[0]?.origem, ...trechos.map((trecho) => trecho.destino)].filter(Boolean),
+                segments: trechos.map((trecho, index) => ({
+                    id: `${index + 1}`,
+                    origem: trecho.origem,
+                    destino: trecho.destino
+                }))
+            };
+        }
+
         function confirmarCorridaFinal() {
             exibirRota();
 
-            if (quandoAtual === 'agendar') {
-                const dataAgendada = fp && fp.selectedDates.length > 0
-                    ? fp.formatDate(fp.selectedDates[0], 'd/m/Y H:i')
-                    : 'data não informada';
-                window.alert(`Agendamento confirmado para ${dataAgendada}.`);
-                return;
-            }
+            const payload = montarPayloadCorrida();
+            if (!payload) return;
 
-            window.alert('Corrida confirmada para agora.');
+            saveActiveRide(payload);
+            window.location.hash = '#/corrida-ativa';
         }
 
         document.getElementById('cr-confirmar').addEventListener('click', confirmarCorridaFinal);

@@ -3,6 +3,7 @@ const _logout = `localStorage.removeItem('gyro.auth.current');${_fecharMenu}docu
 
 export default function Header(_titulo, rotaAtual = '/') {
     const currentUser = JSON.parse(localStorage.getItem('gyro.auth.current') || 'null');
+    const activeRide = JSON.parse(localStorage.getItem('gyro.ride.active') || 'null');
 
     return `
         <header class="hm-header-floating">
@@ -23,6 +24,7 @@ export default function Header(_titulo, rotaAtual = '/') {
             <nav class="hm-sidebar-nav">
                 <a href="#/" class="hm-link ${rotaAtual === '/' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Home</a>
                 <a href="#/sobre" class="hm-link ${rotaAtual === '/sobre' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Sobre</a>
+                ${activeRide ? `<a href="#/corrida-ativa" class="hm-link ${rotaAtual === '/corrida-ativa' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Corrida ativa</a>` : ''}
                 <a href="#/login" class="hm-link ${rotaAtual === '/login' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Entrar</a>
                 <a href="#/cadastro" class="hm-link ${rotaAtual === '/cadastro' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Criar conta</a>
                 ${currentUser ? `<button class="hm-link hm-link-button" onclick="${_logout}">Sair</button>` : ''}
