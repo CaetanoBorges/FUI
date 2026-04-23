@@ -7,6 +7,15 @@ let modalHandlers = [];
 
 const MODAL_ID = 'detail-confirm-modal';
 
+const CANCEL_MOTIVOS = [
+    'Mudei de planos',
+    'Horário alterado',
+    'Encontrei outra opção de transporte',
+    'Errei no destino/origem',
+    'Criei por engano',
+    'Outro motivo',
+];
+
 function formatDatetime(iso) {
     if (!iso) return '—';
     try {
@@ -171,14 +180,23 @@ function openModal(rideId, rideSummary) {
     const backdrop = document.createElement('div');
     backdrop.id = MODAL_ID;
     backdrop.className = 'detail-modal-backdrop';
+    const motivosHtml = CANCEL_MOTIVOS.map((m, i) => `
+        <button type="button" class="detail-motivo-row" data-motivo="${m}" data-index="${i}">
+            <span class="detail-motivo-radio"></span>
+            <span>${m}</span>
+        </button>
+    `).join('');
+
     backdrop.innerHTML = `
         <div class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
             <div class="detail-modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h2 class="detail-modal-title" id="detail-modal-title">Cancelar corrida?</h2>
             <p class="detail-modal-desc">${rideSummary}</p>
+            <div class="detail-motivos">${motivosHtml}</div>
+            <textarea class="detail-motivo-textarea" id="detail-motivo-outro" placeholder="Descreva o motivo..." rows="3" style="display:none"></textarea>
             <div class="detail-modal-actions">
                 <button type="button" class="detail-btn detail-btn-secondary" id="detail-modal-dismiss">Voltar</button>
-                <button type="button" class="detail-btn detail-btn-danger" id="detail-modal-confirm">
+                <button type="button" class="detail-btn detail-btn-danger" id="detail-modal-confirm" disabled>
                     <i class="fa-solid fa-ban"></i>Confirmar cancelamento
                 </button>
             </div>
@@ -188,21 +206,44 @@ function openModal(rideId, rideSummary) {
     document.body.appendChild(backdrop);
     requestAnimationFrame(() => backdrop.classList.add('is-visible'));
 
+    let motivoSelecionado = null;
+    const confirmBtn = document.getElementById('detail-modal-confirm');
+    const outroTextarea = document.getElementById('detail-motivo-outro');
+
+    backdrop.querySelectorAll('.detail-motivo-row').forEach(btn => {
+        btn.addEventListener('click', () => {
+            backdrop.querySelectorAll('.detail-motivo-row').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            motivoSelecionado = btn.dataset.motivo;
+            const isOutro = motivoSelecionado === 'Outro motivo';
+            outroTextarea.style.display = isOutro ? 'block' : 'none';
+            confirmBtn.disabled = isOutro ? !outroTextarea.value.trim() : false;
+        });
+    });
+
+    outroTextarea.addEventListener('input', () => {
+        confirmBtn.disabled = !outroTextarea.value.trim();
+    });
+
     const dismissFn = () => removeModal();
     const confirmFn = () => {
-        cancelScheduledRideById(rideId);
+        const motivo = motivoSelecionado === 'Outro motivo'
+            ? outroTextarea.value.trim()
+            : motivoSelecionado;
+        cancelScheduledRideById(rideId, motivo);
         removeModal();
-        window.location.hash = `#/corrida-agendada?id=${rideId}`;
+        // Força re-renderização mesmo que o hash não mude
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
     };
     const backdropFn = (e) => { if (e.target === backdrop) removeModal(); };
 
     document.getElementById('detail-modal-dismiss').addEventListener('click', dismissFn);
-    document.getElementById('detail-modal-confirm').addEventListener('click', confirmFn);
+    confirmBtn.addEventListener('click', confirmFn);
     backdrop.addEventListener('click', backdropFn);
 
     modalHandlers = [
         { el: document.getElementById('detail-modal-dismiss'), fn: dismissFn, event: 'click' },
-        { el: document.getElementById('detail-modal-confirm'), fn: confirmFn, event: 'click' },
+        { el: confirmBtn, fn: confirmFn, event: 'click' },
         { el: backdrop, fn: backdropFn, event: 'click' },
     ];
 }

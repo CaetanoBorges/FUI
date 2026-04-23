@@ -8,6 +8,7 @@ import CorridasAgendadas from './paginas/CorridasAgendadas.js';
 import CorridaAgendadaDetalhe from './paginas/CorridaAgendadaDetalhe.js';
 import AguardandoMotorista from './paginas/AguardandoMotorista.js';
 import HistoricoCorridas from './paginas/HistoricoCorridas.js';
+import AvaliacaoCorrida from './paginas/AvaliacaoCorrida.js';
 import Perfil from './paginas/Perfil.js';
 
 const root = document.getElementById('render');
@@ -23,7 +24,8 @@ const routes = {
 	'/corridas-agendadas': CorridasAgendadas,
 	'/corrida-agendada': CorridaAgendadaDetalhe,
 	'/historico': HistoricoCorridas,
-	'/perfil': Perfil
+	'/perfil': Perfil,
+	'/avaliacao': AvaliacaoCorrida
 };
 
 function getCurrentPath() {

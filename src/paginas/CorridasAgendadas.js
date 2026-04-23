@@ -8,8 +8,24 @@ let confirmModalHandlers = [];
 
 const MODAL_ID = 'sched-confirm-modal';
 
+const CANCEL_MOTIVOS = [
+    'Mudei de planos',
+    'Horário alterado',
+    'Encontrei outra opção de transporte',
+    'Errei no destino/origem',
+    'Criei por engano',
+    'Outro motivo',
+];
+
 function openCancelModal(rideId, rideSummary) {
     removeCancelModal();
+
+    const motivosHtml = CANCEL_MOTIVOS.map(m => `
+        <button type="button" class="sched-motivo-row" data-motivo="${m}">
+            <span class="sched-motivo-radio"></span>
+            <span>${m}</span>
+        </button>
+    `).join('');
 
     const backdrop = document.createElement('div');
     backdrop.id = MODAL_ID;
@@ -19,9 +35,13 @@ function openCancelModal(rideId, rideSummary) {
             <div class="sched-modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h2 class="sched-modal-title" id="sched-modal-title">Cancelar corrida?</h2>
             <p class="sched-modal-desc">${rideSummary}</p>
+            <div class="sched-motivos">${motivosHtml}</div>
+            <textarea class="sched-motivo-textarea" id="sched-motivo-outro" placeholder="Descreva o motivo..." rows="3" style="display:none"></textarea>
             <div class="sched-modal-actions">
                 <button type="button" class="sched-btn sched-btn-secondary" id="sched-modal-dismiss">Voltar</button>
-                <button type="button" class="sched-btn sched-btn-danger" id="sched-modal-confirm"><i class="fa-solid fa-ban"></i>Confirmar cancelamento</button>
+                <button type="button" class="sched-btn sched-btn-danger" id="sched-modal-confirm" disabled>
+                    <i class="fa-solid fa-ban"></i>Confirmar cancelamento
+                </button>
             </div>
         </div>
     `;
@@ -29,9 +49,31 @@ function openCancelModal(rideId, rideSummary) {
     document.body.appendChild(backdrop);
     requestAnimationFrame(() => backdrop.classList.add('is-visible'));
 
+    let motivoSelecionado = null;
+    const confirmBtn = document.getElementById('sched-modal-confirm');
+    const outroTextarea = document.getElementById('sched-motivo-outro');
+
+    backdrop.querySelectorAll('.sched-motivo-row').forEach(btn => {
+        btn.addEventListener('click', () => {
+            backdrop.querySelectorAll('.sched-motivo-row').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            motivoSelecionado = btn.dataset.motivo;
+            const isOutro = motivoSelecionado === 'Outro motivo';
+            outroTextarea.style.display = isOutro ? 'block' : 'none';
+            confirmBtn.disabled = isOutro ? !outroTextarea.value.trim() : false;
+        });
+    });
+
+    outroTextarea.addEventListener('input', () => {
+        confirmBtn.disabled = !outroTextarea.value.trim();
+    });
+
     const dismissFn = () => removeCancelModal();
     const confirmFn = () => {
-        cancelScheduledRideById(rideId);
+        const motivo = motivoSelecionado === 'Outro motivo'
+            ? outroTextarea.value.trim()
+            : motivoSelecionado;
+        cancelScheduledRideById(rideId, motivo);
         removeCancelModal();
         rerenderList();
     };
@@ -40,12 +82,12 @@ function openCancelModal(rideId, rideSummary) {
     };
 
     document.getElementById('sched-modal-dismiss').addEventListener('click', dismissFn);
-    document.getElementById('sched-modal-confirm').addEventListener('click', confirmFn);
+    confirmBtn.addEventListener('click', confirmFn);
     backdrop.addEventListener('click', backdropFn);
 
     confirmModalHandlers = [
         { el: document.getElementById('sched-modal-dismiss'), fn: dismissFn, event: 'click' },
-        { el: document.getElementById('sched-modal-confirm'), fn: confirmFn, event: 'click' },
+        { el: confirmBtn, fn: confirmFn, event: 'click' },
         { el: backdrop, fn: backdropFn, event: 'click' },
     ];
 }

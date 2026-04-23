@@ -333,3 +333,206 @@
   background: rgba(63, 185, 80, 0.12);
   border-color: #3fb950;
 }
+
+/* ── Modal de cancelamento ── */
+.ride-cancel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.ride-cancel-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.ride-cancel-sheet {
+  width: min(100%, 520px);
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 16px 16px 0 0;
+  padding: 1.5rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transform: translateY(24px);
+  transition: transform 0.26s cubic-bezier(.4,0,.2,1);
+}
+
+.ride-cancel-overlay.visible .ride-cancel-sheet {
+  transform: translateY(0);
+}
+
+.ride-cancel-sheet-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ride-cancel-sheet-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e6edf3;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ride-cancel-sheet-title i {
+  color: #f85149;
+}
+
+.ride-cancel-sheet-sub {
+  font-size: 0.82rem;
+  color: #7d8590;
+  line-height: 1.55;
+}
+
+.ride-cancel-motivos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ride-cancel-motivo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 8px;
+  border: 1.5px solid #30363d;
+  background: #0d1117;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ride-cancel-motivo:hover {
+  border-color: #484f58;
+  background: #161b22;
+}
+
+.ride-cancel-motivo.selected {
+  border-color: #f85149;
+  background: rgba(248, 81, 73, 0.08);
+}
+
+.ride-cancel-motivo-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #484f58;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+}
+
+.ride-cancel-motivo.selected .ride-cancel-motivo-radio {
+  border-color: #f85149;
+  background: #f85149;
+}
+
+.ride-cancel-motivo.selected .ride-cancel-motivo-radio::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+}
+
+.ride-cancel-motivo-label {
+  font-size: 0.875rem;
+  color: #e6edf3;
+  line-height: 1.4;
+}
+
+.ride-cancel-outro-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ride-cancel-outro-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7d8590;
+}
+
+.ride-cancel-textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  background: #0d1117;
+  border: 1.5px solid #30363d;
+  border-radius: 8px;
+  color: #e6edf3;
+  font: 0.875rem/1.6 'Inter', system-ui, sans-serif;
+  padding: 0.65rem 0.875rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.ride-cancel-textarea::placeholder { color: #484f58; }
+
+.ride-cancel-textarea:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+}
+
+.ride-cancel-actions {
+  display: flex;
+  gap: 0.625rem;
+}
+
+.ride-cancel-btn-voltar {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 8px;
+  border: 1px solid #30363d;
+  background: transparent;
+  color: #e6edf3;
+  font: 600 0.875rem/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ride-cancel-btn-voltar:hover { background: #21262d; }
+
+.ride-cancel-btn-confirmar {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 8px;
+  border: none;
+  background: #f85149;
+  color: #fff;
+  font: 700 0.875rem/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ride-cancel-btn-confirmar:hover:not(:disabled) { opacity: 0.82; }
+
+.ride-cancel-btn-confirmar:disabled {
+  background: #21262d;
+  color: #484f58;
+  cursor: not-allowed;
+}

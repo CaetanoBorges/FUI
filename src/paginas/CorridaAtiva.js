@@ -1,11 +1,106 @@
 import Header from '../componentes/Header.js';
-import { clearActiveRide, getActiveRide, saveRideToHistory } from '../dados/corridaStorage.js';
+import { clearActiveRide, getActiveRide, saveActiveRide, saveRideToHistory } from '../dados/corridaStorage.js';
 import './CorridaAtiva.css';
 
-let rideTickInterval = null;
+let rideTickInterval = null; 
 let rideCancelHandler = null;
 let ridePrimaryHandler = null;
 let rideAutoCompleteScheduled = false;
+let rideCancelModalEl = null;
+
+const CANCEL_MOTIVOS = [
+    'Mudei de planos',
+    'Demorou muito a aceitar',
+    'Encontrei outra opção de transporte',
+    'Errei no destino',
+    'Motorista não apareceu',
+    'Outro motivo',
+];
+
+function abrirModalCancelamento(onConfirm) {
+    if (rideCancelModalEl) return;
+
+    const motivosHtml = CANCEL_MOTIVOS.map((m, i) => `
+        <div class="ride-cancel-motivo" data-idx="${i}" role="radio" aria-checked="false" tabindex="0">
+            <span class="ride-cancel-motivo-radio"></span>
+            <span class="ride-cancel-motivo-label">${m}</span>
+        </div>
+    `).join('');
+
+    const el = document.createElement('div');
+    el.className = 'ride-cancel-overlay';
+    el.innerHTML = `
+        <div class="ride-cancel-sheet" role="dialog" aria-modal="true" aria-label="Confirmar cancelamento">
+            <div class="ride-cancel-sheet-header">
+                <div class="ride-cancel-sheet-title"><i class="fa-solid fa-ban"></i> Cancelar corrida</div>
+                <p class="ride-cancel-sheet-sub">Selecione o motivo do cancelamento. Esta informação é importante para melhorarmos o serviço.</p>
+            </div>
+            <div class="ride-cancel-motivos" id="rcc-motivos">${motivosHtml}</div>
+            <div class="ride-cancel-outro-wrap" id="rcc-outro-wrap" style="display:none">
+                <span class="ride-cancel-outro-label">Descreva o motivo</span>
+                <textarea class="ride-cancel-textarea" id="rcc-outro-texto" placeholder="Escreva o motivo do cancelamento..." maxlength="200"></textarea>
+            </div>
+            <div class="ride-cancel-actions">
+                <button type="button" class="ride-cancel-btn-voltar" id="rcc-voltar">Voltar</button>
+                <button type="button" class="ride-cancel-btn-confirmar" id="rcc-confirmar" disabled>
+                    <i class="fa-solid fa-ban"></i> Confirmar cancelamento
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(el);
+    rideCancelModalEl = el;
+
+    // Animar entrada
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+
+    let motivoSelecionado = null;
+    const OUTRO_IDX = CANCEL_MOTIVOS.length - 1;
+
+    function fechar() {
+        el.classList.remove('visible');
+        el.addEventListener('transitionend', () => { el.remove(); rideCancelModalEl = null; }, { once: true });
+    }
+
+    function validar() {
+        const btnConfirmar = document.getElementById('rcc-confirmar');
+        if (!btnConfirmar) return;
+        const outroTexto = document.getElementById('rcc-outro-texto')?.value?.trim() || '';
+        const outroValido = motivoSelecionado !== OUTRO_IDX || outroTexto.length > 0;
+        btnConfirmar.disabled = motivoSelecionado === null || !outroValido;
+    }
+
+    el.querySelector('#rcc-motivos').addEventListener('click', (e) => {
+        const item = e.target.closest('.ride-cancel-motivo');
+        if (!item) return;
+        motivoSelecionado = parseInt(item.dataset.idx, 10);
+        el.querySelectorAll('.ride-cancel-motivo').forEach(m => {
+            const sel = parseInt(m.dataset.idx, 10) === motivoSelecionado;
+            m.classList.toggle('selected', sel);
+            m.setAttribute('aria-checked', sel ? 'true' : 'false');
+        });
+        const outroWrap = document.getElementById('rcc-outro-wrap');
+        if (outroWrap) outroWrap.style.display = motivoSelecionado === OUTRO_IDX ? '' : 'none';
+        validar();
+    });
+
+    document.getElementById('rcc-outro-texto')?.addEventListener('input', validar);
+
+    document.getElementById('rcc-voltar').addEventListener('click', fechar);
+
+    // Fechar ao clicar no fundo
+    el.addEventListener('click', (e) => { if (e.target === el) fechar(); });
+
+    document.getElementById('rcc-confirmar').addEventListener('click', () => {
+        if (motivoSelecionado === null) return;
+        const outroTexto = document.getElementById('rcc-outro-texto')?.value?.trim() || '';
+        const motivoLabel = motivoSelecionado === OUTRO_IDX
+            ? (outroTexto || 'Outro motivo')
+            : CANCEL_MOTIVOS[motivoSelecionado];
+        fechar();
+        onConfirm(motivoLabel);
+    });
+}
 
 const RIDE_FLOW = [
     {
@@ -341,20 +436,18 @@ function updateRideUi() {
         cancelButton.style.cursor = stage.isFinished ? 'not-allowed' : 'pointer';
     }
 
-    // Auto-complete: quando a corrida termina, salva no histórico e navega
+    // Auto-complete: quando a corrida termina, marca como pendente de avaliação e redireciona
     if (stage.key === 'completed' && !rideAutoCompleteScheduled) {
         rideAutoCompleteScheduled = true;
-        // Atualiza título para dar feedback imediato
         if (stageTitle) {
             stageTitle.textContent = 'Corrida concluída!';
         }
         setTimeout(() => {
             const current = getActiveRide();
             if (current) {
-                saveRideToHistory({ ...current, status: 'completed' });
-                clearActiveRide();
+                saveActiveRide({ ...current, status: 'completed', _pendingRating: true });
             }
-            window.location.hash = '#/historico';
+            window.location.hash = '#/avaliacao';
         }, 3000);
     }
 }
@@ -377,25 +470,35 @@ export default function CorridaAtiva(rotaAtual = '/corrida-ativa') {
                 const currentRide = getActiveRide();
                 if (!currentRide) return;
 
-                saveRideToHistory({ ...currentRide, status: 'cancelled' });
-                clearActiveRide();
-                window.location.hash = '#/';
+                abrirModalCancelamento((motivo) => {
+                    const rideAtual = getActiveRide();
+                    if (!rideAtual) return;
+                    saveRideToHistory({ ...rideAtual, status: 'cancelled', cancelReason: motivo });
+                    clearActiveRide();
+                    window.location.hash = '#/';
+                });
             };
 
             ridePrimaryHandler = () => {
                 const currentRide = getActiveRide();
                 const stage = getRideStage(currentRide);
                 if (stage.isFinished && currentRide) {
-                    saveRideToHistory({ ...currentRide, status: 'completed' });
-                    clearActiveRide();
+                    saveActiveRide({ ...currentRide, status: 'completed', _pendingRating: true });
+                    window.location.hash = '#/avaliacao';
+                } else {
+                    window.location.hash = '#/';
                 }
-                window.location.hash = '#/';
             };
 
             cancelButton?.addEventListener('click', rideCancelHandler);
             primaryButton?.addEventListener('click', ridePrimaryHandler);
         },
         destroy() {
+            if (rideCancelModalEl) {
+                rideCancelModalEl.remove();
+                rideCancelModalEl = null;
+            }
+
             if (rideTickInterval) {
                 window.clearInterval(rideTickInterval);
                 rideTickInterval = null;

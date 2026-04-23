@@ -389,7 +389,7 @@ export default function ChamarCorrida() {
                     border-radius: 11px;
                     padding: 9px 12px;
                     font-size: 0.88rem;
-                    font-family: inherit;
+                    font-family: inherit; 
                     color: #0f1729;
                     outline: none;
                     cursor: pointer;

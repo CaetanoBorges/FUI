@@ -59,9 +59,9 @@ export function removeScheduledRideById(id) {
     writeJson(SCHEDULED_LIST_KEY, list);
 }
 
-export function cancelScheduledRideById(id) {
+export function cancelScheduledRideById(id, cancelReason = null) {
     const list = listScheduledRides().map(r =>
-        r.id === id ? { ...r, status: 'cancelled' } : r
+        r.id === id ? { ...r, status: 'cancelled', ...(cancelReason ? { cancelReason } : {}) } : r
     );
     writeJson(SCHEDULED_LIST_KEY, list);
 }

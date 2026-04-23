@@ -48,3 +48,59 @@
   border-radius: 50%;
   animation: loader-spin 1s linear infinite;
 }
+
+/* ── Banner de corrida ativa ──────────────────────────────────────── */
+.home-corrida-ativa-banner {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1.5px solid rgba(229, 231, 235, 0.85);
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.home-corrida-ativa-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f1729;
+}
+
+.home-corrida-ativa-info i {
+  font-size: 1.15rem;
+  color: #f59e0b;
+}
+
+.home-corrida-ativa-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: #0f3460;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  font-family: inherit;
+  transition: background 0.18s;
+  white-space: nowrap;
+}
+
+.home-corrida-ativa-btn:hover {
+  background: #16213e;
+}
