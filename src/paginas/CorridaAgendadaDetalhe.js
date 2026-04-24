@@ -1,9 +1,9 @@
 import Header from '../componentes/Header.js';
-import { listScheduledRides, cancelScheduledRideById } from '../dados/corridaStorage.js';
+import { listarCorridasAgendadas, cancelarCorridaAgendadaPorId } from '../dados/corridaStorage.js';
 import './CorridaAgendadaDetalhe.css';
 
-let cancelBtnHandler = null;
-let modalHandlers = [];
+let handlerBtnCancelar = null;
+let handlersModal = [];
 
 const MODAL_ID = 'detail-confirm-modal';
 
@@ -16,7 +16,7 @@ const CANCEL_MOTIVOS = [
     'Outro motivo',
 ];
 
-function formatDatetime(iso) {
+function formatarDataHora(iso) {
     if (!iso) return '—';
     try {
         return new Date(iso).toLocaleDateString('pt-AO', {
@@ -31,11 +31,11 @@ function formatDatetime(iso) {
     }
 }
 
-function isCancelled(ride) {
+function estaCancelada(ride) {
     return ride.status === 'cancelled';
 }
 
-function getStops(ride) {
+function obterParadas(ride) {
     if (Array.isArray(ride.stops) && ride.stops.length) return ride.stops;
     if (typeof ride.routeSummary === 'string' && ride.routeSummary.includes('→')) {
         return ride.routeSummary.split('→').map(s => s.trim()).filter(Boolean);
@@ -43,27 +43,27 @@ function getStops(ride) {
     return ride.routeSummary ? [ride.routeSummary] : [];
 }
 
-function renderRoute(ride) {
-    const stops = getStops(ride);
-    if (!stops.length) return `<p class="detail-info-value">Rota não disponível</p>`;
+function renderizarRota(ride) {
+    const paradas = obterParadas(ride);
+    if (!paradas.length) return `<p class="detail-info-value">Rota não disponível</p>`;
 
-    return `<div class="detail-route">${stops.map((stop, i) => `
+    return `<div class="detail-route">${paradas.map((stop, i) => `
         <div class="detail-stop">
             <div class="detail-stop-connector">
                 <div class="detail-stop-dot"></div>
                 <div class="detail-stop-line"></div>
             </div>
             <div>
-                <div class="detail-stop-label">${i === 0 ? 'Origem' : i === stops.length - 1 ? 'Destino' : `Paragem ${i}`}</div>
+                <div class="detail-stop-label">${i === 0 ? 'Origem' : i === paradas.length - 1 ? 'Destino' : `Paragem ${i}`}</div>
                 <div class="detail-stop-value">${stop}</div>
             </div>
         </div>
     `).join('')}</div>`;
 }
 
-function renderInfo(ride) {
-    const fields = [
-        { label: 'Data e hora', value: formatDatetime(ride.scheduledAt) },
+function renderizarInfo(ride) {
+    const campos = [
+        { label: 'Data e hora', value: formatarDataHora(ride.scheduledAt) },
         { label: 'Veículo', value: ride.vehicleLabel || '—' },
         { label: 'Passageiros', value: ride.passengers ?? '—' },
         { label: 'Distância', value: ride.estimatedDistance || '—' },
@@ -71,7 +71,7 @@ function renderInfo(ride) {
         { label: 'Preço', value: ride.estimatedPrice || '—' },
     ];
 
-    return `<div class="detail-info">${fields.map(({ label, value }) => `
+    return `<div class="detail-info">${campos.map(({ label, value }) => `
         <div class="detail-info-row">
             <span class="detail-info-label">${label}</span>
             <span class="detail-info-value">${value}</span>
@@ -79,7 +79,7 @@ function renderInfo(ride) {
     `).join('')}</div>`;
 }
 
-function renderDriver(d, cancelled) {
+function renderizarMotorista(d, cancelada) {
     if (!d) return '';
     return `
         <div class="detail-driver">
@@ -89,12 +89,12 @@ function renderDriver(d, cancelled) {
                 <span class="detail-driver-vehicle">${d.vehicleBrand} · ${d.vehicleColor}</span>
                 <span class="detail-driver-plate">${d.plate}</span>
             </div>
-            ${!cancelled ? `<a class="detail-driver-call" href="tel:${d.phone}" title="Ligar para ${d.name}"><i class="fa-solid fa-phone"></i></a>` : ''}
+            ${!cancelada ? `<a class="detail-driver-call" href="tel:${d.phone}" titulo="Ligar para ${d.name}"><i class="fa-solid fa-phone"></i></a>` : ''}
         </div>
     `;
 }
 
-function buildNotFound(rotaAtual) {
+function montarNaoEncontrado(rotaAtual) {
     return `
         ${Header('Agendamento', rotaAtual, true)}
         <main class="detail-shell">
@@ -111,12 +111,12 @@ function buildNotFound(rotaAtual) {
     `;
 }
 
-function buildPage(ride, rotaAtual) {
-    const cancelled = isCancelled(ride);
-    const stops = getStops(ride);
-    const origin = stops[0] || '—';
-    const dest = stops[stops.length - 1] || '—';
-    const title = stops.length >= 2 ? `${origin} → ${dest}` : origin;
+function montarPagina(ride, rotaAtual) {
+    const cancelada = estaCancelada(ride);
+    const paradas = obterParadas(ride);
+    const origem = paradas[0] || '—';
+    const destino = paradas[paradas.length - 1] || '—';
+    const titulo = paradas.length >= 2 ? `${origem} → ${destino}` : origem;
 
     return `
         ${Header('Agendamento', rotaAtual, true)}
@@ -129,10 +129,10 @@ function buildPage(ride, rotaAtual) {
 
                 <div class="detail-page-header">
                     <span class="detail-eyebrow">Corrida agendada</span>
-                    <h1 class="detail-title">${title}</h1>
-                    <span class="detail-badge${cancelled ? ' is-cancelled' : ''}">
-                        <i class="fa-solid fa-${cancelled ? 'ban' : 'calendar-clock'}"></i>
-                        ${cancelled ? 'Cancelada' : formatDatetime(ride.scheduledAt)}
+                    <h1 class="detail-titulo">${titulo}</h1>
+                    <span class="detail-badge${cancelada ? ' is-cancelada' : ''}">
+                        <i class="fa-solid fa-${cancelada ? 'ban' : 'calendar-clock'}"></i>
+                        ${cancelada ? 'Cancelada' : formatarDataHora(ride.scheduledAt)}
                     </span>
                 </div>
 
@@ -140,21 +140,21 @@ function buildPage(ride, rotaAtual) {
 
                 <div>
                     <p class="detail-section-label">Rota</p>
-                    ${renderRoute(ride)}
+                    ${renderizarRota(ride)}
                 </div>
 
                 <hr class="detail-divider">
 
                 <div>
                     <p class="detail-section-label">Detalhes</p>
-                    ${renderInfo(ride)}
+                    ${renderizarInfo(ride)}
                 </div>
 
                 ${ride.driver ? `
                     <hr class="detail-divider">
                     <div>
                         <p class="detail-section-label">Motorista</p>
-                        ${renderDriver(ride.driver, cancelled)}
+                        ${renderizarMotorista(ride.driver, cancelada)}
                     </div>
                 ` : ''}
 
@@ -162,7 +162,7 @@ function buildPage(ride, rotaAtual) {
                     <a href="#/corridas-agendadas" class="detail-btn detail-btn-secondary">
                         <i class="fa-solid fa-arrow-left"></i>Voltar
                     </a>
-                    ${!cancelled ? `
+                    ${!cancelada ? `
                         <button type="button" class="detail-btn detail-btn-danger" id="detail-cancel-btn">
                             <i class="fa-solid fa-ban"></i>Cancelar corrida
                         </button>
@@ -174,8 +174,8 @@ function buildPage(ride, rotaAtual) {
     `;
 }
 
-function openModal(rideId, rideSummary) {
-    removeModal();
+function abrirModal(rideId, rideSummary) {
+    removerModal();
 
     const backdrop = document.createElement('div');
     backdrop.id = MODAL_ID;
@@ -188,9 +188,9 @@ function openModal(rideId, rideSummary) {
     `).join('');
 
     backdrop.innerHTML = `
-        <div class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+        <div class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-titulo">
             <div class="detail-modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <h2 class="detail-modal-title" id="detail-modal-title">Cancelar corrida?</h2>
+            <h2 class="detail-modal-titulo" id="detail-modal-titulo">Cancelar corrida?</h2>
             <p class="detail-modal-desc">${rideSummary}</p>
             <div class="detail-motivos">${motivosHtml}</div>
             <textarea class="detail-motivo-textarea" id="detail-motivo-outro" placeholder="Descreva o motivo..." rows="3" style="display:none"></textarea>
@@ -225,32 +225,32 @@ function openModal(rideId, rideSummary) {
         confirmBtn.disabled = !outroTextarea.value.trim();
     });
 
-    const dismissFn = () => removeModal();
-    const confirmFn = () => {
+    const fnFechar = () => removerModal();
+    const fnConfirmar = () => {
         const motivo = motivoSelecionado === 'Outro motivo'
             ? outroTextarea.value.trim()
             : motivoSelecionado;
-        cancelScheduledRideById(rideId, motivo);
-        removeModal();
+        cancelarCorridaAgendadaPorId(rideId, motivo);
+        removerModal();
         // Força re-renderização mesmo que o hash não mude
         window.dispatchEvent(new HashChangeEvent('hashchange'));
     };
-    const backdropFn = (e) => { if (e.target === backdrop) removeModal(); };
+    const fnFundo = (e) => { if (e.target === backdrop) removerModal(); };
 
-    document.getElementById('detail-modal-dismiss').addEventListener('click', dismissFn);
-    confirmBtn.addEventListener('click', confirmFn);
-    backdrop.addEventListener('click', backdropFn);
+    document.getElementById('detail-modal-dismiss').addEventListener('click', fnFechar);
+    confirmBtn.addEventListener('click', fnConfirmar);
+    backdrop.addEventListener('click', fnFundo);
 
-    modalHandlers = [
-        { el: document.getElementById('detail-modal-dismiss'), fn: dismissFn, event: 'click' },
-        { el: confirmBtn, fn: confirmFn, event: 'click' },
-        { el: backdrop, fn: backdropFn, event: 'click' },
+    handlersModal = [
+        { el: document.getElementById('detail-modal-dismiss'), fn: fnFechar, event: 'click' },
+        { el: confirmBtn, fn: fnConfirmar, event: 'click' },
+        { el: backdrop, fn: fnFundo, event: 'click' },
     ];
 }
 
-function removeModal() {
-    modalHandlers.forEach(({ el, fn, event }) => el?.removeEventListener(event, fn));
-    modalHandlers = [];
+function removerModal() {
+    handlersModal.forEach(({ el, fn, event }) => el?.removeEventListener(event, fn));
+    handlersModal = [];
     const el = document.getElementById(MODAL_ID);
     if (!el) return;
     el.classList.remove('is-visible');
@@ -259,31 +259,31 @@ function removeModal() {
 
 export default function CorridaAgendadaDetalhe(rotaAtual = '/corrida-agendada', query = {}) {
     const id = query.id;
-    const ride = id ? listScheduledRides().find(r => r.id === id) : null;
+    const ride = id ? listarCorridasAgendadas().find(r => r.id === id) : null;
 
     return {
-        html: ride ? buildPage(ride, rotaAtual) : buildNotFound(rotaAtual),
+        html: ride ? montarPagina(ride, rotaAtual) : montarNaoEncontrado(rotaAtual),
         init() {
             if (!ride) return;
 
             const cancelBtn = document.getElementById('detail-cancel-btn');
             if (!cancelBtn) return;
 
-            const stops = getStops(ride);
-            const summary = stops.length >= 2
-                ? `${stops[0]} → ${stops[stops.length - 1]}`
-                : (stops[0] || 'Esta corrida será cancelada.');
+            const paradas = obterParadas(ride);
+            const resumo = paradas.length >= 2
+                ? `${paradas[0]} → ${paradas[paradas.length - 1]}`
+                : (paradas[0] || 'Esta corrida será cancelada.');
 
-            cancelBtnHandler = () => openModal(ride.id, summary);
-            cancelBtn.addEventListener('click', cancelBtnHandler);
+            handlerBtnCancelar = () => abrirModal(ride.id, resumo);
+            cancelBtn.addEventListener('click', handlerBtnCancelar);
         },
         destroy() {
             const cancelBtn = document.getElementById('detail-cancel-btn');
-            if (cancelBtn && cancelBtnHandler) {
-                cancelBtn.removeEventListener('click', cancelBtnHandler);
+            if (cancelBtn && handlerBtnCancelar) {
+                cancelBtn.removeEventListener('click', handlerBtnCancelar);
             }
-            cancelBtnHandler = null;
-            removeModal();
+            handlerBtnCancelar = null;
+            removerModal();
         }
     };
 }

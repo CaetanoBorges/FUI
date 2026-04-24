@@ -1,20 +1,20 @@
 import { scanBilhete } from '../dados/documentScannerApi.js';
-import { getCurrentUser, logoutUser, registerUser } from '../dados/authStorage.js';
+import { obterUsuarioAtual, deslogarUsuario, registrarUsuario } from '../dados/authStorage.js';
 import './Cadastro.css';
 
-function getRoleLabel(role = 'passageiro') {
+function obterRotuloPerfil(role = 'passageiro') {
     return role === 'motorista' ? 'Motorista' : 'Passageiro';
 }
 
-function getValueLabel(value) {
+function obterRotuloValor(value) {
     return value ? value : 'Não identificado automaticamente';
 }
 
-function isImageFile(file) {
+function eArquivoImagem(file) {
     return file instanceof File && file.size > 0 && file.type.startsWith('image/');
 }
 
-function buildScanSummaryMarkup(scanResult) {
+function montarResumoEscaneamento(scanResult) {
     const data = scanResult?.extractedData || {};
     const savedFiles = scanResult?.savedFiles || {};
 
@@ -23,19 +23,19 @@ function buildScanSummaryMarkup(scanResult) {
             <div class="auth-scan-summary-grid">
                 <article class="auth-summary-item">
                     <span class="auth-summary-label">Nome encontrado</span>
-                    <strong class="auth-summary-value">${getValueLabel(data.name)}</strong>
+                    <strong class="auth-summary-value">${obterRotuloValor(data.name)}</strong>
                 </article>
                 <article class="auth-summary-item">
                     <span class="auth-summary-label">Documento</span>
-                    <strong class="auth-summary-value">${getValueLabel(data.documentNumber)}</strong>
+                    <strong class="auth-summary-value">${obterRotuloValor(data.documentNumber)}</strong>
                 </article>
                 <article class="auth-summary-item">
                     <span class="auth-summary-label">Nascimento</span>
-                    <strong class="auth-summary-value">${getValueLabel(data.birthDate)}</strong>
+                    <strong class="auth-summary-value">${obterRotuloValor(data.birthDate)}</strong>
                 </article>
                 <article class="auth-summary-item">
                     <span class="auth-summary-label">Validade</span>
-                    <strong class="auth-summary-value">${getValueLabel(data.validity)}</strong>
+                    <strong class="auth-summary-value">${obterRotuloValor(data.validity)}</strong>
                 </article>
             </div>
             <p class="auth-note">Arquivos salvos no backend: ${savedFiles.frontImage || '-'} e ${savedFiles.backImage || '-'}.</p>
@@ -43,9 +43,9 @@ function buildScanSummaryMarkup(scanResult) {
     `;
 }
 
-function buildLoggedState(user, rotaAtual) {
+function montarEstadoLogado(user, rotaAtual) {
     const firstName = user.name.split(' ')[0];
-    const roleLabel = getRoleLabel(user.role);
+    const roleLabel = obterRotuloPerfil(user.role);
 
     return `
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
@@ -65,7 +65,7 @@ function buildLoggedState(user, rotaAtual) {
     `;
 }
 
-function buildCadastroForm(rotaAtual) {
+function montarFormularioCadastro(rotaAtual) {
     return `
         <main class="auth-shell auth-shell-scrollable cadastro-simple">
             <section class="auth-card">
@@ -166,24 +166,24 @@ function buildCadastroForm(rotaAtual) {
 }
 
 export default function Cadastro(rotaAtual = '/cadastro') {
-    const currentUser = getCurrentUser();
-    let cadastroSubmitHandler = null;
-    let cadastroScanHandler = null;
-    let cadastroLogoutHandler = null;
-    let cadastroBackHandler = null;
-    let cadastroRedirectTimer = null;
-    let latestScanResult = null;
+    const currentUser = obterUsuarioAtual();
+    let cadastroHandlerEnviar = null;
+    let cadastroHandlerEscanear = null;
+    let cadastroHandlerSair = null;
+    let cadastroHandlerVoltar = null;
+    let cadastroTimerRedirecionamento = null;
+    let ultimoResultadoEscaneamento = null;
 
     return {
-        html: currentUser ? buildLoggedState(currentUser, rotaAtual) : buildCadastroForm(rotaAtual),
+        html: currentUser ? montarEstadoLogado(currentUser, rotaAtual) : montarFormularioCadastro(rotaAtual),
         init() {
             const logoutButton = document.getElementById('logout-new-user');
             if (logoutButton) {
-                cadastroLogoutHandler = () => {
-                    logoutUser();
+                cadastroHandlerSair = () => {
+                    deslogarUsuario();
                     window.location.hash = '#/cadastro';
                 };
-                logoutButton.addEventListener('click', cadastroLogoutHandler);
+                logoutButton.addEventListener('click', cadastroHandlerSair);
             }
 
             const form = document.getElementById('cadastro-form');
@@ -236,7 +236,7 @@ export default function Cadastro(rotaAtual = '/cadastro') {
             };
 
             const toggleCadastroForm = enabled => {
-                if (enabled && !latestScanResult?.scanId) {
+                if (enabled && !ultimoResultadoEscaneamento?.scanId) {
                     setWizardStep(1);
                     notifyMissingBilhete();
                     return false;
@@ -267,7 +267,7 @@ export default function Cadastro(rotaAtual = '/cadastro') {
 
             toggleCadastroForm(false);
 
-            cadastroBackHandler = () => {
+            cadastroHandlerVoltar = () => {
                 toggleCadastroForm(false);
                 feedback.className = 'auth-alert';
                 feedback.textContent = '';
@@ -275,10 +275,10 @@ export default function Cadastro(rotaAtual = '/cadastro') {
             };
 
             if (cadastroBackButton) {
-                cadastroBackButton.addEventListener('click', cadastroBackHandler);
+                cadastroBackButton.addEventListener('click', cadastroHandlerVoltar);
             }
 
-            cadastroScanHandler = async event => {
+            cadastroHandlerEscanear = async event => {
                 event.preventDefault();
 
                 const scanFormData = new FormData(scanForm);
@@ -296,7 +296,7 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                     return;
                 }
 
-                if (!isImageFile(frontImage) || !isImageFile(backImage)) {
+                if (!eArquivoImagem(frontImage) || !eArquivoImagem(backImage)) {
                     scanFeedback.classList.add('auth-alert-error');
                     scanFeedback.textContent = 'Os arquivos do bilhete devem ser somente imagens.';
                     return;
@@ -307,18 +307,18 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                 scanFeedback.textContent = 'Processando OCR e salvando arquivos no backend...';
 
                 try {
-                    latestScanResult = await scanBilhete({ frontImage, backImage });
+                    ultimoResultadoEscaneamento = await scanBilhete({ frontImage, backImage });
                     scanFeedback.className = 'auth-alert auth-alert-success';
                     scanFeedback.textContent = 'Bilhete lido com sucesso. Revise os dados abaixo e conclua o cadastro.';
                     scanSummary.hidden = false;
-                    scanSummary.innerHTML = buildScanSummaryMarkup(latestScanResult);
-                    nameInput.value = latestScanResult.extractedData?.name || '';
+                    scanSummary.innerHTML = montarResumoEscaneamento(ultimoResultadoEscaneamento);
+                    nameInput.value = ultimoResultadoEscaneamento.extractedData?.name || '';
                     const movedToStepTwo = toggleCadastroForm(true);
                     if (movedToStepTwo) {
                         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 } catch (error) {
-                    latestScanResult = null;
+                    ultimoResultadoEscaneamento = null;
                     scanSummary.hidden = true;
                     scanSummary.innerHTML = '';
                     toggleCadastroForm(false);
@@ -329,10 +329,10 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                 }
             };
 
-            cadastroSubmitHandler = event => {
+            cadastroHandlerEnviar = event => {
                 event.preventDefault();
 
-                if (!latestScanResult?.scanId) {
+                if (!ultimoResultadoEscaneamento?.scanId) {
                     feedback.className = 'auth-alert auth-alert-error';
                     feedback.textContent = 'Escaneie o bilhete antes de criar a conta.';
                     return;
@@ -348,33 +348,33 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                 feedback.textContent = '';
 
                 try {
-                    const user = registerUser({
+                    const user = registrarUsuario({
                         name,
                         email,
                         password,
                         role,
                         documentData: {
-                            scanId: latestScanResult.scanId,
-                            savedFiles: latestScanResult.savedFiles,
-                            extractedData: latestScanResult.extractedData,
+                            scanId: ultimoResultadoEscaneamento.scanId,
+                            savedFiles: ultimoResultadoEscaneamento.savedFiles,
+                            extractedData: ultimoResultadoEscaneamento.extractedData,
                             createdAt: new Date().toISOString()
                         }
                     });
                     feedback.classList.add('auth-alert-success');
-                    feedback.textContent = `Conta criada com sucesso, ${user.name.split(' ')[0]}! Perfil: ${getRoleLabel(user.role)}.`;
+                    feedback.textContent = `Conta criada com sucesso, ${user.name.split(' ')[0]}! Perfil: ${obterRotuloPerfil(user.role)}.`;
                     form.reset();
                     scanForm.reset();
                     toggleCadastroForm(false);
                     scanSummary.hidden = true;
                     scanSummary.innerHTML = '';
-                    latestScanResult = null;
+                    ultimoResultadoEscaneamento = null;
 
                     const defaultRoleOption = form.querySelector('input[name="role"][value="passageiro"]');
                     if (defaultRoleOption) {
                         defaultRoleOption.checked = true;
                     }
 
-                    cadastroRedirectTimer = window.setTimeout(() => {
+                    cadastroTimerRedirecionamento = window.setTimeout(() => {
                         window.location.hash = '#/';
                     }, 900);
                 } catch (error) {
@@ -383,39 +383,39 @@ export default function Cadastro(rotaAtual = '/cadastro') {
                 }
             };
 
-            scanForm.addEventListener('submit', cadastroScanHandler);
-            form.addEventListener('submit', cadastroSubmitHandler);
+            scanForm.addEventListener('submit', cadastroHandlerEscanear);
+            form.addEventListener('submit', cadastroHandlerEnviar);
             document.dispatchEvent(new CustomEvent('app:ready'));
         },
         destroy() {
-            if (cadastroRedirectTimer) {
-                clearTimeout(cadastroRedirectTimer);
-                cadastroRedirectTimer = null;
+            if (cadastroTimerRedirecionamento) {
+                clearTimeout(cadastroTimerRedirecionamento);
+                cadastroTimerRedirecionamento = null;
             }
 
             const form = document.getElementById('cadastro-form');
-            if (form && cadastroSubmitHandler) {
-                form.removeEventListener('submit', cadastroSubmitHandler);
+            if (form && cadastroHandlerEnviar) {
+                form.removeEventListener('submit', cadastroHandlerEnviar);
             }
-            cadastroSubmitHandler = null;
+            cadastroHandlerEnviar = null;
 
             const scanForm = document.getElementById('cadastro-scan-form');
-            if (scanForm && cadastroScanHandler) {
-                scanForm.removeEventListener('submit', cadastroScanHandler);
+            if (scanForm && cadastroHandlerEscanear) {
+                scanForm.removeEventListener('submit', cadastroHandlerEscanear);
             }
-            cadastroScanHandler = null;
+            cadastroHandlerEscanear = null;
 
             const logoutButton = document.getElementById('logout-new-user');
-            if (logoutButton && cadastroLogoutHandler) {
-                logoutButton.removeEventListener('click', cadastroLogoutHandler);
+            if (logoutButton && cadastroHandlerSair) {
+                logoutButton.removeEventListener('click', cadastroHandlerSair);
             }
-            cadastroLogoutHandler = null;
+            cadastroHandlerSair = null;
 
             const cadastroBackButton = document.getElementById('cadastro-back-button');
-            if (cadastroBackButton && cadastroBackHandler) {
-                cadastroBackButton.removeEventListener('click', cadastroBackHandler);
+            if (cadastroBackButton && cadastroHandlerVoltar) {
+                cadastroBackButton.removeEventListener('click', cadastroHandlerVoltar);
             }
-            cadastroBackHandler = null;
+            cadastroHandlerVoltar = null;
         }
     };
 }

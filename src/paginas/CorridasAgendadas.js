@@ -1,10 +1,10 @@
 import Header from '../componentes/Header.js';
-import { listScheduledRides, cancelScheduledRideById, removeScheduledRideById, seedScheduledRides } from '../dados/corridaStorage.js';
+import { listarCorridasAgendadas, cancelarCorridaAgendadaPorId, removerCorridaAgendadaPorId, inicializarAgendamentos } from '../dados/corridaStorage.js';
 import './CorridasAgendadas.css';
 
-let cancelHandlers = [];
-let viewHandlers = [];
-let confirmModalHandlers = [];
+let handlersCancelar = [];
+let handlersVisualizar = [];
+let handlersModalConfirmar = [];
 
 const MODAL_ID = 'sched-confirm-modal';
 
@@ -17,8 +17,8 @@ const CANCEL_MOTIVOS = [
     'Outro motivo',
 ];
 
-function openCancelModal(rideId, rideSummary) {
-    removeCancelModal();
+function abrirModalCancelamento(rideId, rideSummary) {
+    removerModalCancelamento();
 
     const motivosHtml = CANCEL_MOTIVOS.map(m => `
         <button type="button" class="sched-motivo-row" data-motivo="${m}">
@@ -68,40 +68,40 @@ function openCancelModal(rideId, rideSummary) {
         confirmBtn.disabled = !outroTextarea.value.trim();
     });
 
-    const dismissFn = () => removeCancelModal();
-    const confirmFn = () => {
+    const fnFechar = () => removerModalCancelamento();
+    const fnConfirmar = () => {
         const motivo = motivoSelecionado === 'Outro motivo'
             ? outroTextarea.value.trim()
             : motivoSelecionado;
-        cancelScheduledRideById(rideId, motivo);
-        removeCancelModal();
-        rerenderList();
+        cancelarCorridaAgendadaPorId(rideId, motivo);
+        removerModalCancelamento();
+        rerenderizarLista();
     };
-    const backdropFn = (e) => {
-        if (e.target === backdrop) removeCancelModal();
+    const fnFundo = (e) => {
+        if (e.target === backdrop) removerModalCancelamento();
     };
 
-    document.getElementById('sched-modal-dismiss').addEventListener('click', dismissFn);
-    confirmBtn.addEventListener('click', confirmFn);
-    backdrop.addEventListener('click', backdropFn);
+    document.getElementById('sched-modal-dismiss').addEventListener('click', fnFechar);
+    confirmBtn.addEventListener('click', fnConfirmar);
+    backdrop.addEventListener('click', fnFundo);
 
-    confirmModalHandlers = [
-        { el: document.getElementById('sched-modal-dismiss'), fn: dismissFn, event: 'click' },
-        { el: confirmBtn, fn: confirmFn, event: 'click' },
-        { el: backdrop, fn: backdropFn, event: 'click' },
+    handlersModalConfirmar = [
+        { el: document.getElementById('sched-modal-dismiss'), fn: fnFechar, event: 'click' },
+        { el: confirmBtn, fn: fnConfirmar, event: 'click' },
+        { el: backdrop, fn: fnFundo, event: 'click' },
     ];
 }
 
-function removeCancelModal() {
-    confirmModalHandlers.forEach(({ el, fn, event }) => el?.removeEventListener(event, fn));
-    confirmModalHandlers = [];
+function removerModalCancelamento() {
+    handlersModalConfirmar.forEach(({ el, fn, event }) => el?.removeEventListener(event, fn));
+    handlersModalConfirmar = [];
     const el = document.getElementById(MODAL_ID);
     if (!el) return;
     el.classList.remove('is-visible');
     el.addEventListener('transitionend', () => el.remove(), { once: true });
 }
 
-function formatDatetime(iso) {
+function formatarDataHora(iso) {
     if (!iso) return '—';
     try {
         const d = new Date(iso);
@@ -117,11 +117,11 @@ function formatDatetime(iso) {
     }
 }
 
-function isCancelled(ride) {
+function estaCancelada(ride) {
     return ride.status === 'cancelled';
 }
 
-function getOriginDest(ride) {
+function obterOrigemDestino(ride) {
     if (Array.isArray(ride.stops) && ride.stops.length >= 2) {
         return { origin: ride.stops[0], dest: ride.stops[ride.stops.length - 1] };
     }
@@ -132,31 +132,31 @@ function getOriginDest(ride) {
     return { origin: ride.routeSummary || '—', dest: null };
 }
 
-function renderCard(ride) {
-    const cancelled = isCancelled(ride);
-    const { origin, dest } = getOriginDest(ride);
+function renderizarCard(ride) {
+    const cancelada = estaCancelada(ride);
+    const { origin, dest } = obterOrigemDestino(ride);
     const d = ride.driver;
 
-    const driverBlock = d ? `
+    const blocoMotorista = d ? `
         <div class="sched-driver">
             <div class="sched-driver-avatar">${d.initials || '?'}</div>
             <div class="sched-driver-info">
                 <span class="sched-driver-name">${d.name}</span>
                 <span class="sched-driver-plate">${d.vehicleBrand} · ${d.vehicleColor} · ${d.plate}</span>
             </div>
-            ${!cancelled ? `<a class="sched-driver-call" href="tel:${d.phone}" title="Ligar para ${d.name}"><i class="fa-solid fa-phone"></i></a>` : ''}
+            ${!cancelada ? `<a class="sched-driver-call" href="tel:${d.phone}" title="Ligar para ${d.name}"><i class="fa-solid fa-phone"></i></a>` : ''}
         </div>
     ` : '';
 
     return `
-        <article class="sched-card${cancelled ? ' is-cancelled' : ''}" data-id="${ride.id}">
+        <article class="sched-card${cancelada ? ' is-cancelada' : ''}" data-id="${ride.id}">
             <div class="sched-card-head">
                 <span class="sched-card-datetime">
                     <i class="fa-solid fa-calendar-clock"></i>
-                    ${formatDatetime(ride.scheduledAt)}
+                    ${formatarDataHora(ride.scheduledAt)}
                 </span>
-                <span class="sched-card-badge${cancelled ? ' is-cancelled' : ''}">
-                    ${cancelled ? 'Cancelada' : 'Agendada'}
+                <span class="sched-card-badge${cancelada ? ' is-cancelada' : ''}">
+                    ${cancelada ? 'Cancelada' : 'Agendada'}
                 </span>
             </div>
 
@@ -172,10 +172,10 @@ function renderCard(ride) {
                     ${ride.estimatedPrice ? `<span class="sched-meta-item"><i class="fa-solid fa-money-bill"></i>${ride.estimatedPrice}</span>` : ''}
                 </div>
 
-                ${driverBlock}
+                ${blocoMotorista}
             </div>
 
-            ${!cancelled ? `
+            ${!cancelada ? `
                 <div class="sched-card-foot">
                     <a href="#/corrida-agendada?id=${ride.id}" class="sched-btn sched-btn-secondary" data-view="${ride.id}">
                         <i class="fa-solid fa-eye"></i>Ver corrida
@@ -195,14 +195,14 @@ function renderCard(ride) {
     `;
 }
 
-function buildPage(rides, rotaAtual) {
-    const active = rides.filter(r => !isCancelled(r));
-    const totalLabel = active.length === 1
+function montarPagina(rides, rotaAtual) {
+    const ativas = rides.filter(r => !estaCancelada(r));
+    const rotulTotal = ativas.length === 1
         ? '1 corrida agendada'
-        : `${active.length} corridas agendadas`;
+        : `${ativas.length} corridas agendadas`;
 
-    const content = rides.length
-        ? `<div class="sched-list">${rides.map(renderCard).join('')}</div>`
+    const conteudo = rides.length
+        ? `<div class="sched-list">${rides.map(renderizarCard).join('')}</div>`
         : `
             <div class="sched-empty">
                 <div class="sched-empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
@@ -219,23 +219,23 @@ function buildPage(rides, rotaAtual) {
                 <div class="sched-page-header">
                     <span class="sched-eyebrow">Os meus agendamentos</span>
                     <h1 class="sched-title">Corridas agendadas</h1>
-                    ${rides.length ? `<span class="sched-count">${totalLabel}</span>` : ''}
+                    ${rides.length ? `<span class="sched-count">${rotulTotal}</span>` : ''}
                 </div>
                 <hr class="sched-divider">
-                ${content}
+                ${conteudo}
             </section>
         </main>
     `;
 }
 
-function rerenderList() {
-    const rides = listScheduledRides();
+function rerenderizarLista() {
+    const corridas = listarCorridasAgendadas();
     const listEl = document.querySelector('.sched-list');
     const containerEl = document.querySelector('.sched-container');
 
     if (!containerEl) return;
 
-    if (!rides.length) {
+    if (!corridas.length) {
         containerEl.innerHTML = `
             <div class="sched-page-header">
                 <span class="sched-eyebrow">Os meus agendamentos</span>
@@ -257,26 +257,26 @@ function rerenderList() {
         if (hr) {
             const div = document.createElement('div');
             div.className = 'sched-list';
-            div.innerHTML = rides.map(renderCard).join('');
+            div.innerHTML = corridas.map(renderizarCard).join('');
             hr.after(div);
         }
     } else {
-        listEl.innerHTML = rides.map(renderCard).join('');
+        listEl.innerHTML = corridas.map(renderizarCard).join('');
     }
 
     const countEl = containerEl.querySelector('.sched-count');
-    const active = rides.filter(r => !isCancelled(r));
-    const label = active.length === 1 ? '1 corrida agendada' : `${active.length} corridas agendadas`;
+    const ativas = corridas.filter(r => !estaCancelada(r));
+    const label = ativas.length === 1 ? '1 corrida agendada' : `${ativas.length} corridas agendadas`;
     if (countEl) countEl.textContent = label;
 
-    attachListeners();
+    anexarOuvintes();
 }
 
-function attachListeners() {
-    cancelHandlers.forEach(({ el, fn }) => el.removeEventListener('click', fn));
-    cancelHandlers = [];
-    viewHandlers.forEach(({ el, fn }) => el.removeEventListener('click', fn));
-    viewHandlers = [];
+function anexarOuvintes() {
+    handlersCancelar.forEach(({ el, fn }) => el.removeEventListener('click', fn));
+    handlersCancelar = [];
+    handlersVisualizar.forEach(({ el, fn }) => el.removeEventListener('click', fn));
+    handlersVisualizar = [];
 
     document.querySelectorAll('[data-cancel]').forEach(btn => {
         const fn = () => {
@@ -287,38 +287,38 @@ function attachListeners() {
             const summary = destEl
                 ? `${routeEl?.textContent} → ${destEl?.textContent}`
                 : (routeEl?.textContent || 'Esta corrida será cancelada.');
-            openCancelModal(id, summary);
+            abrirModalCancelamento(id, summary);
         };
         btn.addEventListener('click', fn);
-        cancelHandlers.push({ el: btn, fn });
+        handlersCancelar.push({ el: btn, fn });
     });
 
     document.querySelectorAll('[data-remove]').forEach(btn => {
         const fn = () => {
             const id = btn.dataset.remove;
-            removeScheduledRideById(id);
-            rerenderList();
+            removerCorridaAgendadaPorId(id);
+            rerenderizarLista();
         };
         btn.addEventListener('click', fn);
-        viewHandlers.push({ el: btn, fn });
+        handlersVisualizar.push({ el: btn, fn });
     });
 }
 
 export default function CorridasAgendadas(rotaAtual = '/corridas-agendadas') {
-    seedScheduledRides();
-    const rides = listScheduledRides();
+    inicializarAgendamentos();
+    const corridas = listarCorridasAgendadas();
 
     return {
-        html: buildPage(rides, rotaAtual),
+        html: montarPagina(corridas, rotaAtual),
         init() {
-            attachListeners();
+            anexarOuvintes();
         },
         destroy() {
-            cancelHandlers.forEach(({ el, fn }) => el.removeEventListener('click', fn));
-            viewHandlers.forEach(({ el, fn }) => el.removeEventListener('click', fn));
-            cancelHandlers = [];
-            viewHandlers = [];
-            removeCancelModal();
+            handlersCancelar.forEach(({ el, fn }) => el.removeEventListener('click', fn));
+            handlersVisualizar.forEach(({ el, fn }) => el.removeEventListener('click', fn));
+            handlersCancelar = [];
+            handlersVisualizar = [];
+            removerModalCancelamento();
         }
     };
 }

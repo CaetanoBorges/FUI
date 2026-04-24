@@ -1,7 +1,7 @@
-﻿import rotasEmGrafo from '../dados/rotasEmGrafo.js';
-import { saveActiveRide, saveScheduledRide } from '../dados/corridaStorage.js';
+import rotasEmGrafo from '../dados/rotasEmGrafo.js';
+import { salvarCorridaAtiva, salvarCorridaAgendada } from '../dados/corridaStorage.js';
 
-// ── Ícones customizados para os marcadores do mapa ──────────────────────
+// -- �cones customizados para os marcadores do mapa ----------------------
 function criarIcone(tipo) {
     const estilos = {
         origem:  { cor: '#10b981', icone: 'fa-circle-play' },
@@ -67,30 +67,30 @@ function calcularPreco(feature, veiculo, pessoas) {
     };
 }
 
-const MOCK_DRIVERS = [
+const MOTORISTAS_FICTICIOS = [
     { name: 'Carlos Mendes',    phone: '+244923456789', vehicleBrand: 'Toyota Corolla',    vehicleColor: 'Branco',  plate: 'LD-45-67-BC' },
     { name: 'Manuel da Silva',  phone: '+244912345678', vehicleBrand: 'Hyundai Accent',    vehicleColor: 'Preto',   plate: 'LD-12-34-AB' },
-    { name: 'António Ferreira', phone: '+244934567890', vehicleBrand: 'Honda Civic',       vehicleColor: 'Cinzento',plate: 'BG-78-90-CD' },
-    { name: 'João Baptista',    phone: '+244945678901', vehicleBrand: 'Volkswagen Polo',   vehicleColor: 'Prata',   plate: 'HU-23-45-EF' },
+    { name: 'Ant�nio Ferreira', phone: '+244934567890', vehicleBrand: 'Honda Civic',       vehicleColor: 'Cinzento',plate: 'BG-78-90-CD' },
+    { name: 'Jo�o Baptista',    phone: '+244945678901', vehicleBrand: 'Volkswagen Polo',   vehicleColor: 'Prata',   plate: 'HU-23-45-EF' },
     { name: 'Pedro Domingos',   phone: '+244956789012', vehicleBrand: 'Nissan Tiida',      vehicleColor: 'Azul',    plate: 'LD-99-11-GH' },
     { name: 'Armando Lopes',    phone: '+244967890123', vehicleBrand: 'Kia Morning',       vehicleColor: 'Vermelho',plate: 'LU-56-78-IJ' },
     { name: 'Rui Costa',        phone: '+244978901234', vehicleBrand: 'Mitsubishi Lancer', vehicleColor: 'Branco',  plate: 'MA-34-56-KL' },
 ];
 
-function pickDriver() {
-    const d = MOCK_DRIVERS[Date.now() % MOCK_DRIVERS.length];
+function selecionarMotorista() {
+    const m = MOTORISTAS_FICTICIOS[Date.now() % MOTORISTAS_FICTICIOS.length];
     return {
-        name: d.name,
-        phone: d.phone,
-        vehicleBrand: d.vehicleBrand,
-        vehicleColor: d.vehicleColor,
-        plate: d.plate,
-        initials: d.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+        name: m.name,
+        phone: m.phone,
+        vehicleBrand: m.vehicleBrand,
+        vehicleColor: m.vehicleColor,
+        plate: m.plate,
+        initials: m.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
     };
 }
 
 export default function ChamarCorrida() {
-    let layer = null;
+    let camada = null;
 
     function html() {
         return `
@@ -280,7 +280,7 @@ export default function ChamarCorrida() {
                     box-shadow: 0 1px 6px rgba(0,0,0,0.1);
                 }
 
-                /* TOM SELECT — linhas de rota (sem borda) */
+                /* TOM SELECT � linhas de rota (sem borda) */
                 .cr-sheet .ts-wrapper { min-height: 0; }
                 .cr-rota-row .ts-wrapper { flex: 1; }
 
@@ -296,7 +296,7 @@ export default function ChamarCorrida() {
                     color: #0f1729;
                 }
 
-                /* TOM SELECT — campo de pessoas (com borda) */
+                /* TOM SELECT � campo de pessoas (com borda) */
                 .cr-field .ts-control {
                     border: 1.5px solid rgba(229,231,235,0.75) !important;
                     background: rgba(255,255,255,0.7) !important;
@@ -345,7 +345,7 @@ export default function ChamarCorrida() {
                     line-height: 1.45;
                 }
 
-                /* ROTA SEARCH — opcoes personalizadas */
+                /* ROTA SEARCH � opcoes personalizadas */
                 .cr-ts-rota-opt {
                     display: flex;
                     align-items: center;
@@ -608,7 +608,7 @@ export default function ChamarCorrida() {
 
                     <div class="cr-field">
                         <span class="cr-label">Pesquisar rota</span>
-                        <select id="cr-rota-search" placeholder="Ex: Centro → Aeroporto..."></select>
+                        <select id="cr-rota-search" placeholder="Ex: Centro ? Aeroporto..."></select>
                     </div>
 
                     <div class="cr-field" id="cr-continuar-field" style="display:none">
@@ -629,7 +629,7 @@ export default function ChamarCorrida() {
                     </div>
 
                     <div class="cr-footer">
-                        <button class="cr-btn-back" id="cr-reset-1" title="Limpar seleção"><i class="fa-solid fa-rotate-left"></i></button>
+                        <button class="cr-btn-back" id="cr-reset-1" title="Limpar sele��o"><i class="fa-solid fa-rotate-left"></i></button>
                         <button class="cr-btn-next" id="cr-next-1" disabled>Proximo <i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
@@ -722,10 +722,10 @@ export default function ChamarCorrida() {
         `;
     }
 
-    function init(map) {
-        if (!map || !window.L || !window.TomSelect || !window.flatpickr) return;
+    function inicializar(mapa) {
+        if (!mapa || !window.L || !window.TomSelect || !window.flatpickr) return;
 
-        layer = L.layerGroup().addTo(map);
+        camada = L.layerGroup().addTo(mapa);
 
         let stepAtual    = 1;
         let veiculoAtual = 'carro';
@@ -733,7 +733,7 @@ export default function ChamarCorrida() {
         let fp           = null;
         let pessoasAtual = 1;
         let dataHoraConfirmada = false;
-        let confirmarDatetimeBtn = null;
+        let btnDataHora = null;
         function mostrarNotificacao(msg) {
             const existente = document.getElementById('cr-toast');
             if (existente) existente.remove();
@@ -766,16 +766,16 @@ export default function ChamarCorrida() {
                 document.getElementById(`cr-line-${i}`).classList.toggle('feita', i < stepAtual);
             });
 
-            // Empurra estado no histórico ao avançar (não ao voltar via popstate)
+            // Empurra estado no hist�rico ao avan�ar (n�o ao voltar via popstate)
             if (!viaPopstate && n > 1) {
                 history.pushState({ crStep: n }, '');
             }
         }
 
-        // Estado base no histórico para interceptar o botão voltar no step 1
+        // Estado base no hist�rico para interceptar o bot�o voltar no step 1
         history.pushState({ crStep: 1 }, '');
 
-        function onPopState() {
+        function aoVoltarHistorico() {
             if (stepAtual > 1) {
                 irPara(stepAtual - 1, true);
             } else if (rotaSelecionada !== null) {
@@ -784,20 +784,20 @@ export default function ChamarCorrida() {
                 history.pushState({ crStep: 1 }, '');
             }
         }
-        window.addEventListener('popstate', onPopState);
+        window.addEventListener('popstate', aoVoltarHistorico);
 
-        // ── TomSelect — pesquisa de rota unificada ─────────────────────────
+        // -- TomSelect � pesquisa de rota unificada -------------------------
         let rotaSelecionada = null; // { origem, destino, feature }
         let rotaContinuidade = null;
         let continuarAposDestino = false;
 
-        const next1 = document.getElementById('cr-next-1');
-        const continuarField = document.getElementById('cr-continuar-field');
-        const continuarGroup = document.getElementById('cr-continuar-group');
-        const continuacaoRotaField = document.getElementById('cr-continuacao-rota-field');
-        const continuacaoInfo = document.getElementById('cr-continuacao-info');
+        const proximo1 = document.getElementById('cr-next-1');
+        const campoContinuar = document.getElementById('cr-continuar-field');
+        const grupoContinuar = document.getElementById('cr-continuar-group');
+        const campoRotaContinuacao = document.getElementById('cr-continuacao-rota-field');
+        const infoContinuacao = document.getElementById('cr-continuacao-info');
 
-        // Monta todas as combinações origem → destino do grafo
+        // Monta todas as combina��es origem ? destino do grafo
         const todasRotas = [];
         Object.entries(rotasEmGrafo).forEach(([origem, arestas]) => {
             arestas.forEach((feature) => {
@@ -838,7 +838,7 @@ export default function ChamarCorrida() {
             if (!trechos.length) return '--';
 
             const pontos = [trechos[0].origem, ...trechos.map((trecho) => trecho.destino)];
-            return pontos.join(' → ');
+            return pontos.join(' ? ');
         }
 
         function resetarStep1() {
@@ -846,14 +846,14 @@ export default function ChamarCorrida() {
             rotaContinuidade = null;
             continuarAposDestino = false;
 
-            tsRota.clear(true);
-            tsRotaContinuidade.clear(true);
-            tsRotaContinuidade.clearOptions();
-            tsRotaContinuidade.disable();
+            seletorRota.clear(true);
+            seletorRotaContinuidade.clear(true);
+            seletorRotaContinuidade.clearOptions();
+            seletorRotaContinuidade.disable();
 
-            layer.clearLayers();
+            camada.clearLayers();
 
-            // Reset toggle "Continuar após o destino?" para "Não"
+            // Reset toggle "Continuar ap�s o destino?" para "N�o"
             document.querySelectorAll('#cr-continuar-group button').forEach((btn) => {
                 btn.classList.toggle('cr-on', btn.dataset.c === 'nao');
             });
@@ -866,42 +866,42 @@ export default function ChamarCorrida() {
         function atualizarBotaoStep1() {
             const possuiConectadas = obterRotasConectadas().length > 0;
             const precisaEscolherContinuidade = continuarAposDestino && possuiConectadas;
-            next1.disabled = !rotaSelecionada || (precisaEscolherContinuidade && !rotaContinuidade);
+            proximo1.disabled = !rotaSelecionada || (precisaEscolherContinuidade && !rotaContinuidade);
         }
 
         function atualizarCampoContinuidade() {
             const rotasConectadas = obterRotasConectadas();
 
-            continuarField.style.display = rotaSelecionada ? '' : 'none';
-            continuacaoInfo.style.display = 'none';
-            continuacaoInfo.textContent = '';
+            campoContinuar.style.display = rotaSelecionada ? '' : 'none';
+            infoContinuacao.style.display = 'none';
+            infoContinuacao.textContent = '';
 
             if (!rotaSelecionada || !continuarAposDestino) {
-                continuacaoRotaField.style.display = 'none';
+                campoRotaContinuacao.style.display = 'none';
                 atualizarBotaoStep1();
                 return;
             }
 
             if (!rotasConectadas.length) {
-                continuacaoRotaField.style.display = 'none';
-                continuacaoInfo.style.display = '';
-                continuacaoInfo.textContent = 'Nao existem rotas cadastradas saindo deste destino.';
+                campoRotaContinuacao.style.display = 'none';
+                infoContinuacao.style.display = '';
+                infoContinuacao.textContent = 'Nao existem rotas cadastradas saindo deste destino.';
                 atualizarBotaoStep1();
                 return;
             }
 
-            continuacaoRotaField.style.display = '';
-            continuacaoInfo.style.display = '';
-            continuacaoInfo.textContent = `Mostrando apenas rotas com partida em ${rotaSelecionada.destino}.`;
+            campoRotaContinuacao.style.display = '';
+            infoContinuacao.style.display = '';
+            infoContinuacao.textContent = `Mostrando apenas rotas com partida em ${rotaSelecionada.destino}.`;
             atualizarBotaoStep1();
         }
 
-        const tsRota = new TomSelect('#cr-rota-search', {
+        const seletorRota = new TomSelect('#cr-rota-search', {
             options: todasRotas,
             valueField: 'value',
             labelField: 'value',
             searchField: ['origem', 'destino'],
-            placeholder: 'Ex: Centro → Aeroporto...',
+            placeholder: 'Ex: Centro ? Aeroporto...',
             maxOptions: 20,
             render: {
                 option: renderizarOpcaoRota,
@@ -911,19 +911,19 @@ export default function ChamarCorrida() {
                 const item = todasRotas.find((r) => r.value === value);
                 rotaSelecionada = item || null;
                 rotaContinuidade = null;
-                layer.clearLayers();
-                if (tsRotaContinuidade) {
-                    tsRotaContinuidade.clear(true);
-                    tsRotaContinuidade.clearOptions();
+                camada.clearLayers();
+                if (seletorRotaContinuidade) {
+                    seletorRotaContinuidade.clear(true);
+                    seletorRotaContinuidade.clearOptions();
 
                     const rotasConectadas = obterRotasConectadas();
                     if (rotasConectadas.length) {
-                        tsRotaContinuidade.addOptions(rotasConectadas);
-                        tsRotaContinuidade.enable();
+                        seletorRotaContinuidade.addOptions(rotasConectadas);
+                        seletorRotaContinuidade.enable();
                     } else {
-                        tsRotaContinuidade.disable();
+                        seletorRotaContinuidade.disable();
                     }
-                    tsRotaContinuidade.refreshOptions(false);
+                    seletorRotaContinuidade.refreshOptions(false);
                 }
 
                 atualizarCampoContinuidade();
@@ -931,7 +931,7 @@ export default function ChamarCorrida() {
             },
         });
 
-        const tsRotaContinuidade = new TomSelect('#cr-rota-continuacao', {
+        const seletorRotaContinuidade = new TomSelect('#cr-rota-continuacao', {
             options: [],
             valueField: 'value',
             labelField: 'value',
@@ -950,9 +950,9 @@ export default function ChamarCorrida() {
             },
         });
 
-        tsRotaContinuidade.disable();
+        seletorRotaContinuidade.disable();
 
-        continuarGroup.addEventListener('click', (e) => {
+        grupoContinuar.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-c]');
             if (!btn) return;
 
@@ -961,7 +961,7 @@ export default function ChamarCorrida() {
                 button.classList.toggle('cr-on', button === btn));
 
             rotaContinuidade = null;
-            tsRotaContinuidade.clear(true);
+            seletorRotaContinuidade.clear(true);
             atualizarCampoContinuidade();
             exibirRota();
         });
@@ -994,13 +994,13 @@ export default function ChamarCorrida() {
             onChange() {
                 dataHoraConfirmada = false;
                 atualizarBotaoDataHora();
-                validarStep2();
+                validarPasso2();
             },
         });
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─────────────────────────────────────────────────────────
         // STEP 1
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─────────────────────────────────────────────────────────
         function atualizarBotaoConfirmarCorrida() {
             const btnConfirmar = document.getElementById('cr-confirmar');
             if (!btnConfirmar) return;
@@ -1009,7 +1009,7 @@ export default function ChamarCorrida() {
                 : '<i class="fa-solid fa-check cr-fa"></i>Confirmar corrida';
         }
 
-        function montarPayloadCorrida() {
+        function montarDadosCorrida() {
             if (!rotaSelecionada) return null;
 
             const trechos = obterTrechosSelecionados();
@@ -1033,7 +1033,7 @@ export default function ChamarCorrida() {
                 vehicle: veiculoAtual,
                 vehicleLabel: veiculoAtual === 'moto'
                     ? 'Moto'
-                    : `Carro • ${passageiros} passageiro${passageiros > 1 ? 's' : ''}`,
+                    : `Carro � ${passageiros} passageiro${passageiros > 1 ? 's' : ''}`,
                 estimatedPrice: preco ? `Kz ${preco.total.replace('.', ',')}` : 'Kz --',
                 estimatedDistance: preco ? `${preco.distancia} km` : '-- km',
                 estimatedDuration: preco ? preco.tempo : '--:--:--',
@@ -1045,20 +1045,20 @@ export default function ChamarCorrida() {
                     geometry: trecho.feature?.geometry ?? null,
                     style: trecho.feature?.properties?.style ?? null
                 })),
-                driver: pickDriver()
+                driver: selecionarMotorista()
             };
         }
 
         function confirmarCorridaFinal() {
             exibirRota();
 
-            const payload = montarPayloadCorrida();
-            if (!payload) return;
+            const dadosCorrida = montarDadosCorrida();
+            if (!dadosCorrida) return;
 
-            saveActiveRide(payload);
+            salvarCorridaAtiva(dadosCorrida);
 
-            if (payload.when === 'agendar') {
-                saveScheduledRide(payload);
+            if (dadosCorrida.when === 'agendar') {
+                salvarCorridaAgendada(dadosCorrida);
             }
 
             window.location.hash = '#/aguardando-motorista';
@@ -1068,55 +1068,55 @@ export default function ChamarCorrida() {
 
         document.getElementById('cr-reset-1').addEventListener('click', resetarStep1);
 
-        next1.addEventListener('click', () => irPara(2));
+        proximo1.addEventListener('click', () => irPara(2));
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─────────────────────────────────────────────────────────
         // STEP 2
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        const back2        = document.getElementById('cr-back-2');
-        const next2        = document.getElementById('cr-next-2');
-        const pessoasField = document.getElementById('cr-pessoas-field');
-        const agendarField = document.getElementById('cr-agendar-field');
+        // ─────────────────────────────────────────────────────────
+        const voltar2      = document.getElementById('cr-back-2');
+        const proximo2     = document.getElementById('cr-next-2');
+        const campoPessoas = document.getElementById('cr-pessoas-field');
+        const campoAgendar = document.getElementById('cr-agendar-field');
 
         function montarBotaoNoCalendario() {
             if (!fp || !fp.calendarContainer) return;
 
             const existente = fp.calendarContainer.querySelector('#cr-confirmar-datetime-popup');
             if (existente) {
-                confirmarDatetimeBtn = existente;
+                btnDataHora = existente;
                 return;
             }
 
             const wrap = document.createElement('div');
             wrap.className = 'cr-fp-confirm-wrap';
 
-            confirmarDatetimeBtn = document.createElement('button');
-            confirmarDatetimeBtn.type = 'button';
-            confirmarDatetimeBtn.id = 'cr-confirmar-datetime-popup';
-            confirmarDatetimeBtn.className = 'cr-btn-datahora';
-            confirmarDatetimeBtn.disabled = true;
-            confirmarDatetimeBtn.innerHTML = '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
-            confirmarDatetimeBtn.addEventListener('click', () => {
+            btnDataHora = document.createElement('button');
+            btnDataHora.type = 'button';
+            btnDataHora.id = 'cr-confirmar-datetime-popup';
+            btnDataHora.className = 'cr-btn-datahora';
+            btnDataHora.disabled = true;
+            btnDataHora.innerHTML = '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
+            btnDataHora.addEventListener('click', () => {
                 if (!(fp && fp.selectedDates.length > 0)) return;
                 const selecionada = fp.selectedDates[0];
                 const agora = new Date();
                 const minValido = new Date(agora.getTime() + 60 * 60 * 1000);
                 const maxValido = new Date(agora.getTime() + 2 * 24 * 60 * 60 * 1000);
                 if (selecionada < minValido) {
-                    mostrarNotificacao('O agendamento deve ser com no mínimo 1 hora de antecedência.');
+                    mostrarNotificacao('O agendamento deve ser com no m�nimo 1 hora de anteced�ncia.');
                     return;
                 }
                 if (selecionada > maxValido) {
-                    mostrarNotificacao('O agendamento deve ser para no máximo os próximos 2 dias.');
+                    mostrarNotificacao('O agendamento deve ser para no m�ximo os pr�ximos 2 dias.');
                     return;
                 }
                 dataHoraConfirmada = true;
                 atualizarBotaoDataHora();
-                validarStep2();
+                validarPasso2();
                 fp.close();
             });
 
-            wrap.appendChild(confirmarDatetimeBtn);
+            wrap.appendChild(btnDataHora);
             fp.calendarContainer.appendChild(wrap);
 
             fp.calendarContainer.addEventListener('mousedown', (e) => {
@@ -1126,33 +1126,33 @@ export default function ChamarCorrida() {
                 const todayIdx = allDays.findIndex((d) => d.classList.contains('today'));
                 const diaIdx = allDays.indexOf(dia);
                 if (todayIdx !== -1 && diaIdx < todayIdx) {
-                    mostrarNotificacao('Não é possível agendar para datas passadas.');
+                    mostrarNotificacao('N�o � poss�vel agendar para datas passadas.');
                 } else {
-                    mostrarNotificacao('O agendamento deve ser para no máximo os próximos 2 dias.');
+                    mostrarNotificacao('O agendamento deve ser para no m�ximo os pr�ximos 2 dias.');
                 }
             }, true);
         }
 
         function atualizarBotaoDataHora() {
-            if (!confirmarDatetimeBtn) return;
+            if (!btnDataHora) return;
 
             if (quandoAtual !== 'agendar') {
-                confirmarDatetimeBtn.disabled = true;
-                confirmarDatetimeBtn.classList.remove('confirmado');
-                confirmarDatetimeBtn.innerHTML = '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
+                btnDataHora.disabled = true;
+                btnDataHora.classList.remove('confirmado');
+                btnDataHora.innerHTML = '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
                 return;
             }
 
             const temDataSelecionada = fp && fp.selectedDates.length > 0;
-            confirmarDatetimeBtn.disabled = !temDataSelecionada;
-            confirmarDatetimeBtn.classList.toggle('confirmado', dataHoraConfirmada && temDataSelecionada);
-            confirmarDatetimeBtn.innerHTML = dataHoraConfirmada && temDataSelecionada
+            btnDataHora.disabled = !temDataSelecionada;
+            btnDataHora.classList.toggle('confirmado', dataHoraConfirmada && temDataSelecionada);
+            btnDataHora.innerHTML = dataHoraConfirmada && temDataSelecionada
                 ? '<i class="fa-solid fa-circle-check cr-fa"></i>Data e hora confirmadas'
                 : '<i class="fa-solid fa-clock cr-fa"></i>Confirmar data e hora';
         }
 
-        function validarStep2() {
-            next2.disabled = quandoAtual === 'agendar' && !dataHoraConfirmada;
+        function validarPasso2() {
+            proximo2.disabled = quandoAtual === 'agendar' && !dataHoraConfirmada;
         }
 
         document.getElementById('cr-veiculo-group').addEventListener('click', (e) => {
@@ -1161,7 +1161,7 @@ export default function ChamarCorrida() {
             veiculoAtual = btn.dataset.v;
             document.querySelectorAll('#cr-veiculo-group button').forEach((b) =>
                 b.classList.toggle('cr-on', b === btn));
-            pessoasField.style.display = veiculoAtual === 'moto' ? 'none' : '';
+            campoPessoas.style.display = veiculoAtual === 'moto' ? 'none' : '';
             if (veiculoAtual === 'moto') {
                 pessoasAtual = 1;
                 document.querySelectorAll('#cr-pessoas-group button').forEach((b) =>
@@ -1176,15 +1176,15 @@ export default function ChamarCorrida() {
             dataHoraConfirmada = false;
             document.querySelectorAll('#cr-quando-group button').forEach((b) =>
                 b.classList.toggle('cr-on', b === btn));
-            agendarField.style.display = quandoAtual === 'agendar' ? '' : 'none';
+            campoAgendar.style.display = quandoAtual === 'agendar' ? '' : 'none';
             if (quandoAtual === 'agendar' && fp) fp.open();
             atualizarBotaoDataHora();
-            validarStep2();
+            validarPasso2();
             atualizarBotaoConfirmarCorrida();
         });
 
-        back2.addEventListener('click', () => irPara(1));
-        next2.addEventListener('click', () => {
+        voltar2.addEventListener('click', () => irPara(1));
+        proximo2.addEventListener('click', () => {
             preencherResumo();
             atualizarBotaoConfirmarCorrida();
             irPara(3);
@@ -1193,12 +1193,12 @@ export default function ChamarCorrida() {
         atualizarBotaoDataHora();
         atualizarBotaoConfirmarCorrida();
 
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─────────────────────────────────────────────────────────
         // STEP 3
-        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─────────────────────────────────────────────────────────
         document.getElementById('cr-back-3').addEventListener('click', () => irPara(2));
 
-        // â”€â”€ Preenche o resumo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Preenche o resumo ────────────────────────────────────
         function preencherResumo() {
             if (!rotaSelecionada) return;
             const trechos = obterTrechosSelecionados();
@@ -1209,7 +1209,7 @@ export default function ChamarCorrida() {
             const icon = veiculoAtual === 'moto' ? 'fa-motorcycle' : 'fa-car';
             const desc = veiculoAtual === 'moto'
                 ? 'Moto'
-                : `Carro • ${pessoas} passageiro${pessoas > 1 ? 's' : ''}`;
+                : `Carro � ${pessoas} passageiro${pessoas > 1 ? 's' : ''}`;
             document.getElementById('cr-res-v-icon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
             document.getElementById('cr-res-veiculo').textContent = desc;
 
@@ -1218,7 +1218,7 @@ export default function ChamarCorrida() {
             } else {
                 const val = fp && fp.selectedDates.length > 0
                     ? fp.formatDate(fp.selectedDates[0], 'd/m/Y H:i')
-                    : 'â€”';
+                    : '—';
                 document.getElementById('cr-res-quando').textContent = val;
             }
 
@@ -1230,12 +1230,12 @@ export default function ChamarCorrida() {
             }
         }
 
-        // â”€â”€ Exibe a rota no mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Exibe a rota no mapa ─────────────────────────────────
         function exibirRota() {
             if (!rotaSelecionada) return;
             const trechos = obterTrechosSelecionados();
 
-            layer.clearLayers();
+            camada.clearLayers();
 
             const bounds = L.latLngBounds([]);
 
@@ -1246,40 +1246,40 @@ export default function ChamarCorrida() {
                 const destinoCoord = [coords[coords.length - 1][1], coords[coords.length - 1][0]];
                 const latLngs = coords.map(([lng, lat]) => [lat, lng]);
 
-                L.polyline(latLngs, feature.properties.style || {}).addTo(layer);
+                L.polyline(latLngs, feature.properties.style || {}).addTo(camada);
                 bounds.extend(origemCoord);
                 bounds.extend(destinoCoord);
 
                 if (index === 0) {
                     L.marker(origemCoord, { icon: criarIcone('origem') })
-                        .addTo(layer)
+                        .addTo(camada)
                         .bindPopup(`<b>Origem:</b> ${origem}`);
                 }
 
                 const tipoDestino = index === trechos.length - 1 ? 'destino' : 'parada';
                 const labelDestino = tipoDestino === 'destino' ? 'Destino' : 'Parada';
                 L.marker(destinoCoord, { icon: criarIcone(tipoDestino) })
-                    .addTo(layer)
+                    .addTo(camada)
                     .bindPopup(`<b>${labelDestino}:</b> ${destino}`);
             });
 
             if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [60, 180] });
+                mapa.fitBounds(bounds, { padding: [60, 180] });
             }
         }
 
         return {
-            isRotaAtiva() {
+            estaRotaAtiva() {
                 return rotaSelecionada !== null;
             },
             destroy() {
-                window.removeEventListener('popstate', onPopState);
+                window.removeEventListener('popstate', aoVoltarHistorico);
                 if (fp) fp.destroy();
-                if (tsRota) tsRota.destroy();
-                if (layer) { layer.remove(); layer = null; }
+                if (seletorRota) seletorRota.destroy();
+                if (camada) { camada.remove(); camada = null; }
             }
         };
     }
 
-    return { html: html(), init };
+    return { html: html(), inicializar };
 }

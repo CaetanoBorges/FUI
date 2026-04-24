@@ -1,36 +1,36 @@
-function criarFeature(destino, style, coordinates) {
+function criarElemento(destino, estilo, coordenadas) {
     return {
         type: 'Feature',
         properties: {
             destino,
-            style: { ...style }
+            style: { ...estilo }
         },
         geometry: {
             type: 'LineString',
-            coordinates
+            coordinates: coordenadas
         }
     };
 }
 
 function rotaJaExiste(lista, destino) {
-    return (lista || []).some((feature) => feature.properties.destino === destino);
+    return (lista || []).some((elemento) => elemento.properties.destino === destino);
 }
 
-function adicionarRota(grafo, origem, destino, style, coordinates) {
+function adicionarRota(grafo, origem, destino, estilo, coordenadas) {
     if (!grafo[origem]) {
         grafo[origem] = [];
     }
 
     if (rotaJaExiste(grafo[origem], destino)) return;
 
-    grafo[origem].push(criarFeature(destino, style, coordinates));
+    grafo[origem].push(criarElemento(destino, estilo, coordenadas));
 }
 
 function registrarRotaIdaVolta(grafo, trecho) {
-    const { origem, destino, style, coordinates } = trecho;
+    const { origem, destino, style: estilo, coordinates: coordenadas } = trecho;
 
-    adicionarRota(grafo, origem, destino, style, coordinates);
-    adicionarRota(grafo, destino, origem, style, [...coordinates].reverse());
+    adicionarRota(grafo, origem, destino, estilo, coordenadas);
+    adicionarRota(grafo, destino, origem, estilo, [...coordenadas].reverse());
 }
 
 const trechosBase = [

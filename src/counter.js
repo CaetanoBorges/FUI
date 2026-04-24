@@ -1,9 +1,9 @@
-export function setupCounter(element) {
-  let counter = 0
-  const setCounter = (count) => {
-    counter = count
-    element.innerHTML = `Count is ${counter}`
+export function configurarContador(elemento) {
+  let contador = 0
+  const definirContador = (contagem) => {
+    contador = contagem
+    elemento.innerHTML = `Contagem: ${contador}`
   }
-  element.addEventListener('click', () => setCounter(counter + 1))
-  setCounter(0)
+  elemento.addEventListener('click', () => definirContador(contador + 1))
+  definirContador(0)
 }

@@ -2,7 +2,7 @@ import Header from '../componentes/Header.js';
 import './Sobre.css';
 
 export default function Sobre(rotaAtual = '/sobre') {
-    const randomQuotes = [
+    const citacoesAleatorias = [
         'O sucesso é a soma de pequenos esforços repetidos dia após dia.',
         'A melhor maneira de prever o futuro é criá-lo.',
         'Não espere pela oportunidade perfeita, crie-a.',
@@ -10,17 +10,17 @@ export default function Sobre(rotaAtual = '/sobre') {
         'A programação é como uma arte, exige prática e paixão.'
     ];
 
-    const randomQuote = randomQuotes[Math.floor(Math.random() * randomQuotes.length)];
-    const randomColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+    const citacaoAleatoria = citacoesAleatorias[Math.floor(Math.random() * citacoesAleatorias.length)];
+    const corAleatoria = `hsl(${Math.random() * 360}, 70%, 60%)`;
 
     return `
         ${Header("Sobre Nós", rotaAtual)}
         <main class="sobre-main">
-            <h1 class="sobre-title" style="color: ${randomColor};">
+            <h1 class="sobre-title" style="color: ${corAleatoria};">
                 Bem-vindo à Sobre Nós
             </h1>
             <p class="sobre-quote">
-                "${randomQuote}"
+                "${citacaoAleatoria}"
             </p>
             <div class="sobre-random-box">
                 <h2>Conteúdo Aleatório</h2>

@@ -1,86 +1,86 @@
-const ACTIVE_RIDE_KEY    = 'gyro.ride.active';
-const SCHEDULED_LIST_KEY = 'gyro.rides.scheduled';
-const HISTORY_KEY        = 'gyro.rides.history';
+const CHAVE_CORRIDA_ATIVA    = 'gyro.ride.active';
+const CHAVE_LISTA_AGENDADAS = 'gyro.rides.scheduled';
+const CHAVE_HISTORICO        = 'gyro.rides.history';
 
-function readJson(key, fallback) {
+function lerJson(chave, padrao) {
     try {
-        const value = localStorage.getItem(key);
-        return value ? JSON.parse(value) : fallback;
+        const valor = localStorage.getItem(chave);
+        return valor ? JSON.parse(valor) : padrao;
     } catch {
-        return fallback;
+        return padrao;
     }
 }
 
-function writeJson(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+function escreverJson(chave, valor) {
+    localStorage.setItem(chave, JSON.stringify(valor));
 }
 
-export function getActiveRide() {
-    return readJson(ACTIVE_RIDE_KEY, null);
+export function obterCorridaAtiva() {
+    return lerJson(CHAVE_CORRIDA_ATIVA, null);
 }
 
-export function saveActiveRide(ride) {
-    writeJson(ACTIVE_RIDE_KEY, ride);
-    return ride;
+export function salvarCorridaAtiva(corrida) {
+    escreverJson(CHAVE_CORRIDA_ATIVA, corrida);
+    return corrida;
 }
 
-export function clearActiveRide() {
-    localStorage.removeItem(ACTIVE_RIDE_KEY);
+export function limparCorridaAtiva() {
+    localStorage.removeItem(CHAVE_CORRIDA_ATIVA);
 }
 
-export function listRideHistory() {
-    const list = readJson(HISTORY_KEY, []);
-    return list.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+export function listarHistoricoCorridas() {
+    const lista = lerJson(CHAVE_HISTORICO, []);
+    return lista.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
-export function saveRideToHistory(ride) {
-    const list = readJson(HISTORY_KEY, []).filter(r => r.id !== ride.id);
-    writeJson(HISTORY_KEY, [ride, ...list]);
+export function salvarCorridaNoHistorico(corrida) {
+    const lista = lerJson(CHAVE_HISTORICO, []).filter(c => c.id !== corrida.id);
+    escreverJson(CHAVE_HISTORICO, [corrida, ...lista]);
 }
 
-export function seedRideHistory() {
-    const existing = readJson(HISTORY_KEY, []);
-    if (existing.length > 0) return;
-    writeJson(HISTORY_KEY, SEED_HISTORY);
+export function inicializarHistorico() {
+    const existente = lerJson(CHAVE_HISTORICO, []);
+    if (existente.length > 0) return;
+    escreverJson(CHAVE_HISTORICO, SEED_HISTORICO);
 }
 
-export function listScheduledRides() {
-    const list = readJson(SCHEDULED_LIST_KEY, []);
-    return list.slice().sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt));
+export function listarCorridasAgendadas() {
+    const lista = lerJson(CHAVE_LISTA_AGENDADAS, []);
+    return lista.slice().sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt));
 }
 
-export function saveScheduledRide(ride) {
-    const list = listScheduledRides().filter(r => r.id !== ride.id);
-    writeJson(SCHEDULED_LIST_KEY, [ride, ...list]);
+export function salvarCorridaAgendada(corrida) {
+    const lista = listarCorridasAgendadas().filter(c => c.id !== corrida.id);
+    escreverJson(CHAVE_LISTA_AGENDADAS, [corrida, ...lista]);
 }
 
-export function removeScheduledRideById(id) {
-    const list = listScheduledRides().filter(r => r.id !== id);
-    writeJson(SCHEDULED_LIST_KEY, list);
+export function removerCorridaAgendadaPorId(id) {
+    const lista = listarCorridasAgendadas().filter(c => c.id !== id);
+    escreverJson(CHAVE_LISTA_AGENDADAS, lista);
 }
 
-export function cancelScheduledRideById(id, cancelReason = null) {
-    const list = listScheduledRides().map(r =>
-        r.id === id ? { ...r, status: 'cancelled', ...(cancelReason ? { cancelReason } : {}) } : r
+export function cancelarCorridaAgendadaPorId(id, motivoCancelamento = null) {
+    const lista = listarCorridasAgendadas().map(c =>
+        c.id === id ? { ...c, status: 'cancelled', ...(motivoCancelamento ? { cancelReason: motivoCancelamento } : {}) } : c
     );
-    writeJson(SCHEDULED_LIST_KEY, list);
+    escreverJson(CHAVE_LISTA_AGENDADAS, lista);
 }
 
-function makeDate(daysFromNow, hour = 9, minute = 0) {
+function criarData(diasOffset, hora = 9, minuto = 0) {
     const d = new Date('2026-04-21T00:00:00');
-    d.setDate(d.getDate() + daysFromNow);
-    d.setHours(hour, minute, 0, 0);
+    d.setDate(d.getDate() + diasOffset);
+    d.setHours(hora, minuto, 0, 0);
     return d.toISOString();
 }
 
-const SEED_RIDES = [
+const DADOS_SEMENTE_AGENDADAS = [
     {
         id: 'CR-SEED-001',
-        createdAt: makeDate(-13),
+        createdAt: criarData(-13),
         status: 'active',
         when: 'agendar',
         whenLabel: '22/04/2026 08:30',
-        scheduledAt: makeDate(1, 8, 30),
+        scheduledAt: criarData(1, 8, 30),
         routeSummary: 'Aeroporto Internacional 4 de Fevereiro → Sambizanga',
         passengers: 2,
         vehicle: 'carro',
@@ -93,11 +93,11 @@ const SEED_RIDES = [
     },
     {
         id: 'CR-SEED-002',
-        createdAt: makeDate(-10),
+        createdAt: criarData(-10),
         status: 'active',
         when: 'agendar',
         whenLabel: '24/04/2026 14:00',
-        scheduledAt: makeDate(3, 14, 0),
+        scheduledAt: criarData(3, 14, 0),
         routeSummary: 'Ingombota → Talatona',
         passengers: 1,
         vehicle: 'moto',
@@ -110,11 +110,11 @@ const SEED_RIDES = [
     },
     {
         id: 'CR-SEED-003',
-        createdAt: makeDate(-8),
+        createdAt: criarData(-8),
         status: 'active',
         when: 'agendar',
         whenLabel: '26/04/2026 07:15',
-        scheduledAt: makeDate(5, 7, 15),
+        scheduledAt: criarData(5, 7, 15),
         routeSummary: 'Viana → Miramar → Kilamba',
         passengers: 3,
         vehicle: 'carro',
@@ -127,11 +127,11 @@ const SEED_RIDES = [
     },
     {
         id: 'CR-SEED-004',
-        createdAt: makeDate(-5),
+        createdAt: criarData(-5),
         status: 'active',
         when: 'agendar',
         whenLabel: '28/04/2026 16:45',
-        scheduledAt: makeDate(7, 16, 45),
+        scheduledAt: criarData(7, 16, 45),
         routeSummary: 'Maianga → Cacuaco',
         passengers: 2,
         vehicle: 'carro',
@@ -144,11 +144,11 @@ const SEED_RIDES = [
     },
     {
         id: 'CR-SEED-005',
-        createdAt: makeDate(-3),
+        createdAt: criarData(-3),
         status: 'cancelled',
         when: 'agendar',
         whenLabel: '01/05/2026 10:00',
-        scheduledAt: makeDate(10, 10, 0),
+        scheduledAt: criarData(10, 10, 0),
         routeSummary: 'Rangel → Samba',
         passengers: 1,
         vehicle: 'moto',
@@ -161,11 +161,11 @@ const SEED_RIDES = [
     },
     {
         id: 'CR-SEED-006',
-        createdAt: makeDate(-1),
+        createdAt: criarData(-1),
         status: 'active',
         when: 'agendar',
         whenLabel: '05/05/2026 09:00',
-        scheduledAt: makeDate(14, 9, 0),
+        scheduledAt: criarData(14, 9, 0),
         routeSummary: 'Luanda Sul → Aeroporto Internacional 4 de Fevereiro',
         passengers: 4,
         vehicle: 'carro',
@@ -178,17 +178,17 @@ const SEED_RIDES = [
     }
 ];
 
-function makePast(daysAgo, hour = 10, minute = 0) {
+function criarDataPassada(diasAtras, hora = 10, minuto = 0) {
     const d = new Date('2026-04-21T00:00:00');
-    d.setDate(d.getDate() - daysAgo);
-    d.setHours(hour, minute, 0, 0);
+    d.setDate(d.getDate() - diasAtras);
+    d.setHours(hora, minuto, 0, 0);
     return d.toISOString();
 }
 
-const SEED_HISTORY = [
+const SEED_HISTORICO = [
     {
         id: 'CR-HIST-001',
-        createdAt: makePast(1, 8, 15),
+        createdAt: criarDataPassada(1, 8, 15),
         status: 'completed',
         when: 'agora',
         whenLabel: 'Agora',
@@ -204,7 +204,7 @@ const SEED_HISTORY = [
     },
     {
         id: 'CR-HIST-002',
-        createdAt: makePast(3, 14, 40),
+        createdAt: criarDataPassada(3, 14, 40),
         status: 'completed',
         when: 'agora',
         whenLabel: 'Agora',
@@ -220,7 +220,7 @@ const SEED_HISTORY = [
     },
     {
         id: 'CR-HIST-003',
-        createdAt: makePast(5, 9, 0),
+        createdAt: criarDataPassada(5, 9, 0),
         status: 'cancelled',
         when: 'agora',
         whenLabel: 'Agora',
@@ -236,7 +236,7 @@ const SEED_HISTORY = [
     },
     {
         id: 'CR-HIST-004',
-        createdAt: makePast(8, 17, 20),
+        createdAt: criarDataPassada(8, 17, 20),
         status: 'completed',
         when: 'agora',
         whenLabel: 'Agora',
@@ -252,7 +252,7 @@ const SEED_HISTORY = [
     },
     {
         id: 'CR-HIST-005',
-        createdAt: makePast(12, 11, 5),
+        createdAt: criarDataPassada(12, 11, 5),
         status: 'completed',
         when: 'agora',
         whenLabel: 'Agora',
@@ -268,7 +268,7 @@ const SEED_HISTORY = [
     },
     {
         id: 'CR-HIST-006',
-        createdAt: makePast(20, 7, 45),
+        createdAt: criarDataPassada(20, 7, 45),
         status: 'cancelled',
         when: 'agora',
         whenLabel: 'Agora',
@@ -284,8 +284,8 @@ const SEED_HISTORY = [
     }
 ];
 
-export function seedScheduledRides() {
+export function inicializarAgendamentos() {
     const existing = readJson(SCHEDULED_LIST_KEY, []);
     if (existing.length > 0) return;
-    writeJson(SCHEDULED_LIST_KEY, SEED_RIDES);
+    escreverJson(CHAVE_LISTA_AGENDADAS, DADOS_SEMENTE_AGENDADAS);
 }

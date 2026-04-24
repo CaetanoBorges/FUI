@@ -1,12 +1,12 @@
 import Header from '../componentes/Header.js';
-import { clearActiveRide, getActiveRide, saveActiveRide, saveRideToHistory } from '../dados/corridaStorage.js';
+import { limparCorridaAtiva, obterCorridaAtiva, salvarCorridaAtiva, salvarCorridaNoHistorico } from '../dados/corridaStorage.js';
 import './CorridaAtiva.css';
 
-let rideTickInterval = null; 
-let rideCancelHandler = null;
-let ridePrimaryHandler = null;
-let rideAutoCompleteScheduled = false;
-let rideCancelModalEl = null;
+let intervaloCorrida = null; 
+let handlerCancelar = null;
+let handlerPrincipal = null;
+let concluidaAutomaticamente = false;
+let elementoModalCancelar = null;
 
 const CANCEL_MOTIVOS = [
     'Mudei de planos',
@@ -18,7 +18,7 @@ const CANCEL_MOTIVOS = [
 ];
 
 function abrirModalCancelamento(onConfirm) {
-    if (rideCancelModalEl) return;
+    if (elementoModalCancelar) return;
 
     const motivosHtml = CANCEL_MOTIVOS.map((m, i) => `
         <div class="ride-cancel-motivo" data-idx="${i}" role="radio" aria-checked="false" tabindex="0">
@@ -49,7 +49,7 @@ function abrirModalCancelamento(onConfirm) {
         </div>
     `;
     document.body.appendChild(el);
-    rideCancelModalEl = el;
+    elementoModalCancelar = el;
 
     // Animar entrada
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
@@ -59,7 +59,7 @@ function abrirModalCancelamento(onConfirm) {
 
     function fechar() {
         el.classList.remove('visible');
-        el.addEventListener('transitionend', () => { el.remove(); rideCancelModalEl = null; }, { once: true });
+        el.addEventListener('transitionend', () => { el.remove(); elementoModalCancelar = null; }, { once: true });
     }
 
     function validar() {
@@ -102,7 +102,7 @@ function abrirModalCancelamento(onConfirm) {
     });
 }
 
-const RIDE_FLOW = [
+const FLUXO_CORRIDA = [
     {
         key: 'searching',
         label: 'Procurando motorista',
@@ -133,7 +133,7 @@ const RIDE_FLOW = [
     }
 ];
 
-function formatIso(iso) {
+function formatarIso(iso) {
     if (!iso) return '—';
     try {
         return new Date(iso).toLocaleString('pt-AO', {
@@ -145,7 +145,7 @@ function formatIso(iso) {
     }
 }
 
-function formatRemaining(ms) {
+function formatarRestante(ms) {
     const safe = Math.max(0, ms);
     const totalSeconds = Math.floor(safe / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -154,7 +154,7 @@ function formatRemaining(ms) {
     return [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
 }
 
-function getRideStage(ride) {
+function obterEtapaCorrida(ride) {
     if (!ride) {
         return {
             key: 'missing',
@@ -189,9 +189,9 @@ function getRideStage(ride) {
         return {
             key: 'scheduled',
             label: 'Corrida agendada',
-            description: `A corrida está agendada para ${formatIso(ride.scheduledAt)}.`,
+            description: `A corrida está agendada para ${formatarIso(ride.scheduledAt)}.`,
             progress: 8,
-            progressLabel: `Partida em ${formatRemaining(remaining)}`,
+            progressLabel: `Partida em ${formatarRestante(remaining)}`,
             tone: 'warning',
             isFinished: false,
             isScheduled: true
@@ -200,22 +200,22 @@ function getRideStage(ride) {
 
     const referenceTime = scheduleTime || new Date(ride.createdAt).getTime();
     const elapsed = Math.max(0, now - referenceTime);
-    const totalDuration = RIDE_FLOW.reduce((sum, stage) => sum + stage.durationMs, 0);
+    const totalDuration = FLUXO_CORRIDA.reduce((sum, etapa) => sum + etapa.durationMs, 0);
     let consumed = 0;
 
-    for (const stage of RIDE_FLOW) {
-        const stageEnd = consumed + stage.durationMs;
+    for (const etapa of FLUXO_CORRIDA) {
+        const stageEnd = consumed + etapa.durationMs;
         if (elapsed < stageEnd) {
             const progress = Math.min(98, ((elapsed / totalDuration) * 100));
             return {
-                key: stage.key,
-                label: stage.label,
-                description: stage.description,
+                key: etapa.key,
+                label: etapa.label,
+                description: etapa.description,
                 progress,
-                progressLabel: stage.key === 'in_progress'
+                progressLabel: etapa.key === 'in_progress'
                     ? 'Aproximação ao destino em curso'
                     : 'Atualização automática da simulação',
-                tone: stage.tone,
+                tone: etapa.tone,
                 isFinished: false,
                 isScheduled: false
             };
@@ -235,16 +235,16 @@ function getRideStage(ride) {
     };
 }
 
-function getToneClass(tone = 'default') {
+function obterClasseTom(tone = 'default') {
     if (tone === 'success') return 'is-success';
     if (tone === 'warning') return 'is-warning';
     if (tone === 'danger') return 'is-danger';
     return '';
 }
 
-const STAGES_WITH_DRIVER = new Set(['driver_on_way', 'boarding', 'in_progress', 'completed']);
+const ETAPAS_COM_MOTORISTA = new Set(['driver_on_way', 'boarding', 'in_progress', 'completed']);
 
-function renderDriverCard(ride) {
+function renderizarCardMotorista(ride) {
     const d = ride?.driver;
     if (!d) return '';
 
@@ -263,7 +263,7 @@ function renderDriverCard(ride) {
     `;
 }
 
-function getRouteStops(ride) {
+function obterParadasRota(ride) {
     if (Array.isArray(ride?.stops) && ride.stops.length) {
         return ride.stops;
     }
@@ -275,8 +275,8 @@ function getRouteStops(ride) {
     return [];
 }
 
-function renderMinimalRoute(ride) {
-    const stops = getRouteStops(ride);
+function renderizarRotaMinima(ride) {
+    const stops = obterParadasRota(ride);
     if (!stops.length) {
         return `
             <div class="ride-details">
@@ -312,7 +312,7 @@ function renderMinimalRoute(ride) {
     return `<div class="ride-route">${items}</div>`;
 }
 
-function renderMinimalDetails(ride) {
+function renderizarDetalhesMinimos(ride) {
     const fields = [
         { label: 'Veículo', value: ride.vehicleLabel || '' },
         { label: 'Partida', value: ride.whenLabel || '' },
@@ -333,7 +333,7 @@ function renderMinimalDetails(ride) {
     return `<div class="ride-details">${rows}</div>`;
 }
 
-function buildEmptyState(rotaAtual) {
+function montarEstadoVazio(rotaAtual) {
     return `
         ${Header('Corrida ativa', rotaAtual, true)}
         <main class="ride-shell">
@@ -351,101 +351,101 @@ function buildEmptyState(rotaAtual) {
     `;
 }
 
-function buildRidePage(ride, rotaAtual) {
-    const stage = getRideStage(ride);
-    const toneClass = getToneClass(stage.tone);
+function montarPaginaCorrida(ride, rotaAtual) {
+    const etapa = obterEtapaCorrida(ride);
+    const toneClass = obterClasseTom(etapa.tone);
 
     return `
         ${Header('Corrida ativa', rotaAtual, true)}
         <main class="ride-shell">
             <section class="ride-container">
                 <div class="ride-status-block">
-                    <span class="ride-stage-label">Corrida ativa</span>
-                    <h1 class="ride-stage-title${toneClass ? ' ' + toneClass : ''}" id="ride-stage-title">${stage.label}</h1>
-                    <p class="ride-stage-desc" id="ride-stage-desc">${stage.description}</p>
+                    <span class="ride-etapa-label">Corrida ativa</span>
+                    <h1 class="ride-etapa-title${toneClass ? ' ' + toneClass : ''}" id="ride-etapa-title">${etapa.label}</h1>
+                    <p class="ride-etapa-desc" id="ride-etapa-desc">${etapa.description}</p>
                     <div class="ride-progress">
                         <div class="ride-progress-track">
-                            <div class="ride-progress-bar${toneClass ? ' ' + toneClass : ''}" id="ride-progress-bar" style="width:${stage.progress}%"></div>
+                            <div class="ride-progress-bar${toneClass ? ' ' + toneClass : ''}" id="ride-progress-bar" style="width:${etapa.progress}%"></div>
                         </div>
-                        <span class="ride-progress-meta" id="ride-progress-meta">${stage.progressLabel}</span>
+                        <span class="ride-progress-meta" id="ride-progress-meta">${etapa.progressLabel}</span>
                     </div>
                 </div>
 
-                ${renderDriverCard(ride)}
+                ${renderizarCardMotorista(ride)}
 
                 <hr class="ride-divider">
 
-                ${renderMinimalRoute(ride)}
+                ${renderizarRotaMinima(ride)}
 
                 <hr class="ride-divider">
 
-                ${renderMinimalDetails(ride)}
+                ${renderizarDetalhesMinimos(ride)}
 
                 <div class="ride-actions">
                     <button type="button" class="ride-btn ride-btn-danger" id="ride-cancel-btn"><i class="fa-solid fa-ban"></i>Cancelar</button>
-                    <button type="button" class="ride-btn ride-btn-secondary" id="ride-primary-btn"><i class="fa-solid fa-house"></i>${stage.isFinished ? 'Limpar e voltar' : 'Voltar para Home'}</button>
+                    <button type="button" class="ride-btn ride-btn-secondary" id="ride-primary-btn"><i class="fa-solid fa-house"></i>${etapa.isFinished ? 'Limpar e voltar' : 'Voltar para Home'}</button>
                 </div>
             </section>
         </main>
     `;
 }
 
-function updateRideUi() {
-    const ride = getActiveRide();
+function atualizarInterfaceCorrida() {
+    const corrida = obterCorridaAtiva();
     if (!ride) return;
 
-    const stage = getRideStage(ride);
-    const stageTitle = document.getElementById('ride-stage-title');
-    const stageDesc = document.getElementById('ride-stage-desc');
-    const progressBar = document.getElementById('ride-progress-bar');
-    const progressMeta = document.getElementById('ride-progress-meta');
-    const primaryButton = document.getElementById('ride-primary-btn');
-    const cancelButton = document.getElementById('ride-cancel-btn');
+    const etapa = obterEtapaCorrida(ride);
+    const tituloEtapa = document.getElementById('ride-etapa-title');
+    const descEtapa = document.getElementById('ride-etapa-desc');
+    const barraProgresso = document.getElementById('ride-progress-bar');
+    const metaProgresso = document.getElementById('ride-progress-meta');
+    const botaoPrincipal = document.getElementById('ride-primary-btn');
+    const botaoCancelar = document.getElementById('ride-cancel-btn');
 
-    if (!stageTitle || !progressBar || !progressMeta) return;
+    if (!tituloEtapa || !barraProgresso || !metaProgresso) return;
 
-    const toneClass = getToneClass(stage.tone);
+    const toneClass = obterClasseTom(etapa.tone);
 
-    stageTitle.className = `ride-stage-title${toneClass ? ' ' + toneClass : ''}`;
-    stageTitle.textContent = stage.label;
+    tituloEtapa.className = `ride-etapa-title${toneClass ? ' ' + toneClass : ''}`;
+    tituloEtapa.textContent = etapa.label;
 
-    if (stageDesc) stageDesc.textContent = stage.description;
+    if (descEtapa) descEtapa.textContent = etapa.description;
 
-    progressBar.className = `ride-progress-bar${toneClass ? ' ' + toneClass : ''}`;
-    progressBar.style.width = `${stage.progress}%`;
-    progressMeta.textContent = stage.progressLabel;
+    barraProgresso.className = `ride-progress-bar${toneClass ? ' ' + toneClass : ''}`;
+    barraProgresso.style.width = `${etapa.progress}%`;
+    metaProgresso.textContent = etapa.progressLabel;
 
-    const driverCard = document.getElementById('ride-driver-card');
-    if (driverCard) {
-        if (STAGES_WITH_DRIVER.has(stage.key)) {
-            driverCard.removeAttribute('hidden');
+    const cardMotorista = document.getElementById('ride-driver-card');
+    if (cardMotorista) {
+        if (ETAPAS_COM_MOTORISTA.has(etapa.key)) {
+            cardMotorista.removeAttribute('hidden');
         } else {
-            driverCard.setAttribute('hidden', '');
+            cardMotorista.setAttribute('hidden', '');
         }
     }
 
-    if (primaryButton) {
-        primaryButton.innerHTML = stage.isFinished
+    if (botaoPrincipal) {
+        botaoPrincipal.innerHTML = etapa.isFinished
             ? '<i class="fa-solid fa-house"></i>Limpar e voltar'
             : '<i class="fa-solid fa-house"></i>Voltar para Home';
     }
 
-    if (cancelButton) {
-        cancelButton.disabled = stage.isFinished;
-        cancelButton.style.opacity = stage.isFinished ? '0.4' : '1';
-        cancelButton.style.cursor = stage.isFinished ? 'not-allowed' : 'pointer';
+    if (botaoCancelar) {
+        botaoCancelar.disabled = etapa.isFinished;
+        botaoCancelar.style.opacity = etapa.isFinished ? '0.4' : '1';
+        botaoCancelar.style.cursor = etapa.isFinished ? 'not-allowed' : 'pointer';
     }
 
     // Auto-complete: quando a corrida termina, marca como pendente de avaliação e redireciona
-    if (stage.key === 'completed' && !rideAutoCompleteScheduled) {
-        rideAutoCompleteScheduled = true;
-        if (stageTitle) {
-            stageTitle.textContent = 'Corrida concluída!';
+    if (etapa.key === 'completed' && !concluidaAutomaticamente) {
+        concluidaAutomaticamente = true;
+        if (tituloEtapa) {
+            tituloEtapa.textContent = 'Corrida concluída!';
         }
         setTimeout(() => {
-            const current = getActiveRide();
+            const current = obterCorridaAtiva();
             if (current) {
-                saveActiveRide({ ...current, status: 'completed', _pendingRating: true });
+                salvarCorridaAtiva({ ...current, status: 'completed', _pendingRating: true });
             }
             window.location.hash = '#/avaliacao';
         }, 3000);
@@ -453,72 +453,72 @@ function updateRideUi() {
 }
 
 export default function CorridaAtiva(rotaAtual = '/corrida-ativa') {
-    const ride = getActiveRide();
+    const corrida = obterCorridaAtiva();
 
     return {
-        html: ride ? buildRidePage(ride, rotaAtual) : buildEmptyState(rotaAtual),
+        html: corrida ? montarPaginaCorrida(corrida, rotaAtual) : montarEstadoVazio(rotaAtual),
         init() {
-            if (!ride) return;
+            if (!corrida) return;
 
-            updateRideUi();
-            rideTickInterval = window.setInterval(updateRideUi, 1000);
+            atualizarInterfaceCorrida();
+            intervaloCorrida = window.setInterval(atualizarInterfaceCorrida, 1000);
 
-            const cancelButton = document.getElementById('ride-cancel-btn');
-            const primaryButton = document.getElementById('ride-primary-btn');
+            const botaoCancelar = document.getElementById('ride-cancel-btn');
+            const botaoPrincipal = document.getElementById('ride-primary-btn');
 
-            rideCancelHandler = () => {
-                const currentRide = getActiveRide();
-                if (!currentRide) return;
+            handlerCancelar = () => {
+                const corridaAtual = obterCorridaAtiva();
+                if (!corridaAtual) return;
 
                 abrirModalCancelamento((motivo) => {
-                    const rideAtual = getActiveRide();
-                    if (!rideAtual) return;
-                    saveRideToHistory({ ...rideAtual, status: 'cancelled', cancelReason: motivo });
-                    clearActiveRide();
+                    const corridaAtualLocal = obterCorridaAtiva();
+                    if (!corridaAtualLocal) return;
+                    salvarCorridaNoHistorico({ ...corridaAtualLocal, status: 'cancelled', cancelReason: motivo });
+                    limparCorridaAtiva();
                     window.location.hash = '#/';
                 });
             };
 
-            ridePrimaryHandler = () => {
-                const currentRide = getActiveRide();
-                const stage = getRideStage(currentRide);
-                if (stage.isFinished && currentRide) {
-                    saveActiveRide({ ...currentRide, status: 'completed', _pendingRating: true });
+            handlerPrincipal = () => {
+                const corridaAtual = obterCorridaAtiva();
+                const etapa = obterEtapaCorrida(corridaAtual);
+                if (etapa.isFinished && corridaAtual) {
+                    salvarCorridaAtiva({ ...corridaAtual, status: 'completed', _pendingRating: true });
                     window.location.hash = '#/avaliacao';
                 } else {
                     window.location.hash = '#/';
                 }
             };
 
-            cancelButton?.addEventListener('click', rideCancelHandler);
-            primaryButton?.addEventListener('click', ridePrimaryHandler);
+            botaoCancelar?.addEventListener('click', handlerCancelar);
+            botaoPrincipal?.addEventListener('click', handlerPrincipal);
         },
         destroy() {
-            if (rideCancelModalEl) {
-                rideCancelModalEl.remove();
-                rideCancelModalEl = null;
+            if (elementoModalCancelar) {
+                elementoModalCancelar.remove();
+                elementoModalCancelar = null;
             }
 
-            if (rideTickInterval) {
-                window.clearInterval(rideTickInterval);
-                rideTickInterval = null;
+            if (intervaloCorrida) {
+                window.clearInterval(intervaloCorrida);
+                intervaloCorrida = null;
             }
 
-            rideAutoCompleteScheduled = false;
+            concluidaAutomaticamente = false;
 
-            const cancelButton = document.getElementById('ride-cancel-btn');
-            const primaryButton = document.getElementById('ride-primary-btn');
+            const botaoCancelar = document.getElementById('ride-cancel-btn');
+            const botaoPrincipal = document.getElementById('ride-primary-btn');
 
-            if (cancelButton && rideCancelHandler) {
-                cancelButton.removeEventListener('click', rideCancelHandler);
+            if (botaoCancelar && handlerCancelar) {
+                botaoCancelar.removeEventListener('click', handlerCancelar);
             }
 
-            if (primaryButton && ridePrimaryHandler) {
-                primaryButton.removeEventListener('click', ridePrimaryHandler);
+            if (botaoPrincipal && handlerPrincipal) {
+                botaoPrincipal.removeEventListener('click', handlerPrincipal);
             }
 
-            rideCancelHandler = null;
-            ridePrimaryHandler = null;
+            handlerCancelar = null;
+            handlerPrincipal = null;
         }
     };
 }

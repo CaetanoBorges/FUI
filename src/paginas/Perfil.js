@@ -1,10 +1,10 @@
 import Header from '../componentes/Header.js';
-import { getCurrentUser, deleteUser } from '../dados/authStorage.js';
+import { obterUsuarioAtual, excluirUsuario } from '../dados/authStorage.js';
 import './Perfil.css';
 
 const MODAL_ID = 'perfil-delete-modal';
 
-function getInitials(name = '') {
+function obterIniciais(name = '') {
     return name
         .trim()
         .split(' ')
@@ -14,11 +14,11 @@ function getInitials(name = '') {
         .join('');
 }
 
-function getRoleLabel(role = '') {
+function obterRotuloPerfil(role = '') {
     return role === 'motorista' ? 'Motorista' : 'Passageiro';
 }
 
-function formatDate(iso) {
+function formatarData(iso) {
     if (!iso) return '—';
     try {
         return new Date(iso).toLocaleDateString('pt-AO', {
@@ -29,7 +29,7 @@ function formatDate(iso) {
     }
 }
 
-function buildGuestPage(rotaAtual) {
+function montarPaginaConvidado(rotaAtual) {
     return `
         ${Header('Perfil', rotaAtual, true)}
         <main class="perfil-shell">
@@ -52,9 +52,9 @@ function buildGuestPage(rotaAtual) {
     `;
 }
 
-function buildPage(user, rotaAtual) {
-    const initials = getInitials(user.name);
-    const roleLabel = getRoleLabel(user.role);
+function montarPagina(user, rotaAtual) {
+    const initials = obterIniciais(user.name);
+    const roleLabel = obterRotuloPerfil(user.role);
 
     return `
         ${Header('Perfil', rotaAtual, true)}
@@ -104,7 +104,7 @@ function buildPage(user, rotaAtual) {
                             <div class="perfil-info-icon"><i class="fa-solid fa-cake-candles"></i></div>
                             <div class="perfil-info-content">
                                 <span class="perfil-info-label">Data de nascimento</span>
-                                <span class="perfil-info-value">${user.birthdate ? formatDate(user.birthdate) : '—'}</span>
+                                <span class="perfil-info-value">${user.birthdate ? formatarData(user.birthdate) : '—'}</span>
                             </div>
                         </div>
                         <div class="perfil-info-item">
@@ -139,7 +139,7 @@ function buildPage(user, rotaAtual) {
                             <div class="perfil-info-icon"><i class="fa-solid fa-calendar-plus"></i></div>
                             <div class="perfil-info-content">
                                 <span class="perfil-info-label">Membro desde</span>
-                                <span class="perfil-info-value">${formatDate(user.createdAt ?? null)}</span>
+                                <span class="perfil-info-value">${formatarData(user.createdAt ?? null)}</span>
                             </div>
                         </div>
                     </div>
@@ -192,18 +192,18 @@ function buildPage(user, rotaAtual) {
 }
 
 export default function Perfil(rotaAtual = '/perfil') {
-    const user = getCurrentUser();
-    const html = user ? buildPage(user, rotaAtual) : buildGuestPage(rotaAtual);
+    const user = obterUsuarioAtual();
+    const html = user ? montarPagina(user, rotaAtual) : montarPaginaConvidado(rotaAtual);
 
-    let handlers = [];
+    let ouvintes = [];
 
-    function addHandler(el, event, fn) {
+    function adicionarOuvinte(el, event, fn) {
         if (!el) return;
         el.addEventListener(event, fn);
-        handlers.push({ el, event, fn });
+        ouvintes.push({ el, event, fn });
     }
 
-    function openModal() {
+    function abrirModal() {
         const modal = document.getElementById(MODAL_ID);
         const input = document.getElementById('perfil-confirm-password');
         const error = document.getElementById('perfil-delete-error');
@@ -214,12 +214,12 @@ export default function Perfil(rotaAtual = '/perfil') {
         setTimeout(() => input?.focus(), 60);
     }
 
-    function closeModal() {
+    function fecharModal() {
         const modal = document.getElementById(MODAL_ID);
         if (modal) modal.classList.remove('is-visible');
     }
 
-    function handleConfirmDelete() {
+    function processarExclusao() {
         const input = document.getElementById('perfil-confirm-password');
         const errorEl = document.getElementById('perfil-delete-error');
         const confirmBtn = document.getElementById('perfil-confirm-delete');
@@ -234,7 +234,7 @@ export default function Perfil(rotaAtual = '/perfil') {
         if (confirmBtn) confirmBtn.disabled = true;
 
         try {
-            deleteUser({ email: user.email, password });
+            excluirUsuario({ email: user.email, password });
             window.location.hash = '#/login';
         } catch (err) {
             if (errorEl) { errorEl.textContent = err.message; errorEl.classList.add('is-visible'); }
@@ -243,14 +243,14 @@ export default function Perfil(rotaAtual = '/perfil') {
         }
     }
 
-    function handleBackdropClick(e) {
-        if (e.target.id === MODAL_ID) closeModal();
+    function processarCliqueExterno(e) {
+        if (e.target.id === MODAL_ID) fecharModal();
     }
 
-    function handleKeyDown(e) {
-        if (e.key === 'Escape') closeModal();
+    function processarTecla(e) {
+        if (e.key === 'Escape') fecharModal();
         if (e.key === 'Enter' && document.getElementById(MODAL_ID)?.classList.contains('is-visible')) {
-            handleConfirmDelete();
+            processarExclusao();
         }
     }
 
@@ -259,15 +259,15 @@ export default function Perfil(rotaAtual = '/perfil') {
         init() {
             if (!user) return;
 
-            addHandler(document.getElementById('perfil-open-delete'), 'click', openModal);
-            addHandler(document.getElementById('perfil-cancel-delete'), 'click', closeModal);
-            addHandler(document.getElementById('perfil-confirm-delete'), 'click', handleConfirmDelete);
-            addHandler(document.getElementById(MODAL_ID), 'click', handleBackdropClick);
-            addHandler(document, 'keydown', handleKeyDown);
+            adicionarOuvinte(document.getElementById('perfil-open-delete'), 'click', abrirModal);
+            adicionarOuvinte(document.getElementById('perfil-cancel-delete'), 'click', fecharModal);
+            adicionarOuvinte(document.getElementById('perfil-confirm-delete'), 'click', processarExclusao);
+            adicionarOuvinte(document.getElementById(MODAL_ID), 'click', processarCliqueExterno);
+            adicionarOuvinte(document, 'keydown', processarTecla);
         },
         destroy() {
-            handlers.forEach(({ el, event, fn }) => el?.removeEventListener(event, fn));
-            handlers = [];
+            ouvintes.forEach(({ el, event, fn }) => el?.removeEventListener(event, fn));
+            ouvintes = [];
         }
     };
 }

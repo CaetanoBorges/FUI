@@ -1,5 +1,5 @@
 import Header from '../componentes/Header.js';
-import { getActiveRide, clearActiveRide, saveRideToHistory } from '../dados/corridaStorage.js';
+import { obterCorridaAtiva, limparCorridaAtiva, salvarCorridaNoHistorico } from '../dados/corridaStorage.js';
 import './AvaliacaoCorrida.css';
 
 const TEXTOS_NOTA = ['', 'Péssimo', 'Ruim', 'Regular', 'Bom', 'Excelente'];
@@ -7,12 +7,12 @@ const TEXTOS_NOTA = ['', 'Péssimo', 'Ruim', 'Regular', 'Bom', 'Excelente'];
 const TAGS_POSITIVAS = ['Pontual', 'Educado', 'Carro limpo', 'Boa conversa', 'Direção suave'];
 const TAGS_NEGATIVAS = ['Atrasado', 'Rota errada', 'Carro sujo', 'Condução perigosa', 'Grosseiro'];
 
-let avRide = null;
+let avCorrida = null;
 let avNota = 0;
 let avTagsSelecionadas = new Set();
-let avEnviarHandler = null;
+let avHandlerEnviar = null;
 
-function buildEmptyState(rotaAtual) {
+function montarEstadoVazio(rotaAtual) {
     return `
         ${Header('Avaliação', rotaAtual, true)}
         <main class="av-shell">
@@ -28,8 +28,8 @@ function buildEmptyState(rotaAtual) {
     `;
 }
 
-function buildPage(ride, rotaAtual) {
-    const d = ride.driver || {};
+function montarPagina(corrida, rotaAtual) {
+    const motorista = corrida.driver || {};
     const tagsHtml = [...TAGS_POSITIVAS, ...TAGS_NEGATIVAS].map(t =>
         `<button type="button" class="av-tag" data-tag="${t}">${t}</button>`
     ).join('');
@@ -46,12 +46,12 @@ function buildPage(ride, rotaAtual) {
                     <span class="av-obrigatorio"><i class="fa-solid fa-lock"></i> Avaliação obrigatória</span>
                 </div>
 
-                ${d.name ? `
+                ${motorista.name ? `
                 <div class="av-driver-card">
-                    <div class="av-driver-avatar">${d.initials || '?'}</div>
+                    <div class="av-driver-avatar">${motorista.initials || '?'}</div>
                     <div class="av-driver-info">
-                        <span class="av-driver-name">${d.name}</span>
-                        <span class="av-driver-vehicle">${d.vehicleBrand || ''} · ${d.vehicleColor || ''} · ${d.plate || ''}</span>
+                        <span class="av-driver-name">${motorista.name}</span>
+                        <span class="av-driver-vehicle">${motorista.vehicleBrand || ''} · ${motorista.vehicleColor || ''} · ${motorista.plate || ''}</span>
                     </div>
                 </div>` : ''}
 
@@ -101,17 +101,17 @@ function atualizarEstrelas() {
 }
 
 export default function AvaliacaoCorrida(rotaAtual = '/avaliacao') {
-    avRide = getActiveRide();
+    avCorrida = obterCorridaAtiva();
 
     // Só mostra se a corrida está marcada como "pendente de avaliação"
-    if (!avRide || avRide._pendingRating !== true) {
-        avRide = null;
+    if (!avCorrida || avCorrida._pendingRating !== true) {
+        avCorrida = null;
     }
 
     return {
-        html: avRide ? buildPage(avRide, rotaAtual) : buildEmptyState(rotaAtual),
+        html: avCorrida ? montarPagina(avCorrida, rotaAtual) : montarEstadoVazio(rotaAtual),
         init() {
-            if (!avRide) return;
+            if (!avCorrida) return;
 
             avNota = 0;
             avTagsSelecionadas = new Set();
@@ -124,7 +124,7 @@ export default function AvaliacaoCorrida(rotaAtual = '/avaliacao') {
             };
             window.addEventListener('popstate', onPopState);
             // guarda para remover no destroy
-            avRide.__popstateHandler = onPopState;
+            avCorrida.__popstateHandler = onPopState;
 
             // ── Estrelas ──
             const starsEl = document.getElementById('av-stars');
@@ -172,7 +172,7 @@ export default function AvaliacaoCorrida(rotaAtual = '/avaliacao') {
 
             // ── Enviar ──
             const btnEnviar = document.getElementById('av-btn-enviar');
-            avEnviarHandler = () => {
+            avHandlerEnviar = () => {
                 if (avNota === 0) return;
 
                 btnEnviar.disabled = true;
@@ -181,7 +181,7 @@ export default function AvaliacaoCorrida(rotaAtual = '/avaliacao') {
 
                 const comentario = document.getElementById('av-comentario')?.value?.trim() || '';
                 const rideComAvaliacao = {
-                    ...avRide,
+                    ...avCorrida,
                     _pendingRating: false,
                     status: 'completed',
                     rating: {
@@ -193,24 +193,24 @@ export default function AvaliacaoCorrida(rotaAtual = '/avaliacao') {
                     }
                 };
 
-                saveRideToHistory(rideComAvaliacao);
-                clearActiveRide();
-                avRide = null;
+                salvarCorridaNoHistorico(rideComAvaliacao);
+                limparCorridaAtiva();
+                avCorrida = null;
 
                 setTimeout(() => {
                     window.location.hash = '#/historico';
                 }, 800);
             };
-            btnEnviar?.addEventListener('click', avEnviarHandler);
+            btnEnviar?.addEventListener('click', avHandlerEnviar);
         },
         destroy() {
-            if (avRide?.__popstateHandler) {
-                window.removeEventListener('popstate', avRide.__popstateHandler);
+            if (avCorrida?.__popstateHandler) {
+                window.removeEventListener('popstate', avCorrida.__popstateHandler);
             }
             const btnEnviar = document.getElementById('av-btn-enviar');
-            if (btnEnviar && avEnviarHandler) {
-                btnEnviar.removeEventListener('click', avEnviarHandler);
-                avEnviarHandler = null;
+            if (btnEnviar && avHandlerEnviar) {
+                btnEnviar.removeEventListener('click', avHandlerEnviar);
+                avHandlerEnviar = null;
             }
         }
     };

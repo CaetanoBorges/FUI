@@ -1,16 +1,16 @@
 import './AguardandoMotorista.css';
-import { getActiveRide, clearActiveRide } from '../dados/corridaStorage.js';
+import { obterCorridaAtiva, limparCorridaAtiva } from '../dados/corridaStorage.js';
 import Header from '../componentes/Header.js';
 
 /**
  * Página de espera — mapa em fundo (CartoDB dark tiles), rota desenhada,
- * carros falsos nas proximidades. Após SEARCH_DURATION mostra card do motorista.
+ * carros falsos nas proximidades. Após DURACAO_BUSCA mostra card do motorista.
  */
 
-const SEARCH_DURATION  = 6000;  // ms da fase de busca
-const RIDE_START_DELAY = 5000;  // ms após mostrar motorista → simula "motorista iniciou"
+const DURACAO_BUSCA  = 6000;  // ms da fase de busca
+const ATRASO_INICIO_CORRIDA = 5000;  // ms após mostrar motorista → simula "motorista iniciou"
 const ETA_MINUTOS      = 4;     // minutos simulados para chegada
-const DEFAULT_CENTER  = [-15.7939, -47.8828]; // fallback Brasília Centro
+const CENTRO_PADRAO  = [-15.7939, -47.8828]; // fallback Brasília Centro
 
 // ── Ícones de rota (igual ao ChamarCorrida) ───────────────────────────────
 function criarIconeRota(tipo) {
@@ -31,7 +31,7 @@ function criarIconeCarro(cor = '#1f6feb') {
 }
 
 export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista', query = {}) {
-    const ride = getActiveRide();
+    const corrida = obterCorridaAtiva();
 
     // ── HTML ──────────────────────────────────────────────────────────────
     const html = `
@@ -79,16 +79,16 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
                         </div>
                     </div>
 
-                    ${ride?.driver ? `
+                    ${corrida?.driver ? `
                     <div class="wait-driver-card">
-                        <div class="wait-driver-avatar">${ride.driver.initials ?? '?'}</div>
+                        <div class="wait-driver-avatar">${corrida.driver.initials ?? '?'}</div>
                         <div class="wait-driver-info">
-                            <span class="wait-driver-name">${ride.driver.name ?? '—'}</span>
-                            <span class="wait-driver-vehicle">${ride.driver.vehicleColor ?? ''} ${ride.driver.vehicleBrand ?? ''}</span>
-                            <span class="wait-driver-plate">${ride.driver.plate ?? '—'}</span>
+                            <span class="wait-driver-name">${corrida.driver.name ?? '—'}</span>
+                            <span class="wait-driver-vehicle">${corrida.driver.vehicleColor ?? ''} ${corrida.driver.vehicleBrand ?? ''}</span>
+                            <span class="wait-driver-plate">${corrida.driver.plate ?? '—'}</span>
                         </div>
-                        ${ride.driver.phone ? `
-                        <a href="tel:${ride.driver.phone}" class="wait-driver-call" title="Ligar para motorista">
+                        ${corrida.driver.phone ? `
+                        <a href="tel:${corrida.driver.phone}" class="wait-driver-call" title="Ligar para motorista">
                             <i class="fa-solid fa-phone"></i>
                         </a>` : ''}
                     </div>
@@ -131,34 +131,34 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
     `;
 
     // ── State ───────────────────────────────────────────────────────────
-    let timers      = [];
-    let mapInst     = null;
-    let routeLayer  = null;
-    let fakeLayer   = null;
-    let driverLayer = null;
+    let temporizadores      = [];
+    let instanciaMapa     = null;
+    let camadaRota  = null;
+    let camadaFicticia   = null;
+    let camadaMotorista = null;
 
     // ── Helpers ─────────────────────────────────────────────────────────
-    function qs(sel) { return document.querySelector(sel); }
+    function sel(sel) { return document.querySelector(sel); }
 
     /** Retorna [lat, lng] do primeiro ponto da rota, ou o default. */
-    function getOriginLatLng() {
-        const seg = ride?.segments?.[0];
+    function obterLatLngOrigem() {
+        const seg = corrida?.segments?.[0];
         if (seg?.geometry?.coordinates?.length) {
             const [lng, lat] = seg.geometry.coordinates[0];
             return [lat, lng];
         }
-        return DEFAULT_CENTER;
+        return CENTRO_PADRAO;
     }
 
     // ── Mapa ─────────────────────────────────────────────────────────────
-    function initMap() {
+    function inicializarMapa() {
         if (!window.L) return;
         const mapEl = document.getElementById('wait-map');
         if (!mapEl) return;
 
-        const center = getOriginLatLng();
+        const center = obterLatLngOrigem();
 
-        mapInst = L.map('wait-map', {
+        instanciaMapa = L.map('wait-map', {
             zoomControl: false,
             attributionControl: false,
         }).setView(center, 14);
@@ -167,20 +167,20 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd',
             maxZoom: 19,
-        }).addTo(mapInst);
+        }).addTo(instanciaMapa);
 
-        drawRoute();
-        addFakeDrivers();
+        desenharRota();
+        adicionarMotoristasFantasma();
     }
 
     /** Desenha a polyline + marcadores de origem/destino/parada. */
-    function drawRoute() {
-        if (!mapInst || !ride?.segments?.length) return;
+    function desenharRota() {
+        if (!instanciaMapa || !corrida?.segments?.length) return;
 
-        routeLayer = L.layerGroup().addTo(mapInst);
+        camadaRota = L.layerGroup().addTo(instanciaMapa);
         const bounds = L.latLngBounds([]);
 
-        ride.segments.forEach((seg, index) => {
+        corrida.segments.forEach((seg, index) => {
             if (!seg.geometry?.coordinates?.length) return;
 
             const coords  = seg.geometry.coordinates;
@@ -191,7 +191,7 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
                 color:   seg.style?.color   ?? '#58a6ff',
                 weight:  seg.style?.weight  ?? 5,
                 opacity: seg.style?.opacity ?? 0.85,
-            }).addTo(routeLayer);
+            }).addTo(camadaRota);
 
             const [firstLng, firstLat] = coords[0];
             const [lastLng,  lastLat]  = coords[coords.length - 1];
@@ -200,24 +200,24 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
             bounds.extend([lastLat,  lastLng]);
 
             if (index === 0) {
-                L.marker([firstLat, firstLng], { icon: criarIconeRota('origem') }).addTo(routeLayer);
+                L.marker([firstLat, firstLng], { icon: criarIconeRota('origem') }).addTo(camadaRota);
             }
 
-            const tipo = index === ride.segments.length - 1 ? 'destino' : 'parada';
-            L.marker([lastLat, lastLng], { icon: criarIconeRota(tipo) }).addTo(routeLayer);
+            const tipo = index === corrida.segments.length - 1 ? 'destino' : 'parada';
+            L.marker([lastLat, lastLng], { icon: criarIconeRota(tipo) }).addTo(camadaRota);
         });
 
         // padding[1] reserva espaço para o overlay inferior (~220px)
         if (bounds.isValid()) {
-            mapInst.fitBounds(bounds, { paddingBottomRight: [0, 220], paddingTopLeft: [40, 40], maxZoom: 14 });
+            instanciaMapa.fitBounds(bounds, { paddingBottomRight: [0, 220], paddingTopLeft: [40, 40], maxZoom: 14 });
         }
     }
 
     /** Adiciona 4 marcadores de carro fictícios próximos à rota (fase de busca). */
-    function addFakeDrivers() {
-        if (!mapInst) return;
+    function adicionarMotoristasFantasma() {
+        if (!instanciaMapa) return;
 
-        const [clat, clng] = getOriginLatLng();
+        const [clat, clng] = obterLatLngOrigem();
 
         // Offsets variados para simular carros nas proximidades
         const offsets = [
@@ -227,31 +227,31 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
             [-0.020, -0.018],
         ];
 
-        fakeLayer = L.layerGroup().addTo(mapInst);
+        camadaFicticia = L.layerGroup().addTo(instanciaMapa);
         offsets.forEach(([dlat, dlng]) => {
-            L.marker([clat + dlat, clng + dlng], { icon: criarIconeCarro() }).addTo(fakeLayer);
+            L.marker([clat + dlat, clng + dlng], { icon: criarIconeCarro() }).addTo(camadaFicticia);
         });
     }
 
     /** Volta o marcador do motorista designado próximo à origem. */
-    function addDriverMarker() {
-        if (!mapInst) return;
+    function adicionarMarcadorMotorista() {
+        if (!instanciaMapa) return;
 
-        const [lat, lng] = getOriginLatLng();
-        driverLayer = L.layerGroup().addTo(mapInst);
-        L.marker([lat + 0.006, lng - 0.004], { icon: criarIconeCarro('#3fb950') }).addTo(driverLayer);
+        const [lat, lng] = obterLatLngOrigem();
+        camadaMotorista = L.layerGroup().addTo(instanciaMapa);
+        L.marker([lat + 0.006, lng - 0.004], { icon: criarIconeCarro('#3fb950') }).addTo(camadaMotorista);
     }
 
     // ── Transição das fases ───────────────────────────────────────────────
-    function transitionToFound() {
-        const phaseSearch = qs('#wait-phase-searching');
-        const phaseFound  = qs('#wait-phase-found');
+    function transicionarParaEncontrado() {
+        const phaseSearch = sel('#wait-phase-searching');
+        const phaseFound  = sel('#wait-phase-found');
         if (!phaseSearch || !phaseFound) return;
 
         phaseSearch.style.transition = 'opacity 0.3s ease';
         phaseSearch.style.opacity    = '0';
 
-        timers.push(setTimeout(() => {
+        temporizadores.push(setTimeout(() => {
             phaseSearch.style.display = 'none';
             phaseFound.style.display  = '';
             phaseFound.style.opacity  = '0';
@@ -260,67 +260,67 @@ export default function AguardandoMotorista(rotaAtual = '/aguardando-motorista',
             requestAnimationFrame(() => { phaseFound.style.opacity = '1'; });
 
             // Troca marcadores no mapa
-            if (fakeLayer) { fakeLayer.clearLayers(); }
-            addDriverMarker();
+            if (camadaFicticia) { camadaFicticia.clearLayers(); }
+            adicionarMarcadorMotorista();
 
-            // Simula o motorista iniciando a corrida após RIDE_START_DELAY
-            timers.push(setTimeout(() => {
+            // Simula o motorista iniciando a corrida após ATRASO_INICIO_CORRIDA
+            temporizadores.push(setTimeout(() => {
                 window.location.hash = '#/corrida-ativa';
-            }, RIDE_START_DELAY));
+            }, ATRASO_INICIO_CORRIDA));
         }, 300));
     }
 
     // ── Modal de cancelamento ─────────────────────────────────────────────
-    function openCancelModal() {
-        const backdrop = qs('#wait-cancel-modal');
+    function abrirModalCancelamento() {
+        const backdrop = sel('#wait-cancel-modal');
         if (!backdrop) return;
         backdrop.style.display = 'flex';
         requestAnimationFrame(() => backdrop.classList.add('is-visible'));
     }
 
-    function closeCancelModal() {
-        const backdrop = qs('#wait-cancel-modal');
+    function fecharModalCancelamento() {
+        const backdrop = sel('#wait-cancel-modal');
         if (!backdrop) return;
         backdrop.classList.remove('is-visible');
-        timers.push(setTimeout(() => { backdrop.style.display = 'none'; }, 260));
+        temporizadores.push(setTimeout(() => { backdrop.style.display = 'none'; }, 260));
     }
 
-    function confirmCancel() {
-        clearActiveRide();
+    function confirmarCancelamento() {
+        limparCorridaAtiva();
         window.location.hash = '#/';
     }
 
     // ── init / destroy ────────────────────────────────────────────────────
     function init() {
         // Oculta modal inicialmente
-        const backdrop = qs('#wait-cancel-modal');
+        const backdrop = sel('#wait-cancel-modal');
         if (backdrop) backdrop.style.display = 'none';
 
         // Inicializa mapa
-        initMap();
+        inicializarMapa();
 
-        // Fase 1 → Fase 2 após SEARCH_DURATION
-        timers.push(setTimeout(transitionToFound, SEARCH_DURATION));
+        // Fase 1 → Fase 2 após DURACAO_BUSCA
+        temporizadores.push(setTimeout(transicionarParaEncontrado, DURACAO_BUSCA));
 
         // Botões cancelar
-        qs('#wait-btn-cancel-search')?.addEventListener('click', openCancelModal);
-        qs('#wait-btn-cancel-found')?.addEventListener('click',  openCancelModal);
+        sel('#wait-btn-cancel-search')?.addEventListener('click', abrirModalCancelamento);
+        sel('#wait-btn-cancel-found')?.addEventListener('click',  abrirModalCancelamento);
 
         // Modal: manter / confirmar
-        qs('#wait-modal-keep')?.addEventListener('click', closeCancelModal);
-        qs('#wait-modal-confirm')?.addEventListener('click', confirmCancel);
+        sel('#wait-modal-keep')?.addEventListener('click', fecharModalCancelamento);
+        sel('#wait-modal-confirm')?.addEventListener('click', confirmarCancelamento);
 
         backdrop?.addEventListener('click', (e) => {
-            if (e.target === backdrop) closeCancelModal();
+            if (e.target === backdrop) fecharModalCancelamento();
         });
     }
 
     function destroy() {
-        timers.forEach(clearTimeout);
-        timers = [];
-        if (mapInst) {
-            mapInst.remove();
-            mapInst = null;
+        temporizadores.forEach(clearTimeout);
+        temporizadores = [];
+        if (instanciaMapa) {
+            instanciaMapa.remove();
+            instanciaMapa = null;
         }
     }
 

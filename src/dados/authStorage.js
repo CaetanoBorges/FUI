@@ -1,56 +1,56 @@
-const USERS_KEY = 'gyro.auth.users';
-const SESSION_KEY = 'gyro.auth.current';
+const CHAVE_USUARIOS = 'gyro.auth.users';
+const CHAVE_SESSAO = 'gyro.auth.current';
 
-const DEFAULT_ROLE = 'passageiro';
+const PERFIL_PADRAO = 'passageiro';
 
-function readJson(key, fallback) {
+function lerJson(chave, padrao) {
     try {
-        const value = localStorage.getItem(key);
-        return value ? JSON.parse(value) : fallback;
+        const valor = localStorage.getItem(chave);
+        return valor ? JSON.parse(valor) : padrao;
     } catch {
-        return fallback;
+        return padrao;
     }
 }
 
-function writeJson(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+function escreverJson(chave, valor) {
+    localStorage.setItem(chave, JSON.stringify(valor));
 }
 
-function normalizeEmail(email = '') {
+function normalizarEmail(email = '') {
     return email.trim().toLowerCase();
 }
 
-function normalizeRole(role = '') {
-    return role === 'motorista' ? 'motorista' : DEFAULT_ROLE;
+function normalizarPerfil(perfil = '') {
+    return perfil === 'motorista' ? 'motorista' : PERFIL_PADRAO;
 }
 
-function buildSession(user) {
+function criarSessao(usuario) {
     return {
-        name: user.name,
-        email: user.email,
-        role: normalizeRole(user.role)
+        name: usuario.name,
+        email: usuario.email,
+        role: normalizarPerfil(usuario.role)
     };
 }
 
-export function getUsers() {
-    return readJson(USERS_KEY, []);
+export function obterUsuarios() {
+    return lerJson(CHAVE_USUARIOS, []);
 }
 
-export function getCurrentUser() {
-    return readJson(SESSION_KEY, null);
+export function obterUsuarioAtual() {
+    return lerJson(CHAVE_SESSAO, null);
 }
 
-export function logoutUser() {
-    localStorage.removeItem(SESSION_KEY);
+export function deslogarUsuario() {
+    localStorage.removeItem(CHAVE_SESSAO);
 }
 
-export function registerUser({ name, email, password, role, documentData }) {
-    const normalizedName = name.trim();
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = password.trim();
-    const normalizedRole = normalizeRole(role);
+export function registrarUsuario({ name, email, password, role, documentData }) {
+    const nomeNormalizado = name.trim();
+    const emailNormalizado = normalizarEmail(email);
+    const senhaNormalizada = password.trim();
+    const perfilNormalizado = normalizarPerfil(role);
 
-    if (!normalizedName || !normalizedEmail || !normalizedPassword) {
+    if (!nomeNormalizado || !emailNormalizado || !senhaNormalizada) {
         throw new Error('Preencha todos os campos.');
     }
 
@@ -58,67 +58,67 @@ export function registerUser({ name, email, password, role, documentData }) {
         throw new Error('Escaneie o bilhete antes de concluir o cadastro.');
     }
 
-    if (normalizedPassword.length < 6) {
+    if (senhaNormalizada.length < 6) {
         throw new Error('A senha deve ter pelo menos 6 caracteres.');
     }
 
-    const users = getUsers();
-    const exists = users.some(user => user.email === normalizedEmail);
+    const usuarios = obterUsuarios();
+    const existe = usuarios.some(usuario => usuario.email === emailNormalizado);
 
-    if (exists) {
+    if (existe) {
         throw new Error('Este e-mail já está cadastrado.');
     }
 
-    const user = {
+    const usuario = {
         id: Date.now(),
-        name: normalizedName,
-        email: normalizedEmail,
-        password: normalizedPassword,
-        role: normalizedRole,
+        name: nomeNormalizado,
+        email: emailNormalizado,
+        password: senhaNormalizada,
+        role: perfilNormalizado,
         documentData,
         createdAt: new Date().toISOString()
     };
 
-    users.push(user);
-    writeJson(USERS_KEY, users);
-    writeJson(SESSION_KEY, buildSession(user));
+    usuarios.push(usuario);
+    escreverJson(CHAVE_USUARIOS, usuarios);
+    escreverJson(CHAVE_SESSAO, criarSessao(usuario));
 
-    return buildSession(user);
+    return criarSessao(usuario);
 }
 
-export function authenticateUser({ email, password }) {
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = password.trim();
+export function autenticarUsuario({ email, password }) {
+    const emailNormalizado = normalizarEmail(email);
+    const senhaNormalizada = password.trim();
 
-    if (!normalizedEmail || !normalizedPassword) {
+    if (!emailNormalizado || !senhaNormalizada) {
         throw new Error('Informe e-mail e senha.');
     }
 
-    const user = getUsers().find(
-        savedUser => savedUser.email === normalizedEmail && savedUser.password === normalizedPassword
+    const usuario = obterUsuarios().find(
+        usuarioSalvo => usuarioSalvo.email === emailNormalizado && usuarioSalvo.password === senhaNormalizada
     );
 
-    if (!user) {
+    if (!usuario) {
         throw new Error('E-mail ou senha inválidos.');
     }
 
-    const session = buildSession(user);
-    writeJson(SESSION_KEY, session);
-    return session;
+    const sessao = criarSessao(usuario);
+    escreverJson(CHAVE_SESSAO, sessao);
+    return sessao;
 }
 
-export function deleteUser({ email, password }) {
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = password.trim();
+export function excluirUsuario({ email, password }) {
+    const emailNormalizado = normalizarEmail(email);
+    const senhaNormalizada = password.trim();
 
-    const users = getUsers();
-    const idx = users.findIndex(
-        u => u.email === normalizedEmail && u.password === normalizedPassword
+    const usuarios = obterUsuarios();
+    const indice = usuarios.findIndex(
+        u => u.email === emailNormalizado && u.password === senhaNormalizada
     );
 
-    if (idx === -1) throw new Error('Senha incorreta.');
+    if (indice === -1) throw new Error('Senha incorreta.');
 
-    users.splice(idx, 1);
-    writeJson(USERS_KEY, users);
-    localStorage.removeItem(SESSION_KEY);
+    usuarios.splice(indice, 1);
+    escreverJson(CHAVE_USUARIOS, usuarios);
+    localStorage.removeItem(CHAVE_SESSAO);
 }

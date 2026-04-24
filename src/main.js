@@ -11,10 +11,10 @@ import HistoricoCorridas from './paginas/HistoricoCorridas.js';
 import AvaliacaoCorrida from './paginas/AvaliacaoCorrida.js';
 import Perfil from './paginas/Perfil.js';
 
-const root = document.getElementById('render');
-let currentPageResult = null;
+const raiz = document.getElementById('render');
+let resultadoPaginaAtual = null;
 
-const routes = {
+const rotas = {
 	'/': Home,
 	'/sobre': Sobre,
 	'/login': Login,
@@ -28,61 +28,61 @@ const routes = {
 	'/avaliacao': AvaliacaoCorrida
 };
 
-function getCurrentPath() {
+function obterCaminhoAtual() {
 	const hash = window.location.hash || '#/';
-	const full = hash.replace('#', '');
-	return full.split('?')[0];
+	const completo = hash.replace('#', '');
+	return completo.split('?')[0];
 }
 
-function getCurrentQuery() {
+function obterQueryAtual() {
 	const hash = window.location.hash || '#/';
-	const full = hash.replace('#', '');
-	const qIndex = full.indexOf('?');
-	if (qIndex === -1) return {};
-	return Object.fromEntries(new URLSearchParams(full.slice(qIndex + 1)));
+	const completo = hash.replace('#', '');
+	const indiceQuery = completo.indexOf('?');
+	if (indiceQuery === -1) return {};
+	return Object.fromEntries(new URLSearchParams(completo.slice(indiceQuery + 1)));
 }
 
-function renderRoute() {
-	if (currentPageResult && typeof currentPageResult.destroy === 'function') {
-		currentPageResult.destroy();
+function renderizarRota() {
+	if (resultadoPaginaAtual && typeof resultadoPaginaAtual.destroy === 'function') {
+		resultadoPaginaAtual.destroy();
 	}
 
-	const path = getCurrentPath();
-	const query = getCurrentQuery();
-	const Page = routes[path] || Home;
-	const result = Page(path, query);
-	currentPageResult = result;
+	const caminho = obterCaminhoAtual();
+	const parametros = obterQueryAtual();
+	const Pagina = rotas[caminho] || Home;
+	const resultado = Pagina(caminho, parametros);
+	resultadoPaginaAtual = resultado;
 
-	if (result && typeof result === 'object' && result.html) {
-		root.innerHTML = result.html;
-		result.init?.();
+	if (resultado && typeof resultado === 'object' && resultado.html) {
+		raiz.innerHTML = resultado.html;
+		resultado.init?.();
 	} else {
-		root.innerHTML = result;
+		raiz.innerHTML = resultado;
 	}
 
 	window.scrollTo(0, 0);
 
-	if (path !== '/') {
+	if (caminho !== '/') {
 		document.dispatchEvent(new CustomEvent('app:ready'));
 	}
 }
 
-window.addEventListener('hashchange', renderRoute);
+window.addEventListener('hashchange', renderizarRota);
 window.addEventListener('load', () => {
 	// Prepara as promessas antes do renderRoute para não perder o evento
-	const animDone = new Promise(resolve => setTimeout(resolve, 1600));
-	const pageDone = new Promise(resolve =>
+	const animacaoConcluida = new Promise(resolve => setTimeout(resolve, 1600));
+	const paginaConcluida = new Promise(resolve =>
 		document.addEventListener('app:ready', resolve, { once: true })
 	);
 
 	if (!window.location.hash) {
 		window.location.hash = '#/';
 	}
-	renderRoute();
+	renderizarRota();
 
 	const splash = document.getElementById('splash');
 	if (splash) {
-		Promise.all([animDone, pageDone]).then(() => {
+		Promise.all([animacaoConcluida, paginaConcluida]).then(() => {
 			splash.classList.add('hidden');
 			splash.addEventListener('transitionend', () => splash.remove(), { once: true });
 		});

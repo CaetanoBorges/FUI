@@ -1,9 +1,9 @@
 import Header from '../componentes/Header.js';
-import { listRideHistory, seedRideHistory } from '../dados/corridaStorage.js';
+import { listarHistoricoCorridas, inicializarHistorico } from '../dados/corridaStorage.js';
 import './HistoricoCorridas.css';
 
 /** Formata ISO para data/hora legível */
-function formatDate(iso) {
+function formatarData(iso) {
     if (!iso) return '—';
     try {
         return new Date(iso).toLocaleString('pt-AO', {
@@ -15,13 +15,13 @@ function formatDate(iso) {
     }
 }
 
-function statusLabel(status) {
+function rotuloStatus(status) {
     if (status === 'completed') return 'Concluída';
     if (status === 'cancelled') return 'Cancelada';
     return status;
 }
 
-function renderCard(ride) {
+function renderizarCard(ride) {
     const st = ride.status === 'cancelled' ? 'cancelled' : 'completed';
     const driverHtml = ride.driver ? `
         <div class="hist-card-sep"></div>
@@ -38,13 +38,13 @@ function renderCard(ride) {
                 <div class="hist-card-main">
                     <div class="hist-route" title="${ride.routeSummary ?? ''}">${ride.routeSummary ?? '—'}</div>
                     <div class="hist-meta">
-                        <span><i class="fa-solid fa-circle-play"></i>${formatDate(ride.scheduledAt || ride.createdAt)}</span>
-                        ${ride.status === 'completed' ? `<span><i class="fa-solid fa-flag-checkered"></i>${formatDate(new Date(new Date(ride.scheduledAt || ride.createdAt).getTime() + 70000).toISOString())}</span>` : ''}
+                        <span><i class="fa-solid fa-circle-play"></i>${formatarData(ride.scheduledAt || ride.createdAt)}</span>
+                        ${ride.status === 'completed' ? `<span><i class="fa-solid fa-flag-checkered"></i>${formatarData(new Date(new Date(ride.scheduledAt || ride.createdAt).getTime() + 70000).toISOString())}</span>` : ''}
                         ${ride.estimatedDistance ? `<span><i class="fa-solid fa-location-dot"></i>${ride.estimatedDistance}</span>` : ''}
                         ${ride.estimatedPrice   ? `<span><i class="fa-solid fa-money-bill-wave"></i>${ride.estimatedPrice}</span>` : ''}
                     </div>
                 </div>
-                <span class="hist-badge ${st}">${statusLabel(ride.status)}</span>
+                <span class="hist-badge ${st}">${rotuloStatus(ride.status)}</span>
             </div>
             ${driverHtml}
             <div class="hist-card-footer">
@@ -55,10 +55,10 @@ function renderCard(ride) {
 }
 
 export default function HistoricoCorridas(rotaAtual = '/historico') {
-    seedRideHistory();
+    inicializarHistorico();
 
-    const allRides    = listRideHistory();
-    let activeFilter  = 'all';
+    const todasCorridas    = listarHistoricoCorridas();
+    let filtroAtivo  = 'all';
 
     // ── HTML ─────────────────────────────────────────────────────────────
     const html = `
@@ -68,7 +68,7 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
                 <div class="hist-head">
                     <p class="hist-eyebrow">Gyro — Ride</p>
                     <h1 class="hist-title">Histórico de corridas</h1>
-                    <p class="hist-subtitle">${allRides.length} corrida${allRides.length !== 1 ? 's' : ''} realizadas</p>
+                    <p class="hist-subtitle">${todasCorridas.length} corrida${todasCorridas.length !== 1 ? 's' : ''} realizadas</p>
                 </div>
 
                 <div class="hist-filter-row">
@@ -80,20 +80,20 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
                 <hr class="hist-divider">
 
                 <div class="hist-list" id="hist-list">
-                    ${renderList(allRides)}
+                    ${renderizarLista(todasCorridas)}
                 </div>
             </div>
         </main>
     `;
 
     // ── Helpers ──────────────────────────────────────────────────────────
-    function getFiltered(filter) {
-        if (filter === 'completed') return allRides.filter(r => r.status === 'completed');
-        if (filter === 'cancelled') return allRides.filter(r => r.status === 'cancelled');
-        return allRides;
+    function obterFiltradas(filter) {
+        if (filter === 'completed') return todasCorridas.filter(r => r.status === 'completed');
+        if (filter === 'cancelled') return todasCorridas.filter(r => r.status === 'cancelled');
+        return todasCorridas;
     }
 
-    function renderList(rides) {
+    function renderizarLista(rides) {
         if (!rides.length) {
             return `
                 <div class="hist-empty">
@@ -105,11 +105,11 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
                     </a>
                 </div>`;
         }
-        return rides.map(renderCard).join('');
+        return rides.map(renderizarCard).join('');
     }
 
     // ── Modal de detalhes ─────────────────────────────────────────────────
-    let detailModalEl = null;
+    let elementoModalDetalhe = null;
 
     function horaChegada(ride) {
         if (ride.status !== 'completed') return null;
@@ -121,7 +121,7 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
         return new Date(ref + TOTAL_FLOW_MS).toISOString();
     }
 
-    function buildModal(ride) {
+    function montarModal(ride) {
         const st = ride.status === 'cancelled' ? 'cancelled' : 'completed';
         const d  = ride.driver || {};
 
@@ -148,12 +148,12 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
 
         // ── Dados principais ──
         const rows = [
-            { icon: 'fa-calendar-plus',    label: 'Pedido em',       value: formatDate(ride.createdAt) },
+            { icon: 'fa-calendar-plus',    label: 'Pedido em',       value: formatarData(ride.createdAt) },
             ride.scheduledAt
-                ? { icon: 'fa-calendar-clock', label: 'Agendado para', value: formatDate(ride.scheduledAt) }
+                ? { icon: 'fa-calendar-clock', label: 'Agendado para', value: formatarData(ride.scheduledAt) }
                 : null,
             ride.status === 'completed'
-                ? { icon: 'fa-flag-checkered',  label: 'Chegada',         value: formatDate(horaChegada(ride)) }
+                ? { icon: 'fa-flag-checkered',  label: 'Chegada',         value: formatarData(horaChegada(ride)) }
                 : null,
             ride.estimatedDistance
                 ? { icon: 'fa-location-dot',    label: 'Distância',       value: ride.estimatedDistance }
@@ -214,7 +214,7 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
                             <div class="hm-sheet-eyebrow">Corrida</div>
                             <div class="hm-sheet-route">${ride.routeSummary || '—'}</div>
                         </div>
-                        <span class="hist-badge ${st}">${statusLabel(ride.status)}</span>
+                        <span class="hist-badge ${st}">${rotuloStatus(ride.status)}</span>
                     </div>
 
                     <div class="hm-body">
@@ -238,23 +238,23 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
     }
 
     function abrirModal(ride) {
-        if (detailModalEl) return;
+        if (elementoModalDetalhe) return;
         const wrapper = document.createElement('div');
-        wrapper.innerHTML = buildModal(ride);
-        detailModalEl = wrapper.firstElementChild;
-        document.body.appendChild(detailModalEl);
-        requestAnimationFrame(() => requestAnimationFrame(() => detailModalEl.classList.add('visible')));
+        wrapper.innerHTML = montarModal(ride);
+        elementoModalDetalhe = wrapper.firstElementChild;
+        document.body.appendChild(elementoModalDetalhe);
+        requestAnimationFrame(() => requestAnimationFrame(() => elementoModalDetalhe.classList.add('visible')));
 
         function fechar() {
-            detailModalEl.classList.remove('visible');
-            detailModalEl.addEventListener('transitionend', () => {
-                detailModalEl?.remove();
-                detailModalEl = null;
+            elementoModalDetalhe.classList.remove('visible');
+            elementoModalDetalhe.addEventListener('transitionend', () => {
+                elementoModalDetalhe?.remove();
+                elementoModalDetalhe = null;
             }, { once: true });
         }
 
         document.getElementById('hm-btn-fechar')?.addEventListener('click', fechar);
-        detailModalEl.addEventListener('click', (e) => { if (e.target === detailModalEl) fechar(); });
+        elementoModalDetalhe.addEventListener('click', (e) => { if (e.target === elementoModalDetalhe) fechar(); });
 
         // Fechar com Escape
         const onKey = (e) => { if (e.key === 'Escape') { fechar(); document.removeEventListener('keydown', onKey); } };
@@ -262,48 +262,48 @@ export default function HistoricoCorridas(rotaAtual = '/historico') {
     }
 
     // ── init / destroy ────────────────────────────────────────────────────
-    let filterHandlers = [];
+    let handlersFiltragem = [];
 
     function init() {
-        const filterRow = document.querySelector('.hist-filter-row');
-        if (!filterRow) return;
+        const linhaFiltros = document.querySelector('.hist-filter-row');
+        if (!linhaFiltros) return;
 
-        const handler = (e) => {
+        const handlerFiltro = (e) => {
             const btn = e.target.closest('[data-filter]');
             if (!btn) return;
 
-            activeFilter = btn.dataset.filter;
+            filtroAtivo = btn.dataset.filter;
 
-            filterRow.querySelectorAll('.hist-filter-btn').forEach(b =>
+            linhaFiltros.querySelectorAll('.hist-filter-btn').forEach(b =>
                 b.classList.toggle('is-active', b === btn));
 
             const list = document.getElementById('hist-list');
-            if (list) list.innerHTML = renderList(getFiltered(activeFilter));
+            if (list) list.innerHTML = renderizarLista(obterFiltradas(filtroAtivo));
         };
 
-        filterRow.addEventListener('click', handler);
-        filterHandlers.push(() => filterRow.removeEventListener('click', handler));
+        linhaFiltros.addEventListener('click', handlerFiltro);
+        handlersFiltragem.push(() => linhaFiltros.removeEventListener('click', handlerFiltro));
 
         // Abrir modal ao clicar num card
-        const listEl = document.getElementById('hist-list');
-        const cardHandler = (e) => {
+        const listaEl = document.getElementById('hist-list');
+        const handlerCard = (e) => {
             const card = e.target.closest('.hist-card[data-id]');
             if (!card) return;
             const id = card.dataset.id;
-            const ride = allRides.find(r => r.id === id);
+            const ride = todasCorridas.find(r => r.id === id);
             if (ride) abrirModal(ride);
         };
-        listEl?.addEventListener('click', cardHandler);
-        listEl?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') cardHandler(e); });
-        filterHandlers.push(() => listEl?.removeEventListener('click', cardHandler));
+        listaEl?.addEventListener('click', handlerCard);
+        listaEl?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') handlerCard(e); });
+        handlersFiltragem.push(() => listaEl?.removeEventListener('click', handlerCard));
     }
 
     function destroy() {
-        filterHandlers.forEach(fn => fn());
-        filterHandlers = [];
-        if (detailModalEl) {
-            detailModalEl.remove();
-            detailModalEl = null;
+        handlersFiltragem.forEach(fn => fn());
+        handlersFiltragem = [];
+        if (elementoModalDetalhe) {
+            elementoModalDetalhe.remove();
+            elementoModalDetalhe = null;
         }
     }
 

@@ -1,22 +1,22 @@
 import Header from '../componentes/Header.js';
 import ChamarCorrida from '../componentes/ChamarCorrida.js';
-import { getActiveRide } from '../dados/corridaStorage.js';
+import { obterCorridaAtiva } from '../dados/corridaStorage.js';
 import './Home.css';
 
-let hmMap = null;
-let hmMarker = null;
-let hmGeoWatchId = null;
-let hmMapLoaderEl = null;
-let hmCorridaComponent = null;
-let hmCorridaLifecycle = null;
-let hmPrimeiroFix = true;
-let hmCrResetHandler = null;
-let hmActiveRideLayer = null;
-let hmDriverMarker = null;
-let hmDriverTickInterval = null;
-const HM_FALLBACK_CENTER = [-14.235, -51.925];
-let hmMapState = {
-    center: HM_FALLBACK_CENTER,
+let hmMapa = null;
+let hmMarcador = null;
+let hmIdGeolocalizacao = null;
+let hmElementoCarregamento = null;
+let hmComponenteCorrida = null;
+let hmCicloVidaCorrida = null;
+let hmPrimeiraLocalizacao = true;
+let hmHandlerReset = null;
+let hmCamadaCorridaAtiva = null;
+let hmMarcadorMotorista = null;
+let hmIntervaloMotorista = null;
+const HM_CENTRO_PADRAO = [-14.235, -51.925];
+let hmEstadoMapa = {
+    center: HM_CENTRO_PADRAO,
     zoom: 13
 };
 
@@ -30,7 +30,7 @@ function carregarCentroInicialAtual() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                hmMapState.center = [latitude, longitude];
+                hmEstadoMapa.center = [latitude, longitude];
                 resolve();
             },
             () => resolve(),
@@ -115,14 +115,14 @@ function iconeMotorista() {
 }
 
 function iniciarMapaCorridaAtiva(ride) {
-    if (!hmMap || !window.L) return;
-    hmActiveRideLayer = L.layerGroup().addTo(hmMap);
+    if (!hmMapa || !window.L) return;
+    hmCamadaCorridaAtiva = L.layerGroup().addTo(hmMapa);
     const allLatLngs = [];
     (ride.segments || []).forEach((seg, idx) => {
         if (!seg.geometry?.coordinates) return;
         const coords = seg.geometry.coordinates;
         const latLngs = coords.map(([lng, lat]) => [lat, lng]);
-        L.polyline(latLngs, seg.style || { color: '#3b82f6', weight: 5, opacity: 0.85 }).addTo(hmActiveRideLayer);
+        L.polyline(latLngs, seg.style || { color: '#3b82f6', weight: 5, opacity: 0.85 }).addTo(hmCamadaCorridaAtiva);
         const origemCoord = [coords[0][1], coords[0][0]];
         const destCoord   = [coords[coords.length - 1][1], coords[coords.length - 1][0]];
         if (idx === 0) {
@@ -130,7 +130,7 @@ function iniciarMapaCorridaAtiva(ride) {
                 html: `<div class="cr-map-marker" style="background:#10b981"><i class="fa-solid fa-circle-play"></i></div>`,
                 className: 'cr-map-marker-wrap', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -18],
             });
-            L.marker(origemCoord, { icon: ico }).addTo(hmActiveRideLayer).bindPopup(`<b>Origem:</b> ${seg.origem}`);
+            L.marker(origemCoord, { icon: ico }).addTo(hmCamadaCorridaAtiva).bindPopup(`<b>Origem:</b> ${seg.origem}`);
             allLatLngs.push(origemCoord);
         }
         const isLast = idx === (ride.segments.length - 1);
@@ -138,37 +138,37 @@ function iniciarMapaCorridaAtiva(ride) {
             html: `<div class="cr-map-marker" style="background:${isLast ? '#e63946' : '#f59e0b'}"><i class="fa-solid ${isLast ? 'fa-flag-checkered' : 'fa-circle-dot'}"></i></div>`,
             className: 'cr-map-marker-wrap', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -18],
         });
-        L.marker(destCoord, { icon: icoD }).addTo(hmActiveRideLayer).bindPopup(`<b>${isLast ? 'Destino' : 'Parada'}:</b> ${seg.destino}`);
+        L.marker(destCoord, { icon: icoD }).addTo(hmCamadaCorridaAtiva).bindPopup(`<b>${isLast ? 'Destino' : 'Parada'}:</b> ${seg.destino}`);
         allLatLngs.push(destCoord);
     });
     if (allLatLngs.length) {
         const bounds = L.latLngBounds(allLatLngs);
-        if (bounds.isValid()) hmMap.fitBounds(bounds, { padding: [60, 80] });
+        if (bounds.isValid()) hmMapa.fitBounds(bounds, { padding: [60, 80] });
     }
     const driverPos = posicaoMotorista(ride);
     if (driverPos) {
-        hmDriverMarker = L.marker(driverPos, { icon: iconeMotorista() })
-            .addTo(hmMap)
+        hmMarcadorMotorista = L.marker(driverPos, { icon: iconeMotorista() })
+            .addTo(hmMapa)
             .bindPopup(`<b>${ride.driver?.name || 'Motorista'}</b><br>${ride.driver?.vehicleBrand || ''}`);
     }
-    hmDriverTickInterval = setInterval(() => {
+    hmIntervaloMotorista = setInterval(() => {
         const pos = posicaoMotorista(ride);
         if (!pos) return;
-        if (!hmDriverMarker) {
-            hmDriverMarker = L.marker(pos, { icon: iconeMotorista() })
-                .addTo(hmMap)
+        if (!hmMarcadorMotorista) {
+            hmMarcadorMotorista = L.marker(pos, { icon: iconeMotorista() })
+                .addTo(hmMapa)
                 .bindPopup(`<b>${ride.driver?.name || 'Motorista'}</b><br>${ride.driver?.vehicleBrand || ''}`);
         } else {
-            hmDriverMarker.setLatLng(pos);
+            hmMarcadorMotorista.setLatLng(pos);
         }
     }, 1000);
 }
 
 function html(rotaAtual = '/') {
-    const corridaAtiva = getActiveRide();
+    const corridaAtiva = obterCorridaAtiva();
 
     if (corridaAtiva) {
-        hmCorridaComponent = null;
+        hmComponenteCorrida = null;
         return `
             ${Header('Home', rotaAtual)}
             <main class="home-main">
@@ -191,7 +191,7 @@ function html(rotaAtual = '/') {
         `;
     }
 
-    hmCorridaComponent = ChamarCorrida();
+    hmComponenteCorrida = ChamarCorrida();
     return `
         ${Header("Home", rotaAtual)}
         <main class="home-main">
@@ -200,77 +200,77 @@ function html(rotaAtual = '/') {
                 <div id="loader-overlay" class="loader-overlay">
                     <div id="loader-spinner" class="loader-spinner"></div>
                 </div>
-                ${hmCorridaComponent.html}
+                ${hmComponenteCorrida.html}
             </div>
         </main>
     `;
 }
 
-function setMapLoader(visible) {
-    if (!hmMapLoaderEl) return;
-    hmMapLoaderEl.style.opacity = visible ? '1' : '0';
-    hmMapLoaderEl.style.pointerEvents = visible ? 'all' : 'none';
+function definirCarregamentoMapa(visible) {
+    if (!hmElementoCarregamento) return;
+    hmElementoCarregamento.style.opacity = visible ? '1' : '0';
+    hmElementoCarregamento.style.pointerEvents = visible ? 'all' : 'none';
 }
 
 async function init() {
     const mapEl = document.getElementById('home-map');
-    hmMapLoaderEl = document.getElementById('loader-overlay');
-    if (!mapEl || !window.L || hmMap) return;
+    hmElementoCarregamento = document.getElementById('loader-overlay');
+    if (!mapEl || !window.L || hmMapa) return;
 
     await carregarCentroInicialAtual();
-    if (hmMap) return;
+    if (hmMapa) return;
 
-    hmMap = L.map('home-map').setView(hmMapState.center, hmMapState.zoom);
+    hmMapa = L.map('home-map').setView(hmEstadoMapa.center, hmEstadoMapa.zoom);
 
     const hmTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     });
 
-    setMapLoader(true);
-    hmTileLayer.on('loading', () => setMapLoader(true));
+    definirCarregamentoMapa(true);
+    hmTileLayer.on('loading', () => definirCarregamentoMapa(true));
     hmTileLayer.on('load', () => {
-        setMapLoader(false);
+        definirCarregamentoMapa(false);
         document.dispatchEvent(new CustomEvent('app:ready'));
     });
-    hmTileLayer.addTo(hmMap);
+    hmTileLayer.addTo(hmMapa);
 
     // Fallback: garante que o splash some mesmo se os tiles demorarem
     setTimeout(() => document.dispatchEvent(new CustomEvent('app:ready')), 5000);
 
-    const corridaAtiva = getActiveRide();
+    const corridaAtiva = obterCorridaAtiva();
     if (corridaAtiva) {
         iniciarMapaCorridaAtiva(corridaAtiva);
     } else {
-        hmCorridaLifecycle = hmCorridaComponent?.init?.(hmMap) || null;
+        hmCicloVidaCorrida = hmComponenteCorrida?.inicializar?.(hmMapa) || null;
 
-        hmCrResetHandler = () => {
-            hmPrimeiroFix = true;
-            if (hmMap) {
-                const pos = hmMarker ? hmMarker.getLatLng() : null;
-                const center = pos ? [pos.lat, pos.lng] : hmMapState.center;
-                hmMap.setView(center, hmMap.getZoom(), { animate: true });
+        hmHandlerReset = () => {
+            hmPrimeiraLocalizacao = true;
+            if (hmMapa) {
+                const pos = hmMarcador ? hmMarcador.getLatLng() : null;
+                const center = pos ? [pos.lat, pos.lng] : hmEstadoMapa.center;
+                hmMapa.setView(center, hmMapa.getZoom(), { animate: true });
             }
         };
-        document.addEventListener('cr:reset', hmCrResetHandler);
+        document.addEventListener('cr:reset', hmHandlerReset);
     }
 
-    hmMap.on('moveend zoomend', () => {
-        const center = hmMap.getCenter();
-        hmMapState = {
+    hmMapa.on('moveend zoomend', () => {
+        const center = hmMapa.getCenter();
+        hmEstadoMapa = {
             center: [center.lat, center.lng],
-            zoom: hmMap.getZoom()
+            zoom: hmMapa.getZoom()
         };
     });
 
     if (navigator.geolocation) {
-        hmGeoWatchId = navigator.geolocation.watchPosition(
+        hmIdGeolocalizacao = navigator.geolocation.watchPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                hmMapState.center = [latitude, longitude];
+                hmEstadoMapa.center = [latitude, longitude];
 
                 const userLatLng = [latitude, longitude];
 
-                if (!hmMarker) {
+                if (!hmMarcador) {
                     const userIcon = L.divIcon({
                         html: `<div style="
                             width:28px;height:28px;
@@ -289,18 +289,18 @@ async function init() {
                         iconAnchor: [14, 14],
                         popupAnchor: [0, -16],
                     });
-                    hmMarker = L.marker(userLatLng, { icon: userIcon })
-                        .addTo(hmMap)
+                    hmMarcador = L.marker(userLatLng, { icon: userIcon })
+                        .addTo(hmMapa)
                         .bindPopup('<b>Você está aqui</b>');
                 } else {
-                    hmMarker.setLatLng(userLatLng);
+                    hmMarcador.setLatLng(userLatLng);
                 }
 
-                const rotaAtiva = (hmCorridaLifecycle?.isRotaAtiva?.() ?? false) || !!getActiveRide();
-                if (hmMap && (hmPrimeiroFix || !rotaAtiva)) {
-                    hmMap.setView(userLatLng, hmMap.getZoom(), { animate: true });
+                const rotaAtiva = (hmCicloVidaCorrida?.estaRotaAtiva?.() ?? false) || !!obterCorridaAtiva();
+                if (hmMapa && (hmPrimeiraLocalizacao || !rotaAtiva)) {
+                    hmMapa.setView(userLatLng, hmMapa.getZoom(), { animate: true });
                 }
-                hmPrimeiroFix = false;
+                hmPrimeiraLocalizacao = false;
             },
             () => {
             }
@@ -313,41 +313,41 @@ export default function Home(rotaAtual = '/') {
         html: html(rotaAtual),
         init,
         destroy() {
-            if (hmDriverTickInterval !== null) {
-                clearInterval(hmDriverTickInterval);
-                hmDriverTickInterval = null;
+            if (hmIntervaloMotorista !== null) {
+                clearInterval(hmIntervaloMotorista);
+                hmIntervaloMotorista = null;
             }
 
-            if (hmMap) {
-                const center = hmMap.getCenter();
-                hmMapState = {
+            if (hmMapa) {
+                const center = hmMapa.getCenter();
+                hmEstadoMapa = {
                     center: [center.lat, center.lng],
-                    zoom: hmMap.getZoom()
+                    zoom: hmMapa.getZoom()
                 };
-                hmMap.remove();
-                hmMap = null;
-                hmMarker = null;
-                hmMapLoaderEl = null;
-                hmActiveRideLayer = null;
-                hmDriverMarker = null;
+                hmMapa.remove();
+                hmMapa = null;
+                hmMarcador = null;
+                hmElementoCarregamento = null;
+                hmCamadaCorridaAtiva = null;
+                hmMarcadorMotorista = null;
             }
 
-            if (hmCorridaLifecycle?.destroy) {
-                hmCorridaLifecycle.destroy();
+            if (hmCicloVidaCorrida?.destroy) {
+                hmCicloVidaCorrida.destroy();
             }
 
-            hmCorridaLifecycle = null;
-            hmCorridaComponent = null;
-            hmPrimeiroFix = true;
+            hmCicloVidaCorrida = null;
+            hmComponenteCorrida = null;
+            hmPrimeiraLocalizacao = true;
 
-            if (hmCrResetHandler) {
-                document.removeEventListener('cr:reset', hmCrResetHandler);
-                hmCrResetHandler = null;
+            if (hmHandlerReset) {
+                document.removeEventListener('cr:reset', hmHandlerReset);
+                hmHandlerReset = null;
             }
 
-            if (hmGeoWatchId !== null) {
-                navigator.geolocation.clearWatch(hmGeoWatchId);
-                hmGeoWatchId = null;
+            if (hmIdGeolocalizacao !== null) {
+                navigator.geolocation.clearWatch(hmIdGeolocalizacao);
+                hmIdGeolocalizacao = null;
             }
         }
     };

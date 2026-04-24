@@ -22,7 +22,7 @@
   gap: 0.35rem;
 }
 
-.ride-stage-label {
+.ride-etapa-label {
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -30,18 +30,18 @@
   color: #7d8590;
 }
 
-.ride-stage-title {
+.ride-etapa-title {
   font-size: clamp(1.5rem, 5.5vw, 2rem);
   font-weight: 700;
   color: #e6edf3;
   line-height: 1.2;
 }
 
-.ride-stage-title.is-success { color: #3fb950; }
-.ride-stage-title.is-warning { color: #e3b341; }
-.ride-stage-title.is-danger  { color: #f85149; }
+.ride-etapa-title.is-success { color: #3fb950; }
+.ride-etapa-title.is-warning { color: #e3b341; }
+.ride-etapa-title.is-danger  { color: #f85149; }
 
-.ride-stage-desc {
+.ride-etapa-desc {
   margin-top: 0.15rem;
   font-size: 0.875rem;
   color: #7d8590;
