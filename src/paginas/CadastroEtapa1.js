@@ -67,30 +67,35 @@ export default function CadastroEtapa1() {
     let ultimoResultadoEscaneamento = null;
 
     function processarQRCode(data) {
-        let campos;
-        try {
-            campos = data.trim().startsWith('{') ? JSON.parse(data) : data.split(';');
-        } catch {
-            campos = data.split(';');
-        }
+        // Regras de leitura: processar linhas de BAIXO para CIMA
+        // Índice a partir do fim (0 = última linha):
+        //   0 → ignorar
+        //   1 → ignorar
+        //   2 → validade do bilhete
+        //   3 → ignorar (data de emissão)
+        //   4 → estado civil
+        //   5 → género
+        //   6 → data de nascimento
+        //   7 → local de nascença (província)
+        //   8 → número de identificação
+        //   9+ → linhas do nome completo (revertidas para ordem natural)
 
-        let nome, numero, provincia, nascimento, genero, estado, emissao, validade;
-        if (Array.isArray(campos)) {
-            [nome, numero, provincia, nascimento, genero, estado, emissao, validade] = campos;
-        } else {
-            nome = campos.nome;
-            numero = campos.numero;
-            provincia = campos.provincia;
-            nascimento = campos.nascimento;
-            genero = campos.genero;
-            estado = campos.estado;
-            emissao = campos.emissao;
-            validade = campos.validade;
-        }
+        const linhas = data.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const inv = [...linhas].reverse(); // índice 0 = linha mais em baixo
+
+        const validade   = inv[2] || '';
+        const estadoCivil = inv[4] || '';
+        const genero     = inv[5] || '';
+        const nascimento = inv[6] || '';
+        const provincia  = inv[7] || '';
+        const numero     = inv[8] || '';
+        // as restantes linhas (índice 9+), revertidas, formam o nome completo
+        const nomeLinhas = inv.slice(9).reverse();
+        const nome       = nomeLinhas.join(' ').trim();
 
         ultimoResultadoEscaneamento = {
             scanId: 'qr-' + Date.now(),
-            campos: { nome, numero, provincia, nascimento, genero, estado, emissao, validade },
+            campos: { nome, numero, provincia, nascimento, genero, estado: estadoCivil, validade },
             extractedData: { name: nome, documentNumber: numero, birthDate: nascimento, validity: validade }
         };
 
