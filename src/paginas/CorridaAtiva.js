@@ -392,9 +392,9 @@ function montarPaginaCorrida(ride, rotaAtual) {
 
 function atualizarInterfaceCorrida() {
     const corrida = obterCorridaAtiva();
-    if (!ride) return;
+    if (!corrida) return;
 
-    const etapa = obterEtapaCorrida(ride);
+    const etapa = obterEtapaCorrida(corrida);
     const tituloEtapa = document.getElementById('ride-etapa-title');
     const descEtapa = document.getElementById('ride-etapa-desc');
     const barraProgresso = document.getElementById('ride-progress-bar');

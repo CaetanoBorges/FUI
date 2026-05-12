@@ -285,7 +285,7 @@ const SEED_HISTORICO = [
 ];
 
 export function inicializarAgendamentos() {
-    const existing = readJson(SCHEDULED_LIST_KEY, []);
+    const existing = lerJson(CHAVE_LISTA_AGENDADAS, []);
     if (existing.length > 0) return;
     escreverJson(CHAVE_LISTA_AGENDADAS, DADOS_SEMENTE_AGENDADAS);
 }

@@ -2,6 +2,18 @@
 
 .cadastro-simple {
   padding: 0;
+  /* usa dvh para não ser tapado pela barra do browser no mobile */
+  min-height: 100dvh;
+  min-height: 100vh; /* fallback */
+}
+
+.cadastro-simple .auth-shell {
+  /* espaço seguro para barras de navegação do browser */
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 16px));
+  min-height: 100dvh;
+  min-height: 100vh;
+  height: auto;
+  align-items: flex-start;
 }
 
 .cadastro-simple .auth-card {
@@ -87,4 +99,95 @@
 
 .cadastro-simple .auth-wizard-copy small {
   display: none;
+}
+
+/* ── Passo 2: layout geral ────────────────────────────── */
+#cadastro-form.is-active {
+  padding: 10vh 10px 5vh;
+}
+
+/* ── Passo 2: campos readonly do BI ─────────────────────────── */
+.cadastro-campos-bi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  width: 100%;
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 4px;
+}
+
+.cadastro-campos-bi .auth-field {
+  gap: 3px;
+}
+
+.cadastro-campos-bi .auth-field span {
+  font-size: 0.7em;
+  color: rgba(100, 80, 160, 0.85);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cadastro-campos-bi .auth-field input {
+  font-size: 0.82em;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(124,58,237,0.15);
+  color: #1e1b4b;
+  border-radius: 8px !important;
+}
+
+/* Textarea do nome: auto-resize ao conteúdo */
+.cadastro-nome-textarea {
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  font-size: 0.82em;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(124,58,237,0.15);
+  color: #1e1b4b;
+  border-radius: 8px !important;
+  font-family: inherit;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+.cadastro-campos-bi .auth-field.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ── Separador entre BI e campos de conta ───────────────────── */
+.cadastro-sep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  color: rgba(100,80,160,0.6);
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cadastro-sep::before,
+.cadastro-sep::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(124,58,237,0.18);
+}
+
+/* Botão Criar conta destacado */
+#cadastro-submit-button {
+  margin-top: 4px;
+  padding: 14px;
+  font-size: 1em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: linear-gradient(135deg, #7c3aed, #aa3bff);
+  border-radius: 12px !important;
+  box-shadow: 0 4px 18px rgba(124,58,237,0.35);
 }

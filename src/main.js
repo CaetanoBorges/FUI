@@ -67,6 +67,17 @@ function renderizarRota() {
 	}
 }
 
+function ativarFullscreen() {
+	const el = document.documentElement;
+	if (el.requestFullscreen) el.requestFullscreen();
+	else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+	else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+	document.removeEventListener('click', ativarFullscreen);
+	document.removeEventListener('touchstart', ativarFullscreen);
+}
+document.addEventListener('click', ativarFullscreen, { once: true });
+document.addEventListener('touchstart', ativarFullscreen, { once: true });
+
 window.addEventListener('hashchange', renderizarRota);
 window.addEventListener('load', () => {
 	// Prepara as promessas antes do renderRoute para não perder o evento
