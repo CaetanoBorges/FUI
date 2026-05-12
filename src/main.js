@@ -2,7 +2,8 @@ import './style.css';
 import Home from './paginas/Home.js';
 import Sobre from './paginas/Sobre.js';
 import Login from './paginas/Login.js';
-import Cadastro from './paginas/Cadastro.js';
+import CadastroEtapa1 from './paginas/CadastroEtapa1.js';
+import CadastroEtapa2 from './paginas/CadastroEtapa2.js';
 import CorridaAtiva from './paginas/CorridaAtiva.js';
 import CorridasAgendadas from './paginas/CorridasAgendadas.js';
 import CorridaAgendadaDetalhe from './paginas/CorridaAgendadaDetalhe.js';
@@ -18,7 +19,9 @@ const rotas = {
 	'/': Home,
 	'/sobre': Sobre,
 	'/login': Login,
-	'/cadastro': Cadastro,
+	'/cadastro': CadastroEtapa1,
+	'/cadastro/etapa1': CadastroEtapa1,
+	'/cadastro/etapa2': CadastroEtapa2,
 	'/corrida-ativa': CorridaAtiva,
 	'/aguardando-motorista': AguardandoMotorista,
 	'/corridas-agendadas': CorridasAgendadas,
