@@ -1,0 +1,80 @@
+#gyro-notif-container {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: center;
+    pointer-events: none;
+    width: min(92vw, 400px);
+}
+
+.gyro-notif {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: #e6edf3;
+    background: #161b22;
+    border: 1px solid #30363d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+    width: 100%;
+    pointer-events: all;
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.gyro-notif--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gyro-notif--saindo {
+    opacity: 0;
+    transform: translateY(0.5rem);
+}
+
+/* variantes */
+.gyro-notif--sucesso { border-color: #238636; }
+.gyro-notif--sucesso .gyro-notif__icon { color: #3fb950; }
+
+.gyro-notif--erro { border-color: #da3633; }
+.gyro-notif--erro .gyro-notif__icon { color: #f85149; }
+
+.gyro-notif--aviso { border-color: #9e6a03; }
+.gyro-notif--aviso .gyro-notif__icon { color: #d29922; }
+
+.gyro-notif--info .gyro-notif__icon { color: #58a6ff; }
+
+.gyro-notif__icon {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    margin-top: 0.1rem;
+}
+
+.gyro-notif__msg {
+    flex: 1;
+}
+
+.gyro-notif__close {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: #7d8590;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.85rem;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.gyro-notif__close:hover {
+    color: #e6edf3;
+}

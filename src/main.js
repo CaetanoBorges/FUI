@@ -1,4 +1,5 @@
 import './style.css';
+import './componentes/Notificacao.css';
 import Home from './paginas/Home.js';
 import Sobre from './paginas/Sobre.js';
 import Login from './paginas/Login.js';

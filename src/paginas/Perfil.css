@@ -49,12 +49,213 @@
     overflow: hidden;
 }
 
+.perfil-card-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #7d8590;
+    background: #0d1117;
+    border-top: 1px solid #21262d;
+    border-bottom: 1px solid #21262d;
+}
+
+.perfil-meta {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.78rem;
+    color: #484f58;
+    border-top: 1px solid #21262d;
+}
+
+/* ── Edit form (dados da conta) ── */
+.perfil-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #7d8590;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.perfil-edit-btn:hover {
+    color: #e6edf3;
+    border-color: #58a6ff;
+}
+
+.perfil-conta-row {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid #21262d;
+}
+
+.perfil-conta-row:last-of-type {
+    border-bottom: none;
+}
+
+.perfil-conta-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.2rem;
+}
+
+.perfil-conta-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.perfil-verificado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #3fb950;
+    letter-spacing: 0.03em;
+}
+
+.perfil-verificar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid #9e6a03;
+    border-radius: 6px;
+    color: #d29922;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.perfil-verificar-btn:hover {
+    color: #f0b429;
+    border-color: #d29922;
+}
+
+.perfil-verify-hint {
+    font-size: 0.8rem;
+    color: #7d8590;
+    margin: 0 0 0.15rem;
+}
+
+.perfil-password-dots {
+    color: #7d8590;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+}
+
+.perfil-conta-inline-form .perfil-conta-input + .perfil-conta-input {
+    margin-top: 0.4rem;
+}
+
+.perfil-conta-row-view {
+    font-size: 0.92rem;
+    color: #e6edf3;
+    min-height: 1.4em;
+}
+
+.perfil-conta-inline-form {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.perfil-conta-inline-form.is-visible {
+    display: flex;
+}
+
+.perfil-conta-input {
+    background: #0d1117;
+    border: 1px solid #388bfd;
+    border-radius: 8px;
+    color: #e6edf3;
+    font-size: 0.92rem;
+    font-family: inherit;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.perfil-conta-input:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.12);
+}
+
+.perfil-conta-input::placeholder {
+    color: #484f58;
+}
+
+.perfil-conta-btns {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
 .perfil-card-top {
     display: flex;
     align-items: center;
     gap: 1.25rem;
     padding: 1.5rem;
     border-bottom: 1px solid #21262d;
+}
+
+.perfil-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+    display: block;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.perfil-avatar-wrap:hover .perfil-avatar-overlay {
+    opacity: 1;
+}
+
+.perfil-avatar-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.perfil-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.52);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.05rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.perfil-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }
 
 .perfil-avatar {
@@ -71,6 +272,7 @@
     color: #fff;
     letter-spacing: -0.02em;
     user-select: none;
+    overflow: hidden;
 }
 
 .perfil-name-block {
