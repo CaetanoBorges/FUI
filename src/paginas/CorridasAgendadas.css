@@ -65,7 +65,7 @@
   overflow: hidden;
 }
 
-.sched-card.is-cancelled {
+.sched-card.is-cancelada {
   opacity: 0.5;
 }
 
@@ -96,11 +96,38 @@
   color: #e3b341;
 }
 
-.sched-card-badge.is-cancelled {
+.sched-card-badge.is-cancelada {
   background: rgba(248, 81, 73, 0.1);
   border-color: rgba(248, 81, 73, 0.3);
   color: #f85149;
 }
+
+.sched-card-badge.is-confirmada {
+  background: rgba(63, 185, 80, 0.1);
+  border-color: rgba(63, 185, 80, 0.3);
+  color: #3fb950;
+}
+
+.sched-card-badge.is-espera {
+  background: rgba(227, 179, 65, 0.12);
+  border-color: rgba(227, 179, 65, 0.3);
+  color: #e3b341;
+}
+
+/* Pending driver notice */
+.sched-pending {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 7px;
+  background: rgba(227, 179, 65, 0.07);
+  border: 1px solid rgba(227, 179, 65, 0.2);
+  font-size: 0.78rem;
+  color: #e3b341;
+}
+
+.sched-pending i { font-size: 0.8rem; flex-shrink: 0; }
 
 .sched-card-body {
   padding: 0 0.875rem 0.875rem;

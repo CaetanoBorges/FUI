@@ -121,6 +121,13 @@ function estaCancelada(ride) {
     return ride.status === 'cancelled';
 }
 
+function obterStatusInfo(ride) {
+    if (ride.status === 'cancelled') return { label: 'Cancelada', classe: 'is-cancelada' };
+    if (ride.status === 'confirmed' || (ride.status === 'active' && ride.driver))
+        return { label: 'Confirmado', classe: 'is-confirmada' };
+    return { label: 'Em espera', classe: 'is-espera' };
+}
+
 function obterOrigemDestino(ride) {
     if (Array.isArray(ride.stops) && ride.stops.length >= 2) {
         return { origin: ride.stops[0], dest: ride.stops[ride.stops.length - 1] };
@@ -136,6 +143,7 @@ function renderizarCard(ride) {
     const cancelada = estaCancelada(ride);
     const { origin, dest } = obterOrigemDestino(ride);
     const d = ride.driver;
+    const statusInfo = obterStatusInfo(ride);
 
     const blocoMotorista = d ? `
         <div class="sched-driver">
@@ -146,7 +154,12 @@ function renderizarCard(ride) {
             </div>
             ${!cancelada ? `<a class="sched-driver-call" href="tel:${d.phone}" title="Ligar para ${d.name}"><i class="fa-solid fa-phone"></i></a>` : ''}
         </div>
-    ` : '';
+    ` : (!cancelada ? `
+        <div class="sched-pending">
+            <i class="fa-solid fa-clock"></i>
+            <span>A aguardar aceitação de um motorista</span>
+        </div>
+    ` : '');
 
     return `
         <article class="sched-card${cancelada ? ' is-cancelada' : ''}" data-id="${ride.id}">
@@ -155,8 +168,8 @@ function renderizarCard(ride) {
                     <i class="fa-solid fa-calendar-clock"></i>
                     ${formatarDataHora(ride.scheduledAt)}
                 </span>
-                <span class="sched-card-badge${cancelada ? ' is-cancelada' : ''}">
-                    ${cancelada ? 'Cancelada' : 'Agendada'}
+                <span class="sched-card-badge ${statusInfo.classe}">
+                    ${statusInfo.label}
                 </span>
             </div>
 

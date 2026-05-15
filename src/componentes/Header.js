@@ -1,3 +1,5 @@
+import { iconeBellHtml } from './NotificacaoCentro.js';
+
 const _fecharMenu = `document.getElementById('hm-sidebar').classList.remove('hm-aberto');document.getElementById('hm-overlay').classList.remove('hm-aberto');`;
 const _sair = `localStorage.removeItem('gyro.auth.current');${_fecharMenu}document.querySelector('.hm-btn-hamburger')?.classList.remove('hm-ativo');window.location.hash='#/login';`;
 
@@ -16,6 +18,7 @@ export default function Header(_titulo, rotaAtual = '/', exibirLogo = false) {
                 <span></span>
                 <span></span>
             </button>
+            ${iconeBellHtml()}
             ${exibirLogo ? '<img class="hm-page-logo" src="/ico.svg" alt="Giro" />' : ''}
         </header>
 

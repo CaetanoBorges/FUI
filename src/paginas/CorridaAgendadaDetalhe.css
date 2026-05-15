@@ -65,10 +65,67 @@
   width: fit-content;
 }
 
-.detail-badge.is-cancelled {
+.detail-badge.is-cancelada {
   background: rgba(248, 81, 73, 0.1);
   border-color: rgba(248, 81, 73, 0.3);
   color: #f85149;
+}
+
+.detail-badge.is-confirmada {
+  background: rgba(63, 185, 80, 0.1);
+  border-color: rgba(63, 185, 80, 0.3);
+  color: #3fb950;
+}
+
+.detail-badge.is-espera {
+  background: rgba(227, 179, 65, 0.12);
+  border-color: rgba(227, 179, 65, 0.3);
+  color: #e3b341;
+}
+
+/* Status label below the date badge */
+.detail-status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.detail-status-label.is-confirmada { color: #3fb950; }
+.detail-status-label.is-espera     { color: #e3b341; }
+.detail-status-label.is-cancelada  { color: #f85149; }
+
+/* Pending driver block */
+.detail-pending-driver {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  background: rgba(227, 179, 65, 0.07);
+  border: 1px solid rgba(227, 179, 65, 0.2);
+  color: #e3b341;
+}
+
+.detail-pending-driver > i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.detail-pending-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+}
+
+.detail-pending-desc {
+  font-size: 0.78rem;
+  color: #7d8590;
+  margin: 0;
+  line-height: 1.4;
 }
 
 /* ── Divider ── */

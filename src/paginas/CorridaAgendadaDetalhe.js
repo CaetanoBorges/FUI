@@ -35,6 +35,13 @@ function estaCancelada(ride) {
     return ride.status === 'cancelled';
 }
 
+function obterStatusInfo(ride) {
+    if (ride.status === 'cancelled') return { label: 'Cancelada', classe: 'is-cancelada', icone: 'ban' };
+    if (ride.status === 'confirmed' || (ride.status === 'active' && ride.driver))
+        return { label: 'Confirmado', classe: 'is-confirmada', icone: 'circle-check' };
+    return { label: 'Em espera', classe: 'is-espera', icone: 'clock' };
+}
+
 function obterParadas(ride) {
     if (Array.isArray(ride.stops) && ride.stops.length) return ride.stops;
     if (typeof ride.routeSummary === 'string' && ride.routeSummary.includes('→')) {
@@ -113,6 +120,7 @@ function montarNaoEncontrado(rotaAtual) {
 
 function montarPagina(ride, rotaAtual) {
     const cancelada = estaCancelada(ride);
+    const statusInfo = obterStatusInfo(ride);
     const paradas = obterParadas(ride);
     const origem = paradas[0] || '—';
     const destino = paradas[paradas.length - 1] || '—';
@@ -130,10 +138,14 @@ function montarPagina(ride, rotaAtual) {
                 <div class="detail-page-header">
                     <span class="detail-eyebrow">Corrida agendada</span>
                     <h1 class="detail-titulo">${titulo}</h1>
-                    <span class="detail-badge${cancelada ? ' is-cancelada' : ''}">
-                        <i class="fa-solid fa-${cancelada ? 'ban' : 'calendar-clock'}"></i>
-                        ${cancelada ? 'Cancelada' : formatarDataHora(ride.scheduledAt)}
+                    <span class="detail-badge ${cancelada ? statusInfo.classe : ''}">
+                        <i class="fa-solid fa-${cancelada ? statusInfo.icone : 'calendar-clock'}"></i>
+                        ${cancelada ? statusInfo.label : formatarDataHora(ride.scheduledAt)}
                     </span>
+                    ${!cancelada ? `
+                    <span class="detail-status-label ${statusInfo.classe}">
+                        <i class="fa-solid fa-${statusInfo.icone}"></i>${statusInfo.label}
+                    </span>` : ''}
                 </div>
 
                 <hr class="detail-divider">
@@ -156,7 +168,16 @@ function montarPagina(ride, rotaAtual) {
                         <p class="detail-section-label">Motorista</p>
                         ${renderizarMotorista(ride.driver, cancelada)}
                     </div>
-                ` : ''}
+                ` : (!cancelada ? `
+                    <hr class="detail-divider">
+                    <div class="detail-pending-driver">
+                        <i class="fa-solid fa-clock"></i>
+                        <div>
+                            <p class="detail-pending-title">A aguardar motorista</p>
+                            <p class="detail-pending-desc">A tua corrida foi agendada e está à espera de ser aceite por um motorista.</p>
+                        </div>
+                    </div>
+                ` : '')}
 
                 <div class="detail-actions">
                     <a href="#/corridas-agendadas" class="detail-btn detail-btn-secondary">

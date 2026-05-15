@@ -77,7 +77,7 @@ const DADOS_SEMENTE_AGENDADAS = [
     {
         id: 'CR-SEED-001',
         createdAt: criarData(-13),
-        status: 'active',
+        status: 'confirmed',
         when: 'agendar',
         whenLabel: '22/04/2026 08:30',
         scheduledAt: criarData(1, 8, 30),
@@ -94,7 +94,7 @@ const DADOS_SEMENTE_AGENDADAS = [
     {
         id: 'CR-SEED-002',
         createdAt: criarData(-10),
-        status: 'active',
+        status: 'confirmed',
         when: 'agendar',
         whenLabel: '24/04/2026 14:00',
         scheduledAt: criarData(3, 14, 0),
@@ -111,7 +111,7 @@ const DADOS_SEMENTE_AGENDADAS = [
     {
         id: 'CR-SEED-003',
         createdAt: criarData(-8),
-        status: 'active',
+        status: 'pending',
         when: 'agendar',
         whenLabel: '26/04/2026 07:15',
         scheduledAt: criarData(5, 7, 15),
@@ -123,12 +123,11 @@ const DADOS_SEMENTE_AGENDADAS = [
         estimatedDistance: '21,3 km',
         estimatedDuration: '00:46:00',
         stops: ['Viana', 'Miramar', 'Kilamba'],
-        driver: { name: 'António Ferreira', phone: '+244934567890', vehicleBrand: 'Hyundai Accent', vehicleColor: 'Cinzento', plate: 'BG-78-90-CD', initials: 'AF' }
     },
     {
         id: 'CR-SEED-004',
         createdAt: criarData(-5),
-        status: 'active',
+        status: 'pending',
         when: 'agendar',
         whenLabel: '28/04/2026 16:45',
         scheduledAt: criarData(7, 16, 45),
@@ -140,7 +139,6 @@ const DADOS_SEMENTE_AGENDADAS = [
         estimatedDistance: '9,1 km',
         estimatedDuration: '00:22:00',
         stops: ['Maianga', 'Cacuaco'],
-        driver: { name: 'João Baptista', phone: '+244945678901', vehicleBrand: 'Volkswagen Polo', vehicleColor: 'Prata', plate: 'HU-23-45-EF', initials: 'JB' }
     },
     {
         id: 'CR-SEED-005',
@@ -162,7 +160,7 @@ const DADOS_SEMENTE_AGENDADAS = [
     {
         id: 'CR-SEED-006',
         createdAt: criarData(-1),
-        status: 'active',
+        status: 'confirmed',
         when: 'agendar',
         whenLabel: '05/05/2026 09:00',
         scheduledAt: criarData(14, 9, 0),

@@ -16,11 +16,12 @@
 	z-index: 1400;
 }
 
-/* ── Logo de página (canto superior direito) ── */
+/* ── Logo de página (centro superior) ── */
 .hm-page-logo {
 	position: absolute;
 	top: 0.75rem;
-	right: 1rem;
+	left: 50%;
+	transform: translateX(-50%);
 	height: 34px;
 	width: auto;
 	pointer-events: none;

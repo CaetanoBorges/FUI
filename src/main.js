@@ -1,5 +1,7 @@
 import './style.css';
 import './componentes/Notificacao.css';
+import './componentes/NotificacaoCentro.css';
+import { inicializarCentroNotificacoes } from './componentes/NotificacaoCentro.js';
 import Home from './paginas/Home.js';
 import Sobre from './paginas/Sobre.js';
 import Login from './paginas/Login.js';
@@ -63,6 +65,8 @@ function renderizarRota() {
 	} else {
 		raiz.innerHTML = resultado;
 	}
+
+	inicializarCentroNotificacoes();
 
 	window.scrollTo(0, 0);
 

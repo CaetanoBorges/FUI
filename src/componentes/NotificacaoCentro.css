@@ -1,0 +1,313 @@
+/* ── Botão sino ──────────────────────────────────────────────────────────── */
+.nc-bell-btn {
+    position: absolute;
+    top: 0.82rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #0f3460;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    z-index: 1450;
+    transition: background 0.18s ease, transform 0.15s ease;
+    position: absolute;
+}
+
+.nc-bell-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    transform: scale(1.08);
+}
+
+.nc-bell-btn:active {
+    transform: scale(0.95);
+}
+
+/* ── Badge de contagem ────────────────────────────────────────────────────── */
+.nc-bell-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #f85149;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 2px solid #fff;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+.nc-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 5000;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+
+.nc-backdrop.nc-visivel {
+    opacity: 1;
+}
+
+.nc-backdrop.nc-visivel .nc-panel {
+    transform: translateY(0);
+}
+
+/* ── Painel (bottom sheet) ────────────────────────────────────────────────── */
+.nc-panel {
+    width: 100%;
+    max-height: 82vh;
+    background: #0d1117;
+    border-radius: 18px 18px 0 0;
+    border-top: 1px solid #30363d;
+    border-left: 1px solid #21262d;
+    border-right: 1px solid #21262d;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Drag handle ──────────────────────────────────────────────────────────── */
+.nc-panel-drag {
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: #30363d;
+    margin: 0.75rem auto 0;
+    flex-shrink: 0;
+}
+
+/* ── Cabeçalho do painel ──────────────────────────────────────────────────── */
+.nc-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #21262d;
+    flex-shrink: 0;
+    gap: 0.75rem;
+}
+
+.nc-panel-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e6edf3;
+    margin: 0;
+    flex: 1;
+}
+
+.nc-panel-acoes {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nc-btn-lidas {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #58a6ff;
+    background: rgba(56, 139, 253, 0.1);
+    border: 1px solid rgba(56, 139, 253, 0.2);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.nc-btn-lidas:hover {
+    background: rgba(56, 139, 253, 0.18);
+}
+
+.nc-btn-fechar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #30363d;
+    background: transparent;
+    color: #7d8590;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.nc-btn-fechar:hover {
+    background: #21262d;
+    color: #e6edf3;
+}
+
+/* ── Lista de notificações ────────────────────────────────────────────────── */
+.nc-lista {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem 0 1rem;
+    overscroll-behavior: contain;
+}
+
+.nc-lista::-webkit-scrollbar { width: 4px; }
+.nc-lista::-webkit-scrollbar-track { background: transparent; }
+.nc-lista::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+
+/* ── Item ─────────────────────────────────────────────────────────────────── */
+.nc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 0.875rem 1.25rem;
+    transition: background 0.15s ease;
+    position: relative;
+}
+
+.nc-item:not(:last-child) {
+    border-bottom: 1px solid #161b22;
+}
+
+.nc-item:hover {
+    background: #161b22;
+}
+
+/* Indicador de não lida */
+.nc-item--nova::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: #58a6ff;
+    border-radius: 0 2px 2px 0;
+}
+
+/* ── Ícone do item ────────────────────────────────────────────────────────── */
+.nc-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.nc-icon--confirmado {
+    background: rgba(63, 185, 80, 0.12);
+    color: #3fb950;
+    border: 1px solid rgba(63, 185, 80, 0.25);
+}
+
+.nc-icon--aviso {
+    background: rgba(227, 179, 65, 0.12);
+    color: #e3b341;
+    border: 1px solid rgba(227, 179, 65, 0.25);
+}
+
+.nc-icon--cancelado {
+    background: rgba(248, 81, 73, 0.1);
+    color: #f85149;
+    border: 1px solid rgba(248, 81, 73, 0.2);
+}
+
+.nc-icon--geral {
+    background: rgba(56, 139, 253, 0.1);
+    color: #58a6ff;
+    border: 1px solid rgba(56, 139, 253, 0.2);
+}
+
+/* ── Corpo do item ────────────────────────────────────────────────────────── */
+.nc-item-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.nc-item-titulo {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #e6edf3;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.nc-item--nova .nc-item-titulo {
+    color: #f0f6fc;
+}
+
+.nc-item-corpo {
+    font-size: 0.78rem;
+    color: #7d8590;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.nc-item-tempo {
+    font-size: 0.68rem;
+    color: #484f58;
+    margin-top: 0.15rem;
+}
+
+/* ── Botão "Ver" ──────────────────────────────────────────────────────────── */
+.nc-item-ver {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #58a6ff;
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid rgba(56, 139, 253, 0.2);
+    background: rgba(56, 139, 253, 0.08);
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.nc-item-ver:hover {
+    background: rgba(56, 139, 253, 0.16);
+}
+
+/* ── Estado vazio ─────────────────────────────────────────────────────────── */
+.nc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 3rem 1.5rem;
+    color: #484f58;
+    font-size: 0.85rem;
+}
+
+.nc-empty i {
+    font-size: 2rem;
+}

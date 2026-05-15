@@ -1023,7 +1023,7 @@ export default function ChamarCorrida() {
             return {
                 id: `CR-${Date.now()}`,
                 createdAt: new Date().toISOString(),
-                status: 'active',
+                status: quandoAtual === 'agendar' ? 'pending' : 'active',
                 when: quandoAtual,
                 whenLabel,
                 scheduledAt: quandoAtual === 'agendar' && dataSelecionada ? dataSelecionada.toISOString() : null,
@@ -1045,7 +1045,6 @@ export default function ChamarCorrida() {
                     geometry: trecho.feature?.geometry ?? null,
                     style: trecho.feature?.properties?.style ?? null
                 })),
-                driver: selecionarMotorista()
             };
         }
 
@@ -1055,13 +1054,14 @@ export default function ChamarCorrida() {
             const dadosCorrida = montarDadosCorrida();
             if (!dadosCorrida) return;
 
-            salvarCorridaAtiva(dadosCorrida);
-
             if (dadosCorrida.when === 'agendar') {
                 salvarCorridaAgendada(dadosCorrida);
+                window.location.hash = '#/corridas-agendadas';
+            } else {
+                const corridaComMotorista = { ...dadosCorrida, driver: selecionarMotorista() };
+                salvarCorridaAtiva(corridaComMotorista);
+                window.location.hash = '#/aguardando-motorista';
             }
-
-            window.location.hash = '#/aguardando-motorista';
         }
 
         document.getElementById('cr-confirmar').addEventListener('click', confirmarCorridaFinal);
