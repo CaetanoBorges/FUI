@@ -1,0 +1,331 @@
+/* AvaliacaoPassageiro */
+
+.ap-shell {
+    min-height: 100vh;
+    padding: 5.5rem 1.25rem 2.5rem;
+    background: #0d1117;
+    color: #e6edf3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ap-container {
+    width: min(100%, 480px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    animation: ap-fade-in 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes ap-fade-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Empty ── */
+.ap-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding-top: 4rem;
+}
+
+.ap-empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(227, 179, 65, 0.1);
+    border: 1.5px solid rgba(227, 179, 65, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    color: #e3b341;
+}
+
+.ap-empty h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e6edf3;
+    margin: 0;
+}
+
+.ap-empty p {
+    font-size: 0.9rem;
+    color: #7d8590;
+    margin: 0;
+}
+
+.ap-btn-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.65rem 1.4rem;
+    background: #1f6feb;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: filter 0.15s;
+}
+
+.ap-btn-home:hover { filter: brightness(1.15); }
+
+/* ── Cabeçalho ── */
+.ap-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ap-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(63, 185, 80, 0.12);
+    border: 1.5px solid rgba(63, 185, 80, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    color: #3fb950;
+}
+
+.ap-title {
+    font-size: clamp(1.35rem, 5vw, 1.75rem);
+    font-weight: 700;
+    color: #e6edf3;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.ap-subtitle {
+    font-size: 0.875rem;
+    color: #7d8590;
+    line-height: 1.6;
+    max-width: 36ch;
+    margin: 0;
+}
+
+.ap-obrigatorio {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #e3b341;
+    background: rgba(227, 179, 65, 0.10);
+    border: 1px solid rgba(227, 179, 65, 0.25);
+    border-radius: 20px;
+    padding: 3px 10px;
+}
+
+/* ── Card passageiro ── */
+.ap-passenger-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.ap-passenger-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.ap-passenger-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ap-passenger-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e6edf3;
+}
+
+.ap-passenger-route {
+    font-size: 0.78rem;
+    color: #7d8590;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ap-passenger-earnings {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #3fb950;
+    flex-shrink: 0;
+}
+
+/* ── Estrelas ── */
+.ap-stars-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ap-stars-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7d8590;
+}
+
+.ap-stars {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.ap-star {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #30363d;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: color 0.15s, transform 0.1s;
+}
+
+.ap-star:hover,
+.ap-star.ativo {
+    color: #e3b341;
+}
+
+.ap-star:active { transform: scale(0.9); }
+
+.ap-stars-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e3b341;
+    min-height: 1.2em;
+}
+
+/* ── Tags ── */
+.ap-tags-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.ap-tags-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7d8590;
+}
+
+.ap-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ap-tag {
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    border: 1px solid #30363d;
+    background: transparent;
+    color: #7d8590;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ap-tag:hover { background: #21262d; color: #e6edf3; }
+
+.ap-tag.ativo {
+    background: rgba(63, 185, 80, 0.1);
+    border-color: rgba(63, 185, 80, 0.4);
+    color: #3fb950;
+}
+
+/* ── Comentário ── */
+.ap-comment-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ap-comment-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #7d8590;
+}
+
+.ap-comment-textarea {
+    width: 100%;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    color: #e6edf3;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.88rem;
+    padding: 0.75rem 1rem;
+    resize: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.ap-comment-textarea:focus {
+    outline: none;
+    border-color: #3fb950;
+}
+
+/* ── Botão enviar ── */
+.ap-btn-enviar {
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    background: #3fb950;
+    color: #fff;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(63, 185, 80, 0.35);
+    transition: filter 0.15s, transform 0.1s;
+}
+
+.ap-btn-enviar:hover:not(:disabled) { filter: brightness(1.1); }
+.ap-btn-enviar:active { transform: scale(0.98); }
+
+.ap-btn-enviar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+}

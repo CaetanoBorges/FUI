@@ -1,0 +1,426 @@
+/* CorridaAtivaMotorista */
+
+.cam-shell {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: #0d1117;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+#cam-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* ── Empty state ── */
+.cam-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 3rem;
+}
+
+.cam-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding-top: 4rem;
+}
+
+.cam-empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1.5px solid rgba(88, 166, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #58a6ff;
+}
+
+.cam-empty h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e6edf3;
+    margin: 0;
+}
+
+.cam-empty p {
+    font-size: 0.9rem;
+    color: #7d8590;
+    margin: 0;
+}
+
+.cam-btn-voltar-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.65rem 1.4rem;
+    background: #1f6feb;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: filter 0.15s;
+}
+
+.cam-btn-voltar-home:hover { filter: brightness(1.15); }
+
+/* ── Bottom card ── */
+.cam-bottom-card {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 400;
+    background: rgba(13, 17, 23, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(48, 54, 61, 0.8);
+    border-radius: 22px 22px 0 0;
+    padding: 1.1rem 1.25rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+/* ── Fase row ── */
+.cam-fase-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cam-fase-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cam-fase-dot.embarque {
+    background: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+.cam-fase-dot.viagem {
+    background: #3fb950;
+    box-shadow: 0 0 0 4px rgba(63, 185, 80, 0.2);
+    animation: cam-pulse 1.5s infinite;
+}
+
+@keyframes cam-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(63, 185, 80, 0.2); }
+    50%       { box-shadow: 0 0 0 8px rgba(63, 185, 80, 0.1); }
+}
+
+.cam-fase-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.cam-fase-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e6edf3;
+}
+
+.cam-fase-sub {
+    font-size: 0.78rem;
+    color: #7d8590;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.cam-timer {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #58a6ff;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.03em;
+}
+
+/* ── Passageiro ── */
+.cam-passenger-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+}
+
+.cam-passenger-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.cam-passenger-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cam-passenger-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e6edf3;
+}
+
+.cam-passenger-route {
+    font-size: 0.78rem;
+    color: #7d8590;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cam-ride-price {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #3fb950;
+    flex-shrink: 0;
+}
+
+/* ── Meta ── */
+.cam-meta-row {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.82rem;
+    color: #7d8590;
+}
+
+.cam-meta-row span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cam-meta-row i {
+    color: #484f58;
+    font-size: 0.75rem;
+}
+
+/* ── Ações ── */
+.cam-actions {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.75rem;
+}
+
+.cam-btn-cancelar,
+.cam-btn-principal {
+    border: none;
+    border-radius: 12px;
+    padding: 0.85rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: filter 0.15s, transform 0.1s;
+}
+
+.cam-btn-cancelar {
+    background: rgba(230, 57, 70, 0.1);
+    color: #e63946;
+    border: 1px solid rgba(230, 57, 70, 0.3);
+}
+
+.cam-btn-principal {
+    background: #3fb950;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(63, 185, 80, 0.35);
+}
+
+.cam-btn-cancelar:hover  { filter: brightness(1.2); }
+.cam-btn-principal:hover { filter: brightness(1.1); }
+.cam-btn-cancelar:active,
+.cam-btn-principal:active { transform: scale(0.97); }
+
+/* ── Modal de cancelamento ── */
+.cam-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    background: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.cam-modal-overlay.visible {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.cam-modal {
+    width: 100%;
+    max-width: 480px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 22px 22px 0 0;
+    padding: 1.5rem 1.5rem 2rem;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.cam-modal-overlay.visible .cam-modal {
+    transform: translateY(0);
+}
+
+.cam-modal-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(230, 57, 70, 0.12);
+    border: 1.5px solid rgba(230, 57, 70, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #e63946;
+    margin: 0 auto;
+}
+
+.cam-modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e6edf3;
+    text-align: center;
+    margin: 0;
+}
+
+.cam-modal-sub {
+    font-size: 0.85rem;
+    color: #7d8590;
+    text-align: center;
+    margin: 0;
+}
+
+.cam-motivos {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cam-motivo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid #21262d;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: #c9d1d9;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.cam-motivo:hover { background: #21262d; }
+
+.cam-motivo.selected {
+    background: rgba(230, 57, 70, 0.08);
+    border-color: rgba(230, 57, 70, 0.4);
+    color: #e6edf3;
+}
+
+.cam-motivo-radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #484f58;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.cam-motivo.selected .cam-motivo-radio {
+    border-color: #e63946;
+    background: #e63946;
+}
+
+.cam-outro-textarea {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    color: #e6edf3;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.88rem;
+    padding: 0.7rem 0.9rem;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.cam-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.cam-btn-voltar,
+.cam-btn-confirmar {
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: filter 0.15s;
+}
+
+.cam-btn-voltar {
+    background: #21262d;
+    color: #e6edf3;
+}
+
+.cam-btn-confirmar {
+    background: #e63946;
+    color: #fff;
+}
+
+.cam-btn-confirmar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.cam-btn-voltar:hover    { filter: brightness(1.2); }
+.cam-btn-confirmar:not(:disabled):hover { filter: brightness(1.1); }

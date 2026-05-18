@@ -16,48 +16,43 @@
 	z-index: 1400;
 }
 
-/* ── Logo de página (centro superior) ── */
-.hm-page-logo {
-	position: absolute;
-	top: 0.75rem;
-	left: 50%;
-	transform: translateX(-50%);
-	height: 34px;
-	width: auto;
-	pointer-events: none;
-	user-select: none;
-}
-
 /* ── Botão Hamburger ── */
 .hm-btn-hamburger {
 	position: absolute;
-	top: 1rem;
+	top: 0.82rem;
 	left: 1rem;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	width: 30px;
-	height: 22px;
-	background: none;
-	border: none;
+	width: 38px;
+	height: 38px;
+	background: #161b22;
+	border: 1px solid #30363d;
+	border-radius: 50%;
 	cursor: pointer;
-	padding: 0;
+	padding: 9px 7px;
 	pointer-events: auto;
 	z-index: 1450;
+	transition: background 0.18s ease, border-color 0.18s ease;
 }
 
 .hm-btn-hamburger span {
 	display: block;
 	width: 100%;
-	height: 5px;
-    background: #0f3460;
+	height: 3px;
+	background: #e6edf3;
 	border-radius: 3px;
 	transition: transform 0.3s ease, opacity 0.3s ease, background 0.2s ease;
 	transform-origin: center;
 }
 
+.hm-btn-hamburger:hover {
+	background: #21262d;
+	border-color: #58a6ff;
+}
+
 .hm-btn-hamburger:hover span {
-	background: #63b3ed;
+	background: #58a6ff;
 }
 
 /* Animação X ao abrir */
@@ -149,5 +144,29 @@
 	text-align: left;
 	width: 100%;
 	cursor: pointer;
+}
+
+/* ── Badge corrida ativa (sidebar) ── */
+.hm-link-corrida-ativa {
+	display: flex;
+	align-items: center;
+}
+
+.hm-badge-ativa {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #3fb950;
+	margin-left: auto;
+	flex-shrink: 0;
+	box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.5);
+	animation: hm-pulse-badge 1.8s infinite;
+}
+
+@keyframes hm-pulse-badge {
+	0%   { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.5); }
+	60%  { box-shadow: 0 0 0 7px rgba(63, 185, 80, 0); }
+	100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
 }
 

@@ -1,0 +1,511 @@
+/* HomeMotorista */
+
+.hmd-shell {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#hmd-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* ── Banner de corrida ativa ── */
+.hmd-banner-ativa {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(63, 185, 80, 0.92);
+    backdrop-filter: blur(8px);
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(63, 185, 80, 0.4);
+    white-space: nowrap;
+}
+
+.hmd-banner-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hmd-banner-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 14px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.hmd-banner-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Painel inferior ── */
+.hmd-bottom-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 400;
+    background: rgba(13, 17, 23, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(48, 54, 61, 0.8);
+    border-radius: 22px 22px 0 0;
+    padding: 1.1rem 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ── Status row ── */
+.hmd-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.hmd-status-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hmd-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #484f58;
+    transition: background 0.3s;
+    flex-shrink: 0;
+}
+
+.hmd-status-dot.online {
+    background: #3fb950;
+    box-shadow: 0 0 0 4px rgba(63, 185, 80, 0.25);
+}
+
+.hmd-status-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e6edf3;
+}
+
+/* Toggle */
+.hmd-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.hmd-toggle-text {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #7d8590;
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: color 0.2s;
+}
+
+.hmd-toggle-btn.is-on .hmd-toggle-text {
+    color: #3fb950;
+}
+
+.hmd-toggle-track {
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    background: #30363d;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    transition: background 0.25s;
+}
+
+.hmd-toggle-btn.is-on .hmd-toggle-track {
+    background: #3fb950;
+}
+
+.hmd-toggle-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+.hmd-toggle-btn.is-on .hmd-toggle-thumb {
+    transform: translateX(22px);
+}
+
+/* ── Waiting ── */
+.hmd-waiting {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.5rem 0;
+}
+
+.hmd-waiting-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #58a6ff;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.hmd-waiting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hmd-waiting-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #e6edf3;
+    margin: 0;
+}
+
+.hmd-waiting-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.hmd-waiting-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #58a6ff;
+    animation: hmd-dot-bounce 1.2s infinite ease-in-out;
+}
+
+.hmd-waiting-dots span:nth-child(2) { animation-delay: 0.2s; }
+.hmd-waiting-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes hmd-dot-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Offline msg ── */
+.hmd-offline-msg {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #484f58;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    padding: 0.25rem 0;
+}
+
+.hmd-offline-msg i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.hmd-offline-msg p {
+    margin: 0;
+}
+
+/* ── Overlay de pedido ── */
+.hmd-request-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 600;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.3s;
+    padding-bottom: 0;
+}
+
+.hmd-request-overlay.visible {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.hmd-request-card {
+    width: 100%;
+    max-width: 480px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 22px 22px 0 0;
+    padding: 1.25rem 1.25rem 1.75rem;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.hmd-request-overlay.visible .hmd-request-card {
+    transform: translateY(0);
+}
+
+.hmd-req-pulse {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: #30363d;
+    margin: 0 auto -4px;
+}
+
+.hmd-req-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3fb950;
+}
+
+/* ── Header do pedido ── */
+.hmd-req-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hmd-req-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.hmd-req-passenger-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.hmd-req-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e6edf3;
+}
+
+.hmd-req-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: #e3b341;
+}
+
+.hmd-req-price {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #3fb950;
+}
+
+.hmd-req-phone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.55rem 0.7rem 0.55rem 1rem;
+    background: rgba(63, 185, 80, 0.08);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    border-radius: 10px;
+    color: #e6edf3;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.hmd-req-phone:hover {
+    background: rgba(63, 185, 80, 0.15);
+    border-color: rgba(63, 185, 80, 0.5);
+}
+
+.hmd-req-phone > i {
+    color: #3fb950;
+    font-size: 0.85rem;
+}
+
+.hmd-req-phone-call-btn {
+    margin-left: auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #3fb950;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.hmd-req-phone:hover .hmd-req-phone-call-btn {
+    background: #2ea043;
+}
+
+/* ── Rota ── */
+.hmd-req-route {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+}
+
+.hmd-req-stop {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.hmd-req-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.hmd-req-dot.pickup { background: #3fb950; }
+.hmd-req-dot.dest   { background: #e63946; }
+
+.hmd-req-connector {
+    width: 2px;
+    height: 18px;
+    background: #30363d;
+    margin-left: 5px;
+}
+
+.hmd-req-stop-label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7d8590;
+}
+
+.hmd-req-stop-addr {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-top: 1px;
+}
+
+/* ── Meta ── */
+.hmd-req-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: #7d8590;
+}
+
+.hmd-req-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.hmd-req-meta i {
+    color: #484f58;
+    font-size: 0.75rem;
+}
+
+/* ── Timer ── */
+.hmd-req-timer-bar-wrap {
+    height: 4px;
+    background: #21262d;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.hmd-req-timer-bar {
+    height: 100%;
+    background: #3fb950;
+    border-radius: 2px;
+    width: 100%;
+}
+
+/* ── Ações ── */
+.hmd-req-actions {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.75rem;
+}
+
+.hmd-req-btn-rejeitar,
+.hmd-req-btn-aceitar {
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: filter 0.15s, transform 0.1s;
+}
+
+.hmd-req-btn-rejeitar {
+    background: rgba(230, 57, 70, 0.12);
+    color: #e63946;
+    border: 1px solid rgba(230, 57, 70, 0.3);
+}
+
+.hmd-req-btn-aceitar {
+    background: #3fb950;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(63, 185, 80, 0.35);
+}
+
+.hmd-req-btn-rejeitar:hover { filter: brightness(1.2); }
+.hmd-req-btn-aceitar:hover  { filter: brightness(1.1); }
+.hmd-req-btn-aceitar:active,
+.hmd-req-btn-rejeitar:active { transform: scale(0.97); }

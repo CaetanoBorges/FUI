@@ -1,0 +1,278 @@
+/* HistoricoCorridasMotorista */
+
+.hmd-hist-shell {
+    min-height: 100vh;
+    background: #0d1117;
+    padding: 5rem 1rem 3rem;
+    color: #e6edf3;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.hmd-hist-container {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ── Cabeçalho ── */
+.hmd-hist-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.hmd-hist-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3fb950;
+}
+
+.hmd-hist-title {
+    font-size: clamp(1.3rem, 5vw, 1.75rem);
+    font-weight: 700;
+    color: #e6edf3;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.hmd-hist-subtitle {
+    font-size: 0.875rem;
+    color: #7d8590;
+    margin: 0;
+}
+
+/* ── Filtro ── */
+.hmd-hist-filter-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.hmd-hist-filter-btn {
+    padding: 0.3rem 0.85rem;
+    border-radius: 20px;
+    border: 1px solid #30363d;
+    background: transparent;
+    color: #7d8590;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.hmd-hist-filter-btn:hover {
+    background: #21262d;
+    color: #e6edf3;
+}
+
+.hmd-hist-filter-btn.is-active {
+    background: #21262d;
+    border-color: #3fb950;
+    color: #3fb950;
+}
+
+/* ── Divider ── */
+.hmd-hist-divider {
+    border: none;
+    height: 1px;
+    background: #21262d;
+    margin: 0;
+}
+
+/* ── Empty ── */
+.hmd-hist-empty {
+    color: #7d8590;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 3rem 0;
+}
+
+/* ── Card ── */
+.hmd-hist-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border-color 0.15s, background 0.15s;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.hmd-hist-card:hover {
+    border-color: #58a6ff;
+    background: #1c2128;
+}
+
+.hmd-hist-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.hmd-hist-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.hmd-hist-status-dot.completed { background: #3fb950; }
+.hmd-hist-status-dot.cancelled { background: #e63946; }
+
+.hmd-hist-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.hmd-hist-route {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e6edf3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hmd-hist-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    color: #7d8590;
+}
+
+.hmd-hist-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hmd-hist-meta i {
+    font-size: 0.7rem;
+    color: #484f58;
+}
+
+.hmd-hist-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 2px 9px;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+.hmd-hist-badge.completed {
+    background: rgba(63, 185, 80, 0.12);
+    color: #3fb950;
+    border: 1px solid rgba(63, 185, 80, 0.25);
+}
+
+.hmd-hist-badge.cancelled {
+    background: rgba(230, 57, 70, 0.1);
+    color: #e63946;
+    border: 1px solid rgba(230, 57, 70, 0.25);
+}
+
+/* ── Sep ── */
+.hmd-hist-sep {
+    height: 1px;
+    background: #21262d;
+}
+
+/* ── Card bottom ── */
+.hmd-hist-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.hmd-hist-card-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hmd-hist-ver-detalhes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    font-size: 0.7rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.hmd-hist-card:hover .hmd-hist-ver-detalhes {
+    background: #1f6feb;
+    border-color: #58a6ff;
+    color: #fff;
+}
+
+.hmd-hist-passenger {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.hmd-hist-passenger-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.hmd-hist-passenger-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.hmd-hist-passenger-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #e6edf3;
+}
+
+.hmd-hist-passenger-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: #e3b341;
+}
+
+.hmd-hist-earning {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #3fb950;
+}
+
+.hmd-hist-earning.zero {
+    color: #7d8590;
+}

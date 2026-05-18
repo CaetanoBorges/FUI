@@ -1,4 +1,5 @@
 import { autenticarUsuario, obterUsuarioAtual, deslogarUsuario } from '../dados/authStorage.js';
+import { CREDENCIAIS_MOCK } from '../dados/mockSeeds.js';
 import './Login.css';
 
 let loginHandlerEnviar = null;
@@ -58,6 +59,18 @@ function montarFormularioLogin(rotaAtual) {
                         Ainda não tem conta?
                         <a href="#/cadastro">Criar cadastro</a>
                     </p>
+
+                    <div class="auth-mock-panel">
+                        <span class="auth-mock-label"><i class="fa-solid fa-flask"></i> Acesso rápido (dev)</span>
+                        <div class="auth-mock-btns">
+                            ${CREDENCIAIS_MOCK.map(c =>
+                                `<button type="button" class="auth-mock-btn" data-email="${c.email}" data-password="${c.password}" data-role="${c.role}">
+                                    <i class="fa-solid ${c.role === 'motorista' ? 'fa-car' : 'fa-user'}"></i>
+                                    ${c.label}
+                                </button>`
+                            ).join('')}
+                        </div>
+                    </div>
                 </form>
             </section>
         </main>
@@ -103,7 +116,7 @@ export default function Login(rotaAtual = '/login') {
                     formulario.reset();
 
                     loginTimerRedirecionamento = window.setTimeout(() => {
-                        window.location.hash = '#/';
+                        window.location.hash = user.role === 'motorista' ? '#/motorista' : '#/';
                     }, 900);
                 } catch (error) {
                     feedback.classList.add('auth-alert-error');
@@ -112,6 +125,27 @@ export default function Login(rotaAtual = '/login') {
             };
 
             formulario.addEventListener('submit', loginHandlerEnviar);
+
+            // Botões de acesso rápido (mock)
+            document.querySelectorAll('.auth-mock-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const email    = btn.dataset.email;
+                    const password = btn.dataset.password;
+                    const role     = btn.dataset.role;
+                    try {
+                        const user = autenticarUsuario({ email, password });
+                        feedback.className = 'auth-alert auth-alert-success';
+                        feedback.textContent = `Bem-vindo, ${user.name.split(' ')[0]}! Perfil: ${obterRotuloPerfil(user.role)}. Redirecionando...`;
+                        loginTimerRedirecionamento = window.setTimeout(() => {
+                            window.location.hash = role === 'motorista' ? '#/motorista' : '#/';
+                        }, 600);
+                    } catch (err) {
+                        feedback.className = 'auth-alert auth-alert-error';
+                        feedback.textContent = err.message;
+                    }
+                });
+            });
+
             document.dispatchEvent(new CustomEvent('app:ready'));
         },
         destroy() {

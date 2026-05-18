@@ -170,6 +170,7 @@ export default function CadastroEtapa2() {
                         role,
                         documentData: {
                             scanId: scanData.scanId,
+                            campos: scanData.campos,
                             extractedData: scanData.extractedData,
                             createdAt: new Date().toISOString()
                         }

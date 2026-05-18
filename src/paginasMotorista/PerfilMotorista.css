@@ -1,0 +1,474 @@
+/* PerfilMotorista */
+
+.pmot-shell {
+    min-height: 100vh;
+    background: #0d1117;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding-top: 3.5rem;
+}
+
+.pmot-container {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ── Profile card ── */
+.pmot-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    padding: 1.25rem 1.25rem;
+}
+
+.pmot-avatar-wrap {
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.pmot-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.3rem;
+    overflow: hidden;
+}
+
+.pmot-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.pmot-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-size: 0.9rem;
+}
+
+.pmot-avatar-wrap:hover .pmot-avatar-overlay { opacity: 1; }
+
+.pmot-avatar-input { display: none; }
+
+.pmot-profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pmot-profile-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e6edf3;
+}
+
+.pmot-profile-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(88, 166, 255, 0.12);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    color: #58a6ff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.pmot-profile-since {
+    font-size: 0.78rem;
+    color: #484f58;
+}
+
+/* ── Stats ── */
+.pmot-stats-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.pmot-stat {
+    flex: 1;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 0.9rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.pmot-stat-num {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #e6edf3;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pmot-stat-lbl {
+    font-size: 0.72rem;
+    color: #7d8590;
+    text-align: center;
+}
+
+.pmot-star {
+    font-size: 0.75rem;
+    color: #e3b341;
+}
+
+.pmot-stat-ganhos {
+    flex: 1.5;
+}
+
+.pmot-stat-ganhos-num {
+    font-size: 0.95rem;
+    color: #3fb950;
+}
+
+/* ── Card genérico ── */
+.pmot-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.pmot-card-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.9rem 1.25rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #7d8590;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #21262d;
+}
+
+/* ── Linha editável ── */
+.pmot-row {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pmot-row:last-child { border-bottom: none; }
+
+.pmot-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pmot-row-label {
+    font-size: 0.78rem;
+    color: #7d8590;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pmot-row-view {
+    font-size: 0.95rem;
+    color: #e6edf3;
+}
+
+.pmot-password-dots {
+    letter-spacing: 3px;
+    color: #484f58;
+}
+
+.pmot-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.pmot-edit-btn:hover {
+    border-color: #58a6ff;
+    color: #58a6ff;
+}
+
+/* ── Inline form ── */
+.pmot-inline-form {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.pmot-inline-form.is-visible { display: flex; }
+
+.pmot-input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #e6edf3;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.85rem;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.pmot-input:focus {
+    outline: none;
+    border-color: #58a6ff;
+}
+
+.pmot-error {
+    display: none;
+    font-size: 0.8rem;
+    color: #e63946;
+}
+
+.pmot-error.is-visible { display: block; }
+
+.pmot-form-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.pmot-btn-cancel {
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s;
+}
+
+.pmot-btn-cancel:hover { border-color: #484f58; color: #e6edf3; }
+
+.pmot-btn-confirm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1f6feb;
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 0.15s;
+}
+
+.pmot-btn-confirm:hover { filter: brightness(1.15); }
+
+/* ── Bilhete de Identidade ── */
+.pmot-bi-verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #3fb950;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ── Lista de informação (BI) ── */
+.pmot-info-list {
+    padding: 0.5rem 0;
+}
+
+.pmot-info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid #21262d;
+}
+
+.pmot-info-item:last-child { border-bottom: none; }
+
+.pmot-info-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #21262d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7d8590;
+    font-size: 0.85rem;
+}
+
+.pmot-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.pmot-info-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #7d8590;
+}
+
+.pmot-info-value {
+    font-size: 0.92rem;
+    color: #e6edf3;
+}
+
+/* ── Zona de perigo ── */
+.pmot-danger-card {
+    background: rgba(230, 57, 70, 0.05);
+    border: 1px solid rgba(230, 57, 70, 0.25);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pmot-danger-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e63946;
+}
+
+.pmot-danger-desc {
+    font-size: 0.85rem;
+    color: #7d8590;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.pmot-btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    border: 1px solid #e63946;
+    color: #e63946;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: background 0.15s;
+    align-self: flex-start;
+}
+
+.pmot-btn-danger:hover { background: rgba(230, 57, 70, 0.1); }
+
+/* ── Modal ── */
+.pmot-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.pmot-modal-backdrop.is-visible { display: flex; }
+
+.pmot-modal {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 18px;
+    padding: 2rem 1.5rem;
+    max-width: 360px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pmot-modal-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(230, 57, 70, 0.12);
+    border: 1.5px solid rgba(230, 57, 70, 0.3);
+    color: #e63946;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    align-self: center;
+}
+
+.pmot-modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e6edf3;
+    margin: 0;
+    text-align: center;
+}
+
+.pmot-modal-desc {
+    font-size: 0.88rem;
+    color: #7d8590;
+    margin: 0;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.pmot-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
