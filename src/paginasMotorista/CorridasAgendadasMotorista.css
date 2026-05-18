@@ -1,12 +1,12 @@
 /* CorridasAgendadasMotorista */
 
-.cam-shell {
+.cagm-shell {
     min-height: 100vh;
     background: #0d1117;
     padding-top: 3.5rem;
 }
 
-.cam-container {
+.cagm-container {
     max-width: 520px;
     margin: 0 auto;
     padding: 1.5rem 1.25rem 4rem;
@@ -16,14 +16,14 @@
 }
 
 /* ── Cabeçalho ── */
-.cam-page-header {
+.cagm-page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.25rem;
 }
 
-.cam-title {
+.cagm-title {
     display: flex;
     align-items: center;
     gap: 0.55rem;
@@ -33,9 +33,9 @@
     margin: 0;
 }
 
-.cam-title i { color: #58a6ff; }
+.cagm-title i { color: #58a6ff; }
 
-.cam-count {
+.cagm-count {
     font-size: 0.78rem;
     font-weight: 600;
     background: rgba(88, 166, 255, 0.12);
@@ -45,7 +45,7 @@
     border-radius: 20px;
 }
 
-.cam-section-label {
+.cagm-section-label {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -55,7 +55,7 @@
 }
 
 /* ── Card ── */
-.cam-card {
+.cagm-card {
     background: #161b22;
     border: 1px solid #21262d;
     border-radius: 14px;
@@ -66,18 +66,18 @@
     transition: border-color 0.15s;
 }
 
-.cam-card:hover { border-color: #30363d; }
+.cagm-card:hover { border-color: #30363d; }
 
-.cam-card-rejected { opacity: 0.5; }
+.cagm-card-rejected { opacity: 0.5; }
 
-.cam-card-top {
+.cagm-card-top {
     display: flex;
     align-items: center;
     gap: 0.85rem;
     padding: 1rem 1.1rem 0.75rem;
 }
 
-.cam-avatar {
+.cagm-avatar {
     width: 38px;
     height: 38px;
     border-radius: 50%;
@@ -91,7 +91,7 @@
     flex-shrink: 0;
 }
 
-.cam-card-info {
+.cagm-card-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -99,7 +99,7 @@
     min-width: 0;
 }
 
-.cam-passenger-name {
+.cagm-passenger-name {
     font-size: 0.92rem;
     font-weight: 600;
     color: #e6edf3;
@@ -108,7 +108,7 @@
     text-overflow: ellipsis;
 }
 
-.cam-datetime {
+.cagm-datetime {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -116,10 +116,28 @@
     color: #7d8590;
 }
 
-.cam-datetime i { color: #484f58; }
+.cagm-datetime i { color: #484f58; }
+
+.cagm-passenger-phone {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #58a6ff;
+    text-decoration: none;
+    width: fit-content;
+}
+
+.cagm-passenger-phone i {
+    font-size: 0.7rem;
+    color: #58a6ff;
+}
+
+.cagm-passenger-phone:hover { text-decoration: underline; }
 
 /* ── Status badge ── */
-.cam-status-badge {
+.cagm-status-badge {
     font-size: 0.72rem;
     font-weight: 700;
     padding: 3px 9px;
@@ -127,12 +145,12 @@
     flex-shrink: 0;
 }
 
-.cam-status-pending  { background: rgba(210, 153, 34, 0.12); border: 1px solid rgba(210, 153, 34, 0.3); color: #e3b341; }
-.cam-status-accepted { background: rgba(63, 185, 80, 0.12);  border: 1px solid rgba(63, 185, 80, 0.3);  color: #3fb950; }
-.cam-status-rejected { background: rgba(230, 57, 70, 0.1);   border: 1px solid rgba(230, 57, 70, 0.25); color: #e63946; }
+.cagm-status-pending  { background: rgba(210, 153, 34, 0.12); border: 1px solid rgba(210, 153, 34, 0.3); color: #e3b341; }
+.cagm-status-accepted { background: rgba(63, 185, 80, 0.12);  border: 1px solid rgba(63, 185, 80, 0.3);  color: #3fb950; }
+.cagm-status-rejected { background: rgba(230, 57, 70, 0.1);   border: 1px solid rgba(230, 57, 70, 0.25); color: #e63946; }
 
 /* ── Rota ── */
-.cam-card-route {
+.cagm-card-route {
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -141,24 +159,24 @@
     border-bottom: 1px solid #21262d;
 }
 
-.cam-route-labels {
+.cagm-route-labels {
     display: flex;
     flex-direction: column;
     gap: 4px;
     flex: 1;
 }
 
-.cam-route-label {
+.cagm-route-label {
     font-size: 0.82rem;
     color: #c9d1d9;
 }
 
-.cam-route-sep {
+.cagm-route-sep {
     height: 1px;
     background: #21262d;
 }
 
-.cam-route-dot {
+.cagm-route-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -167,18 +185,18 @@
     margin-top: 3px;
 }
 
-.cam-route-dot-origin { background: #3fb950; }
-.cam-route-dot-dest   { background: #e63946; align-self: flex-end; margin-bottom: 3px; }
+.cagm-route-dot-origin { background: #3fb950; }
+.cagm-route-dot-dest   { background: #e63946; align-self: flex-end; margin-bottom: 3px; }
 
 /* ── Footer ── */
-.cam-card-footer {
+.cagm-card-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.65rem 1.1rem;
 }
 
-.cam-distance {
+.cagm-distance {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -186,24 +204,24 @@
     color: #7d8590;
 }
 
-.cam-distance i { color: #484f58; }
+.cagm-distance i { color: #484f58; }
 
-.cam-earnings {
+.cagm-earnings {
     font-size: 0.92rem;
     font-weight: 700;
     color: #3fb950;
 }
 
 /* ── Ações ── */
-.cam-card-actions {
+.cagm-card-actions {
     display: flex;
     gap: 0.6rem;
     padding: 0.65rem 1.1rem 0.85rem;
     border-top: 1px solid #21262d;
 }
 
-.cam-btn-reject,
-.cam-btn-accept {
+.cagm-btn-reject,
+.cagm-btn-accept {
     flex: 1;
     display: flex;
     align-items: center;
@@ -219,24 +237,24 @@
     transition: filter 0.15s;
 }
 
-.cam-btn-reject {
+.cagm-btn-reject {
     background: transparent;
     border-color: rgba(230, 57, 70, 0.4);
     color: #e63946;
 }
 
-.cam-btn-reject:hover { background: rgba(230, 57, 70, 0.08); }
+.cagm-btn-reject:hover { background: rgba(230, 57, 70, 0.08); }
 
-.cam-btn-accept {
+.cagm-btn-accept {
     background: #1f6feb;
     border-color: #1f6feb;
     color: #fff;
 }
 
-.cam-btn-accept:hover { filter: brightness(1.15); }
+.cagm-btn-accept:hover { filter: brightness(1.15); }
 
 /* ── Vazio ── */
-.cam-empty {
+.cagm-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -248,7 +266,7 @@
     text-align: center;
 }
 
-.cam-empty-icon {
+.cagm-empty-icon {
     width: 52px;
     height: 52px;
     border-radius: 50%;
@@ -260,14 +278,14 @@
     justify-content: center;
 }
 
-.cam-empty-title {
+.cagm-empty-title {
     font-size: 0.95rem;
     font-weight: 600;
     color: #7d8590;
     margin: 0;
 }
 
-.cam-empty-desc {
+.cagm-empty-desc {
     font-size: 0.82rem;
     color: #484f58;
     margin: 0;

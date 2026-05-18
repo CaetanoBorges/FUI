@@ -138,6 +138,7 @@
 .vmt-card-label {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 7px;
     padding: 0.75rem 1.25rem;
     font-size: 0.72rem;
@@ -147,6 +148,39 @@
     letter-spacing: 0.07em;
     border-bottom: 1px solid #21262d;
     background: #0d1117;
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.vmt-card-label span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.vmt-ts {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.vmt-ts--ok {
+    background: rgba(63, 185, 80, 0.08);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    color: #3fb950;
+}
+
+.vmt-ts--lock {
+    background: rgba(230, 57, 70, 0.08);
+    border: 1px solid rgba(230, 57, 70, 0.3);
+    color: #e63946;
 }
 
 /* ── Linha ── */

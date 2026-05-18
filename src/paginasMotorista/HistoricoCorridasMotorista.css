@@ -105,7 +105,10 @@
     text-decoration: none;
     color: inherit;
     cursor: pointer;
+    margin-bottom: 0.65rem;
 }
+
+.hmd-hist-card:last-child { margin-bottom: 0; }
 
 .hmd-hist-card:hover {
     border-color: #58a6ff;

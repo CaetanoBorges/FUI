@@ -31,10 +31,10 @@ function isFuturo(iso) {
 function semeiarMock() {
     if (lerJson(CHAVE, null) !== null) return;
     const base = new Date('2026-05-20T00:00:00');
-    const mk = (offset, h, m, origem, destino, passageiro, valor) => ({
+    const mk = (offset, h, m, origem, destino, passageiro, telefone, valor) => ({
         id: `SCHED-${Date.now()}-${offset}`,
         scheduledAt: new Date(base.getFullYear(), base.getMonth(), base.getDate() + offset, h, m).toISOString(),
-        passenger: { name: passageiro, initials: passageiro.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() },
+        passenger: { name: passageiro, phone: telefone, initials: passageiro.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() },
         origin: origem,
         destination: destino,
         estimatedDistance: `${(4 + offset * 1.3).toFixed(1)} km`,
@@ -43,89 +43,91 @@ function semeiarMock() {
         status: 'pending',
     });
     escreverJson(CHAVE, [
-        mk(2,  8, 30, 'Aeroporto Internacional', 'Belas Shopping',     'Carlos Mendes',  1200),
-        mk(3, 10,  0, 'Marginal de Luanda',       'Talatona',           'Sofia Nunes',     850),
-        mk(5, 14, 15, 'Rocha Pinto',              'Viana Centro',       'Pedro Lopes',     700),
-        mk(7,  7, 45, 'Mutamba',                  'Aeroporto Internacional', 'Ana Ferreira', 1350),
+        mk(2,  8, 30, 'Aeroporto Internacional', 'Belas Shopping',     'Carlos Mendes',  '+244 923 456 789', 1200),
+        mk(3, 10,  0, 'Marginal de Luanda',       'Talatona',           'Sofia Nunes',    '+244 912 345 678',  850),
+        mk(5, 14, 15, 'Rocha Pinto',              'Viana Centro',       'Pedro Lopes',    '+244 934 567 890',  700),
+        mk(7,  7, 45, 'Mutamba',                  'Aeroporto Internacional', 'Ana Ferreira', '+244 941 234 567', 1350),
     ]);
 }
 
 function montarVazio() {
     return `
-        <div class="cam-empty">
-            <div class="cam-empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
-            <p class="cam-empty-title">Sem corridas agendadas</p>
-            <p class="cam-empty-desc">Quando um passageiro agendar uma corrida contigo, ela aparecerá aqui.</p>
+        <div class="cagm-empty">
+            <div class="cagm-empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+            <p class="cagm-empty-title">Sem corridas agendadas</p>
+            <p class="cagm-empty-desc">Quando um passageiro agendar uma corrida contigo, ela aparecerá aqui.</p>
         </div>`;
 }
 
 function montarCard(corrida) {
     const futuro = isFuturo(corrida.scheduledAt);
-    const statusClass = corrida.status === 'accepted' ? 'cam-status-accepted'
-        : corrida.status === 'rejected' ? 'cam-status-rejected'
-        : 'cam-status-pending';
+    const statusClass = corrida.status === 'accepted' ? 'cagm-status-accepted'
+        : corrida.status === 'rejected' ? 'cagm-status-rejected'
+        : 'cagm-status-pending';
     const statusLabel = corrida.status === 'accepted' ? 'Aceite'
         : corrida.status === 'rejected' ? 'Recusada'
         : 'Pendente';
 
     const acoes = (corrida.status === 'pending' && futuro) ? `
-        <div class="cam-card-actions">
-            <button class="cam-btn-reject" data-id="${corrida.id}">
+        <div class="cagm-card-actions">
+            <button class="cagm-btn-reject" data-id="${corrida.id}">
                 <i class="fa-solid fa-xmark"></i>Recusar
             </button>
-            <button class="cam-btn-accept" data-id="${corrida.id}">
+            <button class="cagm-btn-accept" data-id="${corrida.id}">
                 <i class="fa-solid fa-check"></i>Aceitar
             </button>
         </div>` : '';
 
     return `
-        <div class="cam-card ${corrida.status === 'rejected' ? 'cam-card-rejected' : ''}">
-            <div class="cam-card-top">
-                <div class="cam-avatar">${corrida.passenger.initials}</div>
-                <div class="cam-card-info">
-                    <span class="cam-passenger-name">${corrida.passenger.name}</span>
-                    <span class="cam-datetime"><i class="fa-solid fa-calendar-days"></i>${formatarDataHora(corrida.scheduledAt)}</span>
+        <div class="cagm-card ${corrida.status === 'rejected' ? 'cagm-card-rejected' : ''}">
+            <div class="cagm-card-top">
+                <div class="cagm-avatar">${corrida.passenger.initials}</div>
+                <div class="cagm-card-info">
+                    <span class="cagm-passenger-name">${corrida.passenger.name}</span>
+                    <span class="cagm-datetime"><i class="fa-solid fa-calendar-days"></i>${formatarDataHora(corrida.scheduledAt)}</span>
+                    ${corrida.status === 'pending' && corrida.passenger.phone ? `<a class="cagm-passenger-phone" href="tel:${corrida.passenger.phone.replace(/\s/g,'')}"><i class="fa-solid fa-phone"></i>${corrida.passenger.phone}</a>` : ''}
                 </div>
-                <span class="cam-status-badge ${statusClass}">${statusLabel}</span>
+                <span class="cagm-status-badge ${statusClass}">${statusLabel}</span>
             </div>
-            <div class="cam-card-route">
-                <div class="cam-route-dot cam-route-dot-origin"></div>
-                <div class="cam-route-labels">
-                    <span class="cam-route-label">${corrida.origin}</span>
-                    <span class="cam-route-sep"></span>
-                    <span class="cam-route-label">${corrida.destination}</span>
+            <div class="cagm-card-route">
+                <div class="cagm-route-dot cagm-route-dot-origin"></div>
+                <div class="cagm-route-labels">
+                    <span class="cagm-route-label">${corrida.origin}</span>
+                    <span class="cagm-route-sep"></span>
+                    <span class="cagm-route-label">${corrida.destination}</span>
                 </div>
-                <div class="cam-route-dot cam-route-dot-dest"></div>
+                <div class="cagm-route-dot cagm-route-dot-dest"></div>
             </div>
-            <div class="cam-card-footer">
-                <span class="cam-distance"><i class="fa-solid fa-road"></i>${corrida.estimatedDistance}</span>
-                <span class="cam-earnings">${corrida.earnings}</span>
+            <div class="cagm-card-footer">
+                <span class="cagm-distance"><i class="fa-solid fa-road"></i>${corrida.estimatedDistance}</span>
+                <span class="cagm-earnings">${corrida.earnings}</span>
             </div>
             ${acoes}
         </div>`;
 }
 
 function montarPagina(corridas, rotaAtual) {
-    const futuras  = corridas.filter(c => isFuturo(c.scheduledAt) && c.status !== 'rejected');
-    const passadas = corridas.filter(c => !isFuturo(c.scheduledAt) || c.status === 'rejected');
+    const futuras   = corridas.filter(c => isFuturo(c.scheduledAt) && c.status !== 'rejected');
+    const pendentes  = futuras.filter(c => c.status === 'pending');
+    const passadas   = corridas.filter(c => !isFuturo(c.scheduledAt) || c.status === 'rejected');
 
     const secaoFuturas = futuras.length
         ? futuras.map(montarCard).join('')
         : montarVazio();
 
     const secaoPassadas = passadas.length ? `
-        <div class="cam-section-label">Concluídas / Recusadas</div>
+        <div class="cagm-section-label">Concluídas / Recusadas</div>
         ${passadas.map(montarCard).join('')}` : '';
 
     return `
         ${HeaderMotorista(rotaAtual)}
-        <main class="cam-shell">
-            <div class="cam-container">
-                <div class="cam-page-header">
-                    <h1 class="cam-title"><i class="fa-solid fa-calendar-check"></i>Corridas Agendadas</h1>
-                    <span class="cam-count">${futuras.length} pendente${futuras.length !== 1 ? 's' : ''}</span>
+        <main class="cagm-shell">
+            <div class="cagm-container">
+                <div class="cagm-page-header">
+                    <h1 class="cagm-title"><i class="fa-solid fa-calendar-check"></i>Corridas Agendadas</h1>
+                    <span class="cagm-count">${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''}</span>
                 </div>
-                <div class="cam-section-label">Próximas</div>
+                <div class="cagm-section-label">Próximas</div>
                 ${secaoFuturas}
                 ${secaoPassadas}
             </div>
@@ -151,21 +153,17 @@ export default function CorridasAgendadasMotorista(rotaAtual = '/motorista/corri
         dados[idx].status = novoStatus;
         escreverJson(CHAVE, dados);
         corridas = listar();
-        const raiz = document.querySelector('.cam-shell');
-        if (raiz) {
-            raiz.closest('main').outerHTML; // noop — re-render
-            window.dispatchEvent(new HashChangeEvent('hashchange'));
-        }
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
 
     function init() {
-        document.querySelectorAll('.cam-btn-accept').forEach(btn => {
+        document.querySelectorAll('.cagm-btn-accept').forEach(btn => {
             on(btn, 'click', () => {
                 atualizarStatus(btn.dataset.id, 'accepted');
                 notificar('Corrida aceite com sucesso.', 'sucesso');
             });
         });
-        document.querySelectorAll('.cam-btn-reject').forEach(btn => {
+        document.querySelectorAll('.cagm-btn-reject').forEach(btn => {
             on(btn, 'click', () => {
                 atualizarStatus(btn.dataset.id, 'rejected');
                 notificar('Corrida recusada.', 'aviso');

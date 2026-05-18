@@ -5,8 +5,39 @@ import './VeiculoMotorista.css';
 
 const CHAVE = 'gyro.driver.veiculo';
 
-const CATEGORIAS = ['Económico', 'Conforto', 'SUV', 'Executivo', 'Moto'];
+const CATEGORIAS = ['Carro', 'Moto'];
 const CORES = ['Branco', 'Preto', 'Cinzento', 'Prateado', 'Azul', 'Vermelho', 'Verde', 'Amarelo', 'Laranja', 'Outro'];
+const LUGARES = ['1', '2', '3', '4'];
+
+const SECOES = {
+    identificacao: ['marca', 'modelo', 'ano', 'matricula'],
+    detalhes:      ['cor', 'categoria', 'lugares'],
+    documentos:    ['seguro', 'licenca'],
+};
+const LIMITE_MS = 48 * 3600 * 1000;
+
+function secaoDoCampo(field) {
+    return Object.keys(SECOES).find(s => SECOES[s].includes(field));
+}
+
+function isBloqueado(ts) {
+    if (!ts) return false;
+    return (Date.now() - new Date(ts).getTime()) > LIMITE_MS;
+}
+
+function tempoDesde(ts) {
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins  = Math.floor(diff / 60000);
+    if (mins < 60)  return `${mins} min`;
+    const horas = Math.floor(diff / 3600000);
+    if (horas < 24) return `${horas}h`;
+    return `${Math.floor(horas / 24)}d`;
+}
+
+function horasRestantes(ts) {
+    const elapsed = Date.now() - new Date(ts).getTime();
+    return Math.max(0, Math.ceil((LIMITE_MS - elapsed) / 3600000));
+}
 
 function lerVeiculo() {
     try { const v = localStorage.getItem(CHAVE); return v ? JSON.parse(v) : null; }
@@ -19,7 +50,7 @@ function opcoesSelect(lista, selecionado) {
 }
 
 function iconePorCategoria(cat) {
-    const mapa = { 'Moto': 'fa-motorcycle', 'SUV': 'fa-truck-pickup', 'Executivo': 'fa-star' };
+    const mapa = { 'Moto': 'fa-motorcycle' };
     return mapa[cat] || 'fa-car';
 }
 
@@ -43,38 +74,38 @@ function montarCardVeiculo(v) {
         </div>`;
 }
 
-function montarCampo(id, label, valor, tipo = 'text', placeholder = '') {
+function montarCampo(id, label, valor, tipo = 'text', placeholder = '', locked = false) {
     return `
         <div class="vmt-row">
             <div class="vmt-row-header">
                 <span class="vmt-row-label">${label}</span>
-                <button type="button" class="vmt-edit-btn" data-vmt-field="${id}">
+                ${locked ? '' : `<button type="button" class="vmt-edit-btn" data-vmt-field="${id}">
                     <i class="fa-solid fa-pen"></i>Editar
-                </button>
+                </button>`}
             </div>
             <div class="vmt-row-view" id="vmt-view-${id}">${valor || '<span style="color:#484f58">Não definido</span>'}</div>
-            <form class="vmt-inline-form" id="vmt-form-${id}" novalidate>
+            ${locked ? '' : `<form class="vmt-inline-form" id="vmt-form-${id}" novalidate>
                 <input type="${tipo}" id="vmt-input-${id}" class="vmt-input"
                     value="${valor || ''}" placeholder="${placeholder}" />
                 <div class="vmt-form-btns">
                     <button type="button" class="vmt-btn-cancel" data-vmt-cancel="${id}">Cancelar</button>
                     <button type="submit" class="vmt-btn-confirm"><i class="fa-solid fa-check"></i>Guardar</button>
                 </div>
-            </form>
+            </form>`}
         </div>`;
 }
 
-function montarCampoSelect(id, label, opcoes, selecionado) {
+function montarCampoSelect(id, label, opcoes, selecionado, locked = false) {
     return `
         <div class="vmt-row">
             <div class="vmt-row-header">
                 <span class="vmt-row-label">${label}</span>
-                <button type="button" class="vmt-edit-btn" data-vmt-field="${id}">
+                ${locked ? '' : `<button type="button" class="vmt-edit-btn" data-vmt-field="${id}">
                     <i class="fa-solid fa-pen"></i>Editar
-                </button>
+                </button>`}
             </div>
             <div class="vmt-row-view" id="vmt-view-${id}">${selecionado || '<span style="color:#484f58">Não definido</span>'}</div>
-            <form class="vmt-inline-form" id="vmt-form-${id}" novalidate>
+            ${locked ? '' : `<form class="vmt-inline-form" id="vmt-form-${id}" novalidate>
                 <select id="vmt-input-${id}" class="vmt-input vmt-select">
                     ${opcoesSelect(opcoes, selecionado)}
                 </select>
@@ -82,13 +113,35 @@ function montarCampoSelect(id, label, opcoes, selecionado) {
                     <button type="button" class="vmt-btn-cancel" data-vmt-cancel="${id}">Cancelar</button>
                     <button type="submit" class="vmt-btn-confirm"><i class="fa-solid fa-check"></i>Guardar</button>
                 </div>
-            </form>
+            </form>`}
         </div>`;
+}
+
+function formatarData(ts) {
+    const d = new Date(ts);
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function labelSecao(icone, nome, ts) {
+    if (!ts) return `<div class="vmt-card-label"><i class="fa-solid ${icone}"></i>${nome}</div>`;
+    const bloq = isBloqueado(ts);
+    const data = formatarData(ts);
+    const badge = bloq
+        ? `<span class="vmt-ts vmt-ts--lock"><i class="fa-solid fa-lock"></i>Bloqueado · ${data}</span>`
+        : `<span class="vmt-ts vmt-ts--ok"><i class="fa-solid fa-clock"></i>${data} · editável por mais ${horasRestantes(ts)}h</span>`;
+    return `<div class="vmt-card-label"><span><i class="fa-solid ${icone}"></i>${nome}</span>${badge}</div>`;
 }
 
 function montarPagina(rotaAtual) {
     const veiculo = lerVeiculo();
     const v = veiculo || {};
+    const tsI = v._ts_identificacao;
+    const tsD = v._ts_detalhes;
+    const tsDoc = v._ts_documentos;
+    const lI   = isBloqueado(tsI);
+    const lD   = isBloqueado(tsD);
+    const lDoc = isBloqueado(tsDoc);
 
     return `
         ${HeaderMotorista(rotaAtual)}
@@ -103,25 +156,25 @@ function montarPagina(rotaAtual) {
 
                 <!-- Dados do veículo -->
                 <div class="vmt-card">
-                    <div class="vmt-card-label"><i class="fa-solid fa-id-card"></i>Identificação</div>
-                    ${montarCampo('marca',     'Marca',     v.marca,     'text', 'Ex: Toyota')}
-                    ${montarCampo('modelo',    'Modelo',    v.modelo,    'text', 'Ex: Corolla')}
-                    ${montarCampo('ano',       'Ano',       v.ano,       'number', 'Ex: 2020')}
-                    ${montarCampo('matricula', 'Matrícula', v.matricula, 'text', 'Ex: LD-12-34-AB')}
+                    ${labelSecao('fa-id-card', 'Identificação', tsI)}
+                    ${montarCampo('marca',     'Marca',     v.marca,     'text', 'Ex: Toyota', lI)}
+                    ${montarCampo('modelo',    'Modelo',    v.modelo,    'text', 'Ex: Corolla', lI)}
+                    ${montarCampo('ano',       'Ano',       v.ano,       'number', 'Ex: 2020', lI)}
+                    ${montarCampo('matricula', 'Matrícula', v.matricula, 'text', 'Ex: LD-12-34-AB', lI)}
                 </div>
 
                 <div class="vmt-card">
-                    <div class="vmt-card-label"><i class="fa-solid fa-palette"></i>Detalhes</div>
-                    ${montarCampoSelect('cor',       'Cor',       CORES,       v.cor       || '')}
-                    ${montarCampoSelect('categoria', 'Categoria', CATEGORIAS,  v.categoria || '')}
-                    ${montarCampo('lugares', 'Nº de lugares', v.lugares, 'number', 'Ex: 4')}
+                    ${labelSecao('fa-palette', 'Detalhes', tsD)}
+                    ${montarCampoSelect('cor',       'Cor',           CORES,      v.cor       || '',      lD)}
+                    ${montarCampoSelect('categoria', 'Categoria',     CATEGORIAS, v.categoria || 'Carro', lD)}
+                    ${montarCampoSelect('lugares',   'Nº de lugares', LUGARES,    v.lugares   || '4',    lD)}
                 </div>
 
                 <!-- Documentos -->
                 <div class="vmt-card">
-                    <div class="vmt-card-label"><i class="fa-solid fa-file-shield"></i>Documentos</div>
-                    ${montarCampo('seguro',  'Apólice de seguro', v.seguro,  'text', 'Nº da apólice')}
-                    ${montarCampo('licenca', 'Licença de condução', v.licenca, 'text', 'Nº da licença')}
+                    ${labelSecao('fa-file-shield', 'Documentos', tsDoc)}
+                    ${montarCampo('seguro',  'Apólice de seguro',   v.seguro,  'text', 'Nº da apólice', lDoc)}
+                    ${montarCampo('licenca', 'Licença de condução', v.licenca, 'text', 'Nº da licença', lDoc)}
                 </div>
             </div>
         </main>`;
@@ -130,6 +183,7 @@ function montarPagina(rotaAtual) {
 export default function VeiculoMotorista(rotaAtual = '/motorista/veiculo') {
     const html = montarPagina(rotaAtual);
     let ouvintes = [];
+    const tsInstances = {};  // TomSelect instances por campo
 
     function on(el, ev, fn) {
         if (!el) return;
@@ -138,12 +192,41 @@ export default function VeiculoMotorista(rotaAtual = '/motorista/veiculo') {
     }
 
     const CAMPOS = ['marca', 'modelo', 'ano', 'matricula', 'cor', 'categoria', 'lugares', 'seguro', 'licenca'];
+    const SELECT_CAMPOS = ['cor', 'categoria', 'lugares'];
+    const DEFAULTS = { categoria: 'Carro', lugares: '4' };
 
     function abrirCampo(field) {
+        const veiculo = lerVeiculo() || {};
+        // Lugares bloqueado se categoria for Moto
+        if (field === 'lugares' && veiculo.categoria === 'Moto') {
+            notificar('Em motos o número de lugares é sempre 1.', 'info');
+            return;
+        }
+        // Bloquear se a secção já passou as 48h
+        const secao = secaoDoCampo(field);
+        if (secao && isBloqueado(veiculo[`_ts_${secao}`])) {
+            notificar('Esta secção já não pode ser editada (48h ultrapassadas).', 'erro');
+            return;
+        }
         CAMPOS.forEach(f => { if (f !== field) fecharCampo(f); });
         document.getElementById(`vmt-form-${field}`)?.classList.add('is-visible');
         document.getElementById(`vmt-view-${field}`)?.style.setProperty('display', 'none');
-        document.getElementById(`vmt-input-${field}`)?.focus();
+
+        if (SELECT_CAMPOS.includes(field)) {
+            // Destruir instância anterior se existir
+            tsInstances[field]?.destroy();
+            const el = document.getElementById(`vmt-input-${field}`);
+            if (el && window.TomSelect) {
+                tsInstances[field] = new window.TomSelect(el, {
+                    create: false,
+                    maxOptions: null,
+                    controlInput: null,  // sem campo de pesquisa (listas curtas)
+                    dropdownParent: 'body',
+                });
+            }
+        } else {
+            document.getElementById(`vmt-input-${field}`)?.focus();
+        }
     }
 
     function fecharCampo(field) {
@@ -151,18 +234,41 @@ export default function VeiculoMotorista(rotaAtual = '/motorista/veiculo') {
         const view = document.getElementById(`vmt-view-${field}`);
         form?.classList.remove('is-visible');
         if (view) view.style.display = '';
+        // Destruir TomSelect antes de repor valor (evita conflitos)
+        if (SELECT_CAMPOS.includes(field) && tsInstances[field]) {
+            tsInstances[field].destroy();
+            delete tsInstances[field];
+        }
         const inp = document.getElementById(`vmt-input-${field}`);
         if (inp) {
             const veiculo = lerVeiculo() || {};
-            inp.value = veiculo[field] || '';
+            inp.value = veiculo[field] || DEFAULTS[field] || '';
         }
     }
 
     function guardarCampo(field) {
-        const inp = document.getElementById(`vmt-input-${field}`);
-        const val = inp?.value?.trim() || '';
+        // Ler valor: TomSelect ou input normal
+        const val = tsInstances[field]
+            ? (tsInstances[field].getValue() || DEFAULTS[field] || '')
+            : (document.getElementById(`vmt-input-${field}`)?.value?.trim() || DEFAULTS[field] || '');
         const veiculo = lerVeiculo() || {};
         veiculo[field] = val || undefined;
+
+        // Registar timestamp da secção na primeira gravação
+        const secao = secaoDoCampo(field);
+        if (secao && !veiculo[`_ts_${secao}`]) {
+            veiculo[`_ts_${secao}`] = new Date().toISOString();
+        }
+
+        // Moto → lugares fixo em 1
+        if (field === 'categoria' && val === 'Moto') {
+            veiculo.lugares = '1';
+            const lugaresView = document.getElementById('vmt-view-lugares');
+            if (lugaresView) lugaresView.innerHTML = '1';
+            const lugaresInp = document.getElementById('vmt-input-lugares');
+            if (lugaresInp) lugaresInp.value = '1';
+        }
+
         guardarVeiculo(veiculo);
 
         const view = document.getElementById(`vmt-view-${field}`);
@@ -193,6 +299,7 @@ export default function VeiculoMotorista(rotaAtual = '/motorista/veiculo') {
     function destroy() {
         ouvintes.forEach(({ el, ev, fn }) => el?.removeEventListener(ev, fn));
         ouvintes = [];
+        Object.values(tsInstances).forEach(ts => ts.destroy());
     }
 
     return { html, init, destroy };
