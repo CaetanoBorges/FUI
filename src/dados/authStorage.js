@@ -35,7 +35,9 @@ function criarSessao(usuario) {
         documentData: usuario.documentData ?? null,
         emailVerified: usuario.emailVerified ?? false,
         phoneVerified: usuario.phoneVerified ?? false,
-        avatar: usuario.avatar ?? null
+        avatar: usuario.avatar ?? null,
+        subscriptionStart: usuario.subscriptionStart ?? null,
+        subscriptionEnd: usuario.subscriptionEnd ?? null,
     };
 }
 

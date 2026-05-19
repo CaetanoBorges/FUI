@@ -8,6 +8,15 @@ export default function HeaderMotorista(rotaAtual = '/motorista') {
     const usuarioAtual = JSON.parse(localStorage.getItem('gyro.auth.current') || 'null');
     const corridaAtual = JSON.parse(localStorage.getItem('gyro.ride.driver.active') || 'null');
 
+    const formatarData = (iso) => {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleDateString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const subInicio = usuarioAtual?.subscriptionStart;
+    const subFim    = usuarioAtual?.subscriptionEnd;
+    const subAtiva  = subFim ? new Date(subFim) >= new Date() : false;
+
     return `
         <header class="hm-header-floating">
             <button
@@ -26,6 +35,21 @@ export default function HeaderMotorista(rotaAtual = '/motorista') {
 
         <aside class="hm-sidebar" id="hm-sidebar">
             <nav class="hm-sidebar-nav">
+                ${usuarioAtual?.role === 'motorista' ? `
+                <div class="hm-subscricao ${subAtiva ? 'hm-subscricao-ativa' : 'hm-subscricao-expirada'}">
+                    <div class="hm-subscricao-titulo">
+                        <i class="fa-solid fa-id-card" style="margin-right:.4rem;"></i>Subscrição
+                        <span class="hm-subscricao-badge">${subAtiva ? 'Ativa' : 'Expirada'}</span>
+                    </div>
+                    <div class="hm-subscricao-linha">
+                        <span class="hm-subscricao-label">Desde</span>
+                        <span class="hm-subscricao-valor">${formatarData(subInicio)}</span>
+                    </div>
+                    <div class="hm-subscricao-linha">
+                        <span class="hm-subscricao-label">Válida até</span>
+                        <span class="hm-subscricao-valor">${formatarData(subFim)}</span>
+                    </div>
+                </div>` : ''}
                 <a href="#/motorista" class="hm-link ${rotaAtual === '/motorista' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">
                     <i class="fa-solid fa-house" style="margin-right:.4rem;opacity:.7;"></i>Home
                 </a>

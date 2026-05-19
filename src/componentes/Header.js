@@ -25,15 +25,15 @@ export default function Header(_titulo, rotaAtual = '/', exibirLogo = false) {
 
         <aside class="hm-sidebar" id="hm-sidebar">
             <nav class="hm-sidebar-nav">
-                <a href="#/" class="hm-link ${rotaAtual === '/' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Home</a>
-                ${corridaAtual ? `<a href="#/corrida-ativa" class="hm-link ${rotaAtual === '/corrida-ativa' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Corrida ativa</a>` : ''}
-                <a href="#/corridas-agendadas" class="hm-link ${rotaAtual === '/corridas-agendadas' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Agendamentos</a>
-                <a href="#/historico" class="hm-link ${rotaAtual === '/historico' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Histórico</a>
-                ${usuarioAtual ? `<a href="#/perfil" class="hm-link ${rotaAtual === '/perfil' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Perfil</a>` : ''}
-                ${!usuarioAtual ? `<a href="#/login" class="hm-link ${rotaAtual === '/login' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Entrar</a>` : ''}
-                <a href="#/sobre" class="hm-link ${rotaAtual === '/sobre' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Sobre</a>
-                ${!usuarioAtual ? `<a href="#/cadastro" class="hm-link ${rotaAtual === '/cadastro' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');">Criar conta</a>` : ''}
-                ${usuarioAtual ? `<button class="hm-link hm-link-button" onclick="${_sair}">Sair</button>` : ''}
+                <a href="#/" class="hm-link ${rotaAtual === '/' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-house" style="margin-right:.4rem;opacity:.7;"></i>Home</a>
+                ${corridaAtual ? `<a href="#/corrida-ativa" class="hm-link hm-link-corrida-ativa ${rotaAtual === '/corrida-ativa' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-route" style="margin-right:.4rem;opacity:.7;"></i>Corrida ativa<span class="hm-badge-ativa"></span></a>` : ''}
+                <a href="#/corridas-agendadas" class="hm-link ${rotaAtual === '/corridas-agendadas' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-calendar-check" style="margin-right:.4rem;opacity:.7;"></i>Agendamentos</a>
+                <a href="#/historico" class="hm-link ${rotaAtual === '/historico' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-clock-rotate-left" style="margin-right:.4rem;opacity:.7;"></i>Histórico</a>
+                ${usuarioAtual ? `<a href="#/perfil" class="hm-link ${rotaAtual === '/perfil' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-user" style="margin-right:.4rem;opacity:.7;"></i>Perfil</a>` : ''}
+                ${!usuarioAtual ? `<a href="#/login" class="hm-link ${rotaAtual === '/login' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-right-to-bracket" style="margin-right:.4rem;opacity:.7;"></i>Entrar</a>` : ''}
+                <a href="#/sobre" class="hm-link ${rotaAtual === '/sobre' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-circle-info" style="margin-right:.4rem;opacity:.7;"></i>Sobre</a>
+                ${!usuarioAtual ? `<a href="#/cadastro" class="hm-link ${rotaAtual === '/cadastro' ? 'hm-ativo' : ''}" onclick="${_fecharMenu}document.querySelector('.hm-btn-hamburger').classList.remove('hm-ativo');"><i class="fa-solid fa-user-plus" style="margin-right:.4rem;opacity:.7;"></i>Criar conta</a>` : ''}
+                ${usuarioAtual ? `<button class="hm-link hm-link-button" onclick="${_sair}"><i class="fa-solid fa-right-from-bracket" style="margin-right:.4rem;opacity:.7;"></i>Sair</button>` : ''}
             </nav>
         </aside>
     `;

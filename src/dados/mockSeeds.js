@@ -33,6 +33,8 @@ const MOCK_USERS = [
         phoneVerified: true,
         documentData: { scanId: 'mock-doc-motorista', type: 'BI', number: '000000002LA041' },
         createdAt: '2026-01-10T08:05:00.000Z',
+        subscriptionStart: '2026-01-10T08:05:00.000Z',
+        subscriptionEnd: '2027-01-10T08:05:00.000Z',
         _isMock: true,
     },
 ];
