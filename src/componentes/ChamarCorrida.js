@@ -201,6 +201,31 @@ export default function ChamarCorrida() {
                     letter-spacing: 0.07em;
                 }
 
+                .cr-input {
+                    width: 100%;
+                    border: 1.5px solid rgba(229,231,235,0.75);
+                    border-radius: 11px;
+                    padding: 9px 12px;
+                    font-size: 0.9rem;
+                    font-family: inherit;
+                    color: #0f1729;
+                    outline: none;
+                    background: rgba(255,255,255,0.8);
+                    box-sizing: border-box;
+                    transition: border-color 0.18s, box-shadow 0.18s;
+                }
+                .cr-input:focus {
+                    border-color: #0f3460;
+                    box-shadow: 0 0 0 3px rgba(15,52,96,0.1);
+                    background: rgba(255,255,255,0.95);
+                }
+
+                .cr-hint {
+                    font-size: 0.75rem;
+                    color: #6b7280;
+                    line-height: 1.45;
+                }
+
                 /* ROTA PICKER */
                 .cr-rota-wrap {
                     background: rgba(248,250,255,0.55);
@@ -602,13 +627,31 @@ export default function ChamarCorrida() {
 
                 <!-- STEP 1: ROTA -->
                 <div class="cr-step ativo" id="cr-step-1">
-                    <div>
-                        <div class="cr-titulo">Para onde vamos?</div>
+                    <div class="cr-field">
+                        <span class="cr-label">Tipo de pedido</span>
+                        <div class="cr-toggle" id="cr-modo-group">
+                            <button type="button" data-m="rota" class="cr-on"><i class="fa-solid fa-route cr-fa"></i>Por rota</button>
+                            <button type="button" data-m="endereco"><i class="fa-solid fa-location-dot cr-fa"></i>Por endereço</button>
+                        </div>
                     </div>
 
-                    <div class="cr-field">
+                    <div class="cr-field" id="cr-rota-section">
                         <span class="cr-label">Pesquisar rota</span>
                         <select id="cr-rota-search" placeholder="Ex: Centro ? Aeroporto..."></select>
+                    </div>
+
+                    <div class="cr-field" id="cr-endereco-section" style="display:none">
+                        <div class="cr-subopcao">
+                            <div class="cr-field">
+                                <span class="cr-label">Onde você está</span>
+                                <input id="cr-origem-endereco" class="cr-input" type="text" placeholder="Ex: Maianga, Centro..." />
+                            </div>
+                            <div class="cr-field">
+                                <span class="cr-label">Para onde vai</span>
+                                <input id="cr-destino-endereco" class="cr-input" type="text" placeholder="Ex: Aeroporto, Talatona..." />
+                            </div>
+                            <div class="cr-hint">Informe o local onde está e o destino para a corrida.</div>
+                        </div>
                     </div>
 
                     <div class="cr-field" id="cr-continuar-field" style="display:none">
@@ -629,7 +672,7 @@ export default function ChamarCorrida() {
                     </div>
 
                     <div class="cr-footer">
-                        <button class="cr-btn-back" id="cr-reset-1" title="Limpar sele��o"><i class="fa-solid fa-rotate-left"></i></button>
+                        <button class="cr-btn-back" id="cr-reset-1" title="Limpar seleção"><i class="fa-solid fa-rotate-left"></i></button>
                         <button class="cr-btn-next" id="cr-next-1" disabled>Proximo <i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
@@ -732,6 +775,9 @@ export default function ChamarCorrida() {
         let quandoAtual  = 'agora';
         let fp           = null;
         let pessoasAtual = 1;
+        let modoAtual    = 'rota';
+        let enderecoOrigem = '';
+        let enderecoDestino = '';
         let dataHoraConfirmada = false;
         let btnDataHora = null;
         function mostrarNotificacao(msg) {
@@ -792,10 +838,15 @@ export default function ChamarCorrida() {
         let continuarAposDestino = false;
 
         const proximo1 = document.getElementById('cr-next-1');
+        const campoModoRota = document.getElementById('cr-rota-section');
+        const campoModoEndereco = document.getElementById('cr-endereco-section');
         const campoContinuar = document.getElementById('cr-continuar-field');
         const grupoContinuar = document.getElementById('cr-continuar-group');
         const campoRotaContinuacao = document.getElementById('cr-continuacao-rota-field');
         const infoContinuacao = document.getElementById('cr-continuacao-info');
+        const grupoModo = document.getElementById('cr-modo-group');
+        const inputOrigemEndereco = document.getElementById('cr-origem-endereco');
+        const inputDestinoEndereco = document.getElementById('cr-destino-endereco');
 
         // Monta todas as combina��es origem ? destino do grafo
         const todasRotas = [];
@@ -845,31 +896,49 @@ export default function ChamarCorrida() {
             rotaSelecionada = null;
             rotaContinuidade = null;
             continuarAposDestino = false;
+            enderecoOrigem = '';
+            enderecoDestino = '';
 
             seletorRota.clear(true);
             seletorRotaContinuidade.clear(true);
             seletorRotaContinuidade.clearOptions();
             seletorRotaContinuidade.disable();
 
+            inputOrigemEndereco.value = '';
+            inputDestinoEndereco.value = '';
             camada.clearLayers();
 
-            // Reset toggle "Continuar ap�s o destino?" para "N�o"
             document.querySelectorAll('#cr-continuar-group button').forEach((btn) => {
                 btn.classList.toggle('cr-on', btn.dataset.c === 'nao');
             });
 
             atualizarCampoContinuidade();
+            atualizarBotaoStep1();
 
             document.dispatchEvent(new CustomEvent('cr:reset'));
         }
 
         function atualizarBotaoStep1() {
+            if (modoAtual === 'endereco') {
+                proximo1.disabled = !enderecoOrigem.trim() || !enderecoDestino.trim();
+                return;
+            }
+
             const possuiConectadas = obterRotasConectadas().length > 0;
             const precisaEscolherContinuidade = continuarAposDestino && possuiConectadas;
             proximo1.disabled = !rotaSelecionada || (precisaEscolherContinuidade && !rotaContinuidade);
         }
 
         function atualizarCampoContinuidade() {
+            if (modoAtual !== 'rota') {
+                campoContinuar.style.display = 'none';
+                campoRotaContinuacao.style.display = 'none';
+                infoContinuacao.style.display = 'none';
+                infoContinuacao.textContent = '';
+                atualizarBotaoStep1();
+                return;
+            }
+
             const rotasConectadas = obterRotasConectadas();
 
             campoContinuar.style.display = rotaSelecionada ? '' : 'none';
@@ -952,6 +1021,40 @@ export default function ChamarCorrida() {
 
         seletorRotaContinuidade.disable();
 
+        grupoModo.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-m]');
+            if (!btn) return;
+
+            modoAtual = btn.dataset.m;
+            document.querySelectorAll('#cr-modo-group button').forEach((button) =>
+                button.classList.toggle('cr-on', button === btn));
+
+            campoModoRota.style.display = modoAtual === 'rota' ? '' : 'none';
+            campoModoEndereco.style.display = modoAtual === 'endereco' ? '' : 'none';
+
+            if (modoAtual === 'endereco') {
+                rotaSelecionada = null;
+                rotaContinuidade = null;
+                continuarAposDestino = false;
+                seletorRota.clear(true);
+                seletorRotaContinuidade.clear(true);
+                seletorRotaContinuidade.clearOptions();
+                seletorRotaContinuidade.disable();
+                camada.clearLayers();
+            }
+
+            atualizarCampoContinuidade();
+            atualizarBotaoStep1();
+        });
+
+        [inputOrigemEndereco, inputDestinoEndereco].forEach((input) => {
+            input.addEventListener('input', () => {
+                enderecoOrigem = inputOrigemEndereco.value.trim();
+                enderecoDestino = inputDestinoEndereco.value.trim();
+                atualizarBotaoStep1();
+            });
+        });
+
         grupoContinuar.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-c]');
             if (!btn) return;
@@ -1010,6 +1113,39 @@ export default function ChamarCorrida() {
         }
 
         function montarDadosCorrida() {
+            if (modoAtual === 'endereco') {
+                const enderecoResumo = `${enderecoOrigem} → ${enderecoDestino}`;
+                const passageiros = veiculoAtual === 'moto' ? 1 : pessoasAtual;
+                const dataSelecionada = fp && fp.selectedDates.length > 0 ? fp.selectedDates[0] : null;
+                const whenLabel = quandoAtual === 'agendar' && dataSelecionada
+                    ? fp.formatDate(dataSelecionada, 'd/m/Y H:i')
+                    : 'Agora';
+
+                return {
+                    id: `CR-${Date.now()}`,
+                    createdAt: new Date().toISOString(),
+                    status: quandoAtual === 'agendar' ? 'pending' : 'active',
+                    when: quandoAtual,
+                    whenLabel,
+                    scheduledAt: quandoAtual === 'agendar' && dataSelecionada ? dataSelecionada.toISOString() : null,
+                    routeSummary: enderecoResumo,
+                    continueAfterDestination: false,
+                    passengers: passageiros,
+                    vehicle: veiculoAtual,
+                    vehicleLabel: veiculoAtual === 'moto'
+                        ? 'Moto'
+                        : `Carro • ${passageiros} passageiro${passageiros > 1 ? 's' : ''}`,
+                    estimatedPrice: 'Kz --',
+                    estimatedDistance: '-- km',
+                    estimatedDuration: '--:--:--',
+                    stops: [enderecoOrigem, enderecoDestino].filter(Boolean),
+                    modo: 'endereco',
+                    addressOrigin: enderecoOrigem,
+                    addressDestination: enderecoDestino,
+                    segments: [],
+                };
+            }
+
             if (!rotaSelecionada) return null;
 
             const trechos = obterTrechosSelecionados();
@@ -1033,11 +1169,12 @@ export default function ChamarCorrida() {
                 vehicle: veiculoAtual,
                 vehicleLabel: veiculoAtual === 'moto'
                     ? 'Moto'
-                    : `Carro � ${passageiros} passageiro${passageiros > 1 ? 's' : ''}`,
+                    : `Carro • ${passageiros} passageiro${passageiros > 1 ? 's' : ''}`,
                 estimatedPrice: preco ? `Kz ${preco.total.replace('.', ',')}` : 'Kz --',
                 estimatedDistance: preco ? `${preco.distancia} km` : '-- km',
                 estimatedDuration: preco ? preco.tempo : '--:--:--',
                 stops: [trechos[0]?.origem, ...trechos.map((trecho) => trecho.destino)].filter(Boolean),
+                modo: 'rota',
                 segments: trechos.map((trecho, index) => ({
                     id: `${index + 1}`,
                     origem: trecho.origem,
@@ -1052,6 +1189,7 @@ export default function ChamarCorrida() {
             exibirRota();
 
             const dadosCorrida = montarDadosCorrida();
+            console.log('Dados da corrida a ser confirmada:', dadosCorrida);
             if (!dadosCorrida) return;
 
             if (dadosCorrida.when === 'agendar') {
@@ -1200,6 +1338,19 @@ export default function ChamarCorrida() {
 
         // ── Preenche o resumo ────────────────────────────────────
         function preencherResumo() {
+            if (modoAtual === 'endereco') {
+                document.getElementById('cr-res-rota').textContent = `${enderecoOrigem} → ${enderecoDestino}`;
+                document.getElementById('cr-res-v-icon').innerHTML = `<i class="fa-solid ${veiculoAtual === 'moto' ? 'fa-motorcycle' : 'fa-car'}"></i>`;
+                document.getElementById('cr-res-veiculo').textContent = veiculoAtual === 'moto'
+                    ? 'Moto'
+                    : `Carro • ${pessoasAtual} passageiro${pessoasAtual > 1 ? 's' : ''}`;
+                document.getElementById('cr-res-quando').textContent = quandoAtual === 'agora' ? 'Agora' : (fp && fp.selectedDates.length > 0 ? fp.formatDate(fp.selectedDates[0], 'd/m/Y H:i') : '—');
+                document.getElementById('cr-preco-valor').textContent = 'Kz --';
+                document.getElementById('cr-preco-dist').innerHTML = '<i class="fa-solid fa-location-dot cr-fa"></i>-- km';
+                document.getElementById('cr-preco-tempo').innerHTML = '<i class="fa-solid fa-stopwatch cr-fa"></i>--:--:--';
+                return;
+            }
+
             if (!rotaSelecionada) return;
             const trechos = obterTrechosSelecionados();
             const pessoas = pessoasAtual;
@@ -1209,7 +1360,7 @@ export default function ChamarCorrida() {
             const icon = veiculoAtual === 'moto' ? 'fa-motorcycle' : 'fa-car';
             const desc = veiculoAtual === 'moto'
                 ? 'Moto'
-                : `Carro � ${pessoas} passageiro${pessoas > 1 ? 's' : ''}`;
+                : `Carro • ${pessoas} passageiro${pessoas > 1 ? 's' : ''}`;
             document.getElementById('cr-res-v-icon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
             document.getElementById('cr-res-veiculo').textContent = desc;
 
